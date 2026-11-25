@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Snow Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: ski-patrol morning briefing — terse, confident, numbers first
+   IDEA: the trail-sign / snow-stake board at the top of the lift
+   PICTURE: the "best bet" card with a giant fresh-snow number + ranked bars
+   COLOUR and TYPE: snow white, storm blue, one signal orange; Barlow Condensed + Inter
+   LAYOUT: best bet → ranked list → resort cards → storm/radar → roads → manage */
+:root{color-scheme:light dark;
+ --bg:light-dark(#f6f8fb,#0c1220);--card:light-dark(#fff,#141c2e);--ink:light-dark(#0f1726,#e8eef8);
+ --mute:light-dark(#5b6678,#93a0b8);--line:light-dark(#dfe5ee,#26324a);
+ --blue:light-dark(#1d4ed8,#6f9bff);--ice:light-dark(#dbe7fb,#1c2a48);--hot:#f2611d;--ok:light-dark(#0f7b4b,#4cd39a)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3,.big{font-family:"Barlow Condensed",Inter,sans-serif;letter-spacing:.01em;line-height:1.05;margin:0}
+h1{font-size:clamp(30px,5vw,44px)}h2{font-size:28px;margin-bottom:12px}h3{font-size:22px}
+a{color:var(--blue)}
+.band{padding:clamp(18px,3vw,40px) max(4vw,14px);max-width:1240px;margin:0 auto}
+.top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.mute{color:var(--mute);font-size:14px}
+button,input,select{font:inherit;font-size:16px}
+button{min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.pri{background:var(--blue);color:#fff;border-color:transparent}
+button:focus-visible,input:focus-visible{outline:3px solid var(--hot);outline-offset:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:16px}
+@media(max-width:760px){.hero{grid-template-columns:1fr}}
+.best{background:var(--blue);color:#fff;border:0}
+.best .big{font-size:clamp(64px,12vw,110px)}
+.best .mute{color:#dbe6ff}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{min-height:40px;border-radius:999px;padding:0 14px}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.rank{display:grid;gap:8px}
+.row{display:grid;grid-template-columns:7.5em minmax(0,1fr) 4.2em;gap:10px;align-items:center}
+.bar{height:22px;border-radius:6px;background:var(--ice);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--blue);border-radius:6px}
+.row b{text-align:right;white-space:nowrap}
+.why{grid-column:2/4;font-size:13px;color:var(--mute);margin-top:-6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:14px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.stat{background:var(--ice);border-radius:10px;padding:8px}
+.stat .v{font-family:"Barlow Condensed";font-size:26px;line-height:1}
+.stat .l{font-size:12px;color:var(--mute)}
+.strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;align-items:end;height:120px;margin:8px 0 4px}
+.col{display:flex;flex-direction:column;justify-content:flex-end;height:100%;position:relative}
+.col .b{background:var(--blue);border-radius:4px 4px 0 0;min-height:2px}
+.col .rng{position:absolute;left:50%;width:2px;background:var(--hot);transform:translateX(-50%)}
+.col .n{font-size:12px;text-align:center;white-space:nowrap}
+.dl{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;font-size:12px;color:var(--mute);text-align:center}
+.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--ice);margin:2px 4px 2px 0}
+.tag.warn{background:var(--hot);color:#fff}
+.per{font-size:14px;margin:4px 0}
+.links{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px;margin-top:8px}
+pre{white-space:pre-wrap;font-size:13px;max-height:340px;overflow:auto;background:var(--ice);padding:10px;border-radius:10px}
+.radar{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:14px}
+.radar img{width:100%;border-radius:12px;display:block;background:var(--ice);aspect-ratio:600/550;object-fit:cover}
+form .f{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+label{font-size:13px;color:var(--mute);display:grid;gap:4px}
+input{min-height:44px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.err{color:var(--hot);font-size:13px}
+.sugg{display:grid;gap:6px;margin-top:8px}.sugg button{text-align:left;height:auto;padding:10px 14px}.sugg button:disabled{opacity:.55}
+details summary{cursor:pointer;font-weight:600;min-height:32px}
+@media(prefers-reduced-motion:no-preference){.bar i,.col .b{transition:height .4s,width .4s}}
+</style>
+</head>
+<body>
+<header class="band top">
+ <div><h1>Snow Desk</h1><div class="mute" id="status">Loading forecasts…</div></div>
+ <div style="display:flex;gap:8px"><button class="pri" id="refresh">Refresh</button><button id="toManage">Resorts &amp; settings</button></div>
+</header>
+
+<section class="band hero" id="bestbet">
+ <div class="card best" id="best"><div class="mute">Best bet</div><div class="big">—</div></div>
+ <div class="card"><h3 style="margin-bottom:10px">Where to ski</h3><div class="chips" id="days"></div><div class="rank" id="rank"></div>
+  <details style="margin-top:12px"><summary class="mute">How the pick works</summary><p class="mute">Score = overnight snow before first chair (4 pm–9 am) ×10, plus half of daytime snow, plus the model-consensus daily total ×2. Minus gust penalty above your wind limit (lift holds), 15 if rain/mix is likely at the base, 8 for an active road alert, and drive time × your drive weight. Snow is forecast at mid-mountain elevation.</p></details>
+ </div>
+</section>
+
+<section class="band"><h2>Resorts</h2><div class="grid" id="cards"></div></section>
+
+<section class="band" id="storm"><h2>Storm tracking</h2>
+ <div class="radar">
+  <figure style="margin:0"><img id="rSLC" alt="Salt Lake radar loop (KMTX)"><figcaption class="mute">Salt Lake City radar loop (KMTX) · <a href="https://radar.weather.gov/?settings=v1_eyJhZ2VuZGEiOnsiaWQiOiJsb2NhbCIsImNlbnRlciI6Wy0xMTEuOCw0MC45XSwibG9jYXRpb24iOm51bGwsInpvb20iOjcsImZpbHRlciI6bnVsbCwibGF5ZXIiOiJicmVmX3JhdyIsInN0YXRpb24iOiJLTVRYIn19" target="_blank" rel="noopener">full radar</a></figcaption></figure>
+  <figure style="margin:0"><img id="rJAC" alt="Pocatello radar loop (KSFX), nearest to Jackson"><figcaption class="mute">Pocatello radar loop (KSFX), covers the Tetons</figcaption></figure>
+ </div>
+ <div id="afd" style="margin-top:16px"></div>
+</section>
+
+<section class="band" id="roads"><h2>Roads</h2><div id="roadbox" class="card"></div></section>
+
+<section class="band" id="season"><h2>Season context</h2><div class="card">
+ <p style="margin-top:0">Snowpack vs. the 1991–2020 median is on each resort card (from SNOTEL). Historical and ENSO analog comparisons (how past La Niña/El Niño winters played out per resort) are the next build phase.</p>
+ <div class="links"><a href="https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml" target="_blank" rel="noopener">CPC ENSO discussion</a><a href="https://www.cpc.ncep.noaa.gov/products/predictions/90day/" target="_blank" rel="noopener">CPC 90-day outlook</a><a href="https://utahavalanchecenter.org" target="_blank" rel="noopener">Utah Avalanche Center</a><a href="https://bridgertetonavalanchecenter.org" target="_blank" rel="noopener">Bridger-Teton Avalanche Center</a></div>
+</div></section>
+
+<section class="band" id="manage"><h2>Resorts &amp; settings</h2>
+ <div class="grid">
+ <div class="card" id="addCard"><h3 style="margin-bottom:10px">Add a resort</h3>
+  <label>Resort name<input id="q" placeholder="Start typing, e.g. Powder Mountain" autocomplete="off" enterkeyhint="search"></label>
+  <div class="sugg" id="sugg"></div>
+  <p class="mute" id="addMsg">Tap a match and everything else fills in automatically: location, base and summit elevation, nearest SNOTEL station and drive time from Ogden.</p>
+ </div>
+ <form class="card" id="setForm"><h3 style="margin-bottom:10px">Settings</h3>
+  <div class="f">
+   <label>Drive weight (points per hour)<input name="driveWeight" inputmode="decimal"></label>
+   <label>Wind limit (mph gust)<input name="windLimit" inputmode="numeric"></label>
+   <label style="grid-column:1/-1">UDOT Traffic API key (optional, free at udottraffic.utah.gov developer page)<input name="udotKey" autocomplete="off"></label>
+  </div>
+  <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="pri" type="submit">Save</button><button type="button" id="reset">Reset resorts to default</button></div>
+  <p class="mute">Resorts and settings are saved in this browser only.</p>
+ </form>
+ </div>
+</section>
+<footer class="band mute">Data: NOAA/NWS (api.weather.gov), Open-Meteo (GFS, ECMWF, ICON, GEM), USDA NRCS SNOTEL, UDOT Traffic. Forecasts are guidance; check avalanche and road conditions before you go.</footer>
+
+<script>
+{
+const DEFAULTS=[
+ {id:'snowbasin',name:'Snowbasin',lat:41.2160,lon:-111.8569,base:6400,top:9570,drive:35,snotel:'332:UT:SNTL',snotelName:'Ben Lomond Peak',roads:['I-84','SR-167','SR-226'],report:'https://www.snowbasin.com'},
+ {id:'snowbird',name:'Snowbird',lat:40.5810,lon:-111.6570,base:7760,top:11000,drive:70,snotel:'766:UT:SNTL',snotelName:'Snowbird',roads:['SR-210'],report:'https://www.snowbird.com'},
+ {id:'alta',name:'Alta',lat:40.5884,lon:-111.6386,base:8530,top:10550,drive:75,snotel:'1308:UT:SNTL',snotelName:'Atwater',roads:['SR-210'],report:'https://www.alta.com'},
+ {id:'brighton',name:'Brighton',lat:40.5980,lon:-111.5832,base:8755,top:10500,drive:75,snotel:'366:UT:SNTL',snotelName:'Brighton',roads:['SR-190'],report:'https://www.brightonresort.com'},
+ {id:'solitude',name:'Solitude',lat:40.6199,lon:-111.5919,base:7988,top:10488,drive:70,snotel:'628:UT:SNTL',snotelName:'Mill-D North',roads:['SR-190'],report:'https://www.solitudemountain.com'},
+ {id:'deervalley',name:'Deer Valley',lat:40.6374,lon:-111.4783,base:6570,top:9570,drive:60,snotel:'814:UT:SNTL',snotelName:'Thaynes Canyon',roads:['I-80','US-40','SR-224','SR-248'],report:'https://www.deervalley.com'},
+ {id:'jackson',name:'Jackson Hole',lat:43.5875,lon:-110.8279,base:6311,top:10450,drive:270,snotel:'689:WY:SNTL',snotelName:'Phillips Bench',roads:['US-89','WY-22'],dot:'wydot',report:'https://www.jacksonhole.com'}
+];
+const TZ='America/Denver';
+const MODELS=[['gfs_seamless','GFS'],['ecmwf_ifs025','ECMWF'],['icon_seamless','ICON'],['gem_seamless','GEM']];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeUrl=u=>/^https?:\/\//i.test(u||'')?u:'';
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let resorts=store.get('sd.resorts',null)||JSON.parse(JSON.stringify(DEFAULTS));
+let settings=Object.assign({udotKey:'',driveWeight:6,windLimit:40},store.get('sd.settings',{}));
+const state={};let snotel={},snotelErr='',udot=null,udotErr='',lastUpdated=null,dayPick=null;const afd={};
+const localDate=d=>d.toLocaleDateString('en-CA',{timeZone:TZ});
+const dayName=s=>new Date(s+'T12:00').toLocaleDateString('en-US',{weekday:'short'});
+const dayLong=s=>new Date(s+'T12:00').toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+const inch=x=>x==null||isNaN(x)?'–':(x<0.05?'0':x<10?x.toFixed(1):Math.round(x))+'"';
+const sum=a=>a.reduce((s,v)=>s+(v||0),0);
+async function getJSON(url,opts){const r=await fetch(url,opts);if(!r.ok)throw new Error(r.status+' '+(r.statusText||'error'));return r.json()}
+
+/* ---------- loaders ---------- */
+async function loadOM(r){
+ const elev=Math.round((r.base+r.top)/2*0.3048);
+ const base=`https://api.open-meteo.com/v1/forecast?latitude=${r.lat}&longitude=${r.lon}&elevation=${elev}&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=${encodeURIComponent(TZ)}&forecast_days=7&past_days=2`;
+ const [h,m]=await Promise.allSettled([
+  getJSON(base+'&hourly=snowfall,precipitation,temperature_2m,freezing_level_height,wind_gusts_10m&daily=snowfall_sum,wind_gusts_10m_max,temperature_2m_max,temperature_2m_min'),
+  getJSON(base+'&daily=snowfall_sum&models='+MODELS.map(x=>x[0]).join(','))]);
+ if(h.status!=='fulfilled')throw h.reason;
+ return processOM(r,h.value,m.status==='fulfilled'?m.value:null);
+}
+function processOM(r,main,models){
+ const D=main.daily,H=main.hourly,days=[];
+ for(let i=0;i<D.time.length;i++){
+  const d=D.time[i],prev=i?D.time[i-1]:null;
+  let over=0,day=0,flMax=0,rain=false,gust=D.wind_gusts_10m_max[i]||0;
+  for(let j=0;j<H.time.length;j++){
+   const t=H.time[j],sn=H.snowfall[j]||0,pr=H.precipitation[j]||0,fl=(H.freezing_level_height[j]||0)*3.281;
+   const inOver=prev&&t>=prev+'T16:00'&&t<d+'T09:00',inDay=t>=d+'T09:00'&&t<d+'T16:00';
+   if(inOver)over+=sn;if(inDay){day+=sn;flMax=Math.max(flMax,fl)}
+   if((inOver||inDay)&&pr>0.02&&fl-1000>r.base)rain=true;
+  }
+  const mv={};if(models)for(const[k,lbl]of MODELS){const a=models.daily['snowfall_sum_'+k];if(a&&a[i]!=null)mv[lbl]=a[i]}
+  const vals=Object.values(mv);const all=[D.snowfall_sum[i]||0,...vals];
+  days.push({date:d,snow:D.snowfall_sum[i]||0,overnight:over,daySnow:day,gust,hi:D.temperature_2m_max[i],lo:D.temperature_2m_min[i],flMax,rain,models:mv,
+   consensus:sum(all)/all.length,spread:vals.length>1?Math.max(...vals)-Math.min(...vals):null});
+ }
+ return days;
+}
+async function loadNWS(r){
+ const H={headers:{Accept:'application/geo+json'}};
+ const p=(await getJSON(`https://api.weather.gov/points/${r.lat.toFixed(4)},${r.lon.toFixed(4)}`,H)).properties;
+ const [g,f]=await Promise.allSettled([getJSON(p.forecastGridData,H),getJSON(p.forecast,H)]);
+ const daily={};let gridFt=null;
+ if(g.status==='fulfilled'){const gp=g.value.properties;gridFt=gp.elevation?Math.round(gp.elevation.value*3.281):null;
+  for(const v of (gp.snowfallAmount&&gp.snowfallAmount.values)||[]){const d=localDate(new Date(v.validTime.split('/')[0]));daily[d]=(daily[d]||0)+(v.value||0)/25.4}}
+ return {cwa:p.cwa,daily,gridFt,periods:f.status==='fulfilled'?f.value.properties.periods.slice(0,4):[]};
+}
+function loadAFD(cwa){
+ if(!afd[cwa])afd[cwa]=(async()=>{const H={headers:{Accept:'application/ld+json'}};
+  const l=await getJSON(`https://api.weather.gov/products/types/AFD/locations/${cwa}`,H);
+  const p=await getJSON(`https://api.weather.gov/products/${l['@graph'][0].id}`,H);
+  return {text:p.productText,time:p.issuanceTime}})();
+ return afd[cwa];
+}
+async function loadSnotel(){
+ const trips=[...new Set(resorts.map(r=>(r.snotel||'').trim().toUpperCase()).filter(Boolean))];if(!trips.length)return {};
+ const url=`https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/data?stationTriplets=${trips.join(',')}&elements=SNWD,WTEQ&duration=DAILY&beginDate=${localDate(new Date(Date.now()-8*864e5))}&endDate=${localDate(new Date())}&centralTendencyType=MEDIAN`;
+ const res=await getJSON(url),out={};
+ for(const st of res){const o={};for(const el of st.data||[]){const v=(el.values||[]).filter(x=>x.value!=null);if(!v.length)continue;const L=v[v.length-1],P=v[v.length-2];
+  o[el.stationElement.elementCode]={value:L.value,date:L.date,median:L.median,d24:P?L.value-P.value:null,d7:L.value-v[0].value}}
+  out[String(st.stationTriplet).toUpperCase()]=o}
+ return out;
+}
+async function loadUDOT(){
+ if(!settings.udotKey)return null;const k=encodeURIComponent(settings.udotKey),b='https://www.udottraffic.utah.gov/api/v2/get/';
+ const [e,c]=await Promise.allSettled([getJSON(b+'event?key='+k+'&format=json'),getJSON(b+'roadconditions?key='+k+'&format=json')]);
+ if(e.status!=='fulfilled'&&c.status!=='fulfilled')throw e.reason;
+ return {events:e.status==='fulfilled'?e.value:[],conds:c.status==='fulfilled'?c.value:[]};
+}
+const norm=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+const ALIAS={SR210:['LITTLECOTTONWOOD'],SR190:['BIGCOTTONWOOD'],SR167:['TRAPPERS'],SR224:['PARKCITY']};
+function roadItems(r){
+ if(!udot||r.dot)return [];
+ const keys=r.roads.flatMap(x=>[norm(x),...(ALIAS[norm(x)]||[])]);
+ const pick=o=>{const t=norm([o.RoadwayName,o.Roadway,o.Name,o.Location,o.Description].join(' '));return keys.some(k=>t.includes(k))};
+ return [...udot.events.filter(pick).map(o=>({kind:'Event',text:[o.EventType,o.Description||o.Comment].filter(Boolean).join(': ')})),
+  ...udot.conds.filter(pick).map(o=>({kind:'Conditions',text:[o.RoadwayName||o.Name,o.RoadCondition,o.WeatherCondition,o.Restriction].filter(Boolean).join(' · ')}))];
+}
+const alertRe=/clos|chain|traction|restrict|avalanche|interlodge/i;
+
+/* ---------- scoring ---------- */
+function score(r,date){
+ const s=state[r.id];const d=s&&s.days&&s.days.find(x=>x.date===date);if(!d)return null;
+ const fresh=d.overnight+0.5*d.daySnow;let sc=fresh*10+d.consensus*2;const notes=[];
+ if(d.gust>settings.windLimit){sc-=(d.gust-settings.windLimit)*1.5;notes.push(`gusts ${Math.round(d.gust)} mph`)}
+ if(d.rain){sc-=15;notes.push('rain/mix at base')}
+ if(s.roadAlert){sc-=8;notes.push('road alert')}
+ sc-=(r.drive/60)*settings.driveWeight;
+ if(d.spread!=null&&d.consensus>=2&&d.spread>d.consensus)notes.push('models disagree');
+ else if(d.spread!=null&&d.consensus>=4&&d.spread<d.consensus*0.5)notes.push('models agree');
+ return {r,sc,fresh,d,notes};
+}
+function upcomingDates(){const t=localDate(new Date());const any=resorts.map(r=>state[r.id]&&state[r.id].days).find(Boolean);return any?any.map(x=>x.date).filter(x=>x>=t).slice(0,5):[]}
+
+/* ---------- render ---------- */
+let raf=0;function render(){if(!raf)raf=requestAnimationFrame(()=>{raf=0;draw()})}
+function draw(){
+ const dates=upcomingDates();if(!dayPick||!dates.includes(dayPick))dayPick=dates[new Date().getHours()>=12?1:0]||dates[0];
+ $('#status').textContent=lastUpdated?`Updated ${lastUpdated.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})} · forecasts at mid-mountain`:'Loading forecasts…';
+ // best bet across next 5 days
+ let best=null;for(const dt of dates)for(const r of resorts){const s=score(r,dt);if(s&&s.fresh>=2&&(!best||s.sc>best.sc))best=s}
+ const B=$('#best');
+ if(best)B.innerHTML=`<div class="mute">Best bet · next 5 days</div><h2 style="font-size:40px;margin:6px 0 0">${esc(best.r.name)}</h2><div style="font-size:18px">${esc(dayLong(best.d.date))}</div>
+  <div class="big">${inch(best.fresh)}</div><div>fresh by first chair + daytime refills</div>
+  <div class="mute" style="margin-top:8px">${esc(best.d.consensus.toFixed(1))}" model consensus for the day${best.d.spread!=null?` (range ${esc(best.d.spread.toFixed(1))}")`:''} · gusts ${Math.round(best.d.gust)} mph · ${best.r.drive} min drive${best.notes.length?' · '+esc(best.notes.join(', ')):''}</div>`;
+ else B.innerHTML=lastUpdated?`<div class="mute">Best bet · next 5 days</div><h2 style="font-size:40px;margin:6px 0">No storm in sight</h2><div>Under 2" of fresh forecast anywhere. Pick the shortest drive and enjoy the groomers.</div>`:'<div class="mute">Best bet</div><div class="big">…</div>';
+ $('#days').innerHTML=dates.map(d=>`<button class="chip" data-day="${esc(d)}" aria-pressed="${d===dayPick}">${esc(dayName(d))}</button>`).join('');
+ const rows=resorts.map(r=>score(r,dayPick)).filter(Boolean).sort((a,b)=>b.sc-a.sc);
+ const mx=Math.max(1,...rows.map(x=>x.fresh));
+ $('#rank').innerHTML=rows.length?rows.map((x,i)=>`<div class="row"><span>${i===0?'★ ':''}${esc(x.r.name)}</span><div class="bar"><i style="width:${Math.max(2,x.fresh/mx*100)}%"></i></div><b>${inch(x.fresh)}</b>${x.notes.length?`<div class="why">${esc(x.notes.join(' · '))}</div>`:''}</div>`).join(''):'<div class="mute">Waiting for forecast data…</div>';
+ // cards
+ const t=localDate(new Date());
+ $('#cards').innerHTML=resorts.map(r=>{
+  const s=state[r.id]||{},days=(s.days||[]).filter(x=>x.date>=t).slice(0,7),sn=snotel[(r.snotel||'').toUpperCase()]||{};
+  const dp=sn.SNWD,swe=sn.WTEQ,pct=swe&&swe.median?Math.round(swe.value/swe.median*100):null;
+  const m72=sum(days.slice(0,3).map(x=>x.consensus)),n72=s.nws?sum(days.slice(0,3).map(x=>s.nws.daily[x.date]||0)):null;
+  const top=Math.max(12,...days.map(x=>Math.max(x.consensus,...Object.values(x.models))));
+  const strip=days.map(x=>{const mv=Object.values(x.models);const lo=mv.length?Math.min(...mv):x.consensus,hi=mv.length?Math.max(...mv):x.consensus;
+   return `<div class="col" title="${esc(Object.entries(x.models).map(([k,v])=>k+' '+v.toFixed(1)+'"').join(', '))}"><div class="n">${inch(x.consensus)}</div><div class="b" style="height:${x.consensus/top*85}%"></div>${mv.length>1?`<span class="rng" style="bottom:${lo/top*85}%;height:${Math.max(1,(hi-lo)/top*85)}%"></span>`:''}</div>`}).join('');
+  const items=roadItems(r);
+  const tags=[];if(days[0]&&days[0].rain)tags.push('<span class="tag warn">Rain/mix risk today</span>');if(s.roadAlert)tags.push('<span class="tag warn">Road alert</span>');if(r.approx)tags.push('<span class="tag">Elevations estimated</span>');
+  if(days[0])tags.push(`<span class="tag">Snow line ~${Math.round((days[0].flMax-1000)/100)*100} ft</span>`,`<span class="tag">${Math.round(days[0].lo)}–${Math.round(days[0].hi)}°F</span>`);
+  return `<article class="card" id="card-${esc(r.id)}"><div class="top"><h3>${esc(r.name)}</h3><span class="mute">${esc(r.base)}–${esc(r.top)} ft · ${esc(r.drive)} min</span></div>
+   <div class="stats"><div class="stat"><div class="v">${dp?inch(dp.value):'–'}</div><div class="l">Snow depth${dp&&dp.d24!=null?` (${dp.d24>=0?'+':''}${Math.round(dp.d24)}" 24h)`:''}</div></div>
+    <div class="stat"><div class="v">${pct!=null?pct+'%':'–'}</div><div class="l">SWE vs median</div></div>
+    <div class="stat"><div class="v">${s.days?inch(m72):'–'}</div><div class="l">Next 72h models${n72!=null?` · NWS ${inch(n72)}`:''}</div></div></div>
+   ${s.days?`<div class="strip">${strip}</div><div class="dl">${days.map(x=>`<span>${esc(dayName(x.date))}</span>`).join('')}</div><div class="mute" style="font-size:12px">Bars: model consensus · orange line: GFS/ECMWF/ICON/GEM range</div>`:s.err&&s.err.om?`<div class="err">Forecast failed: ${esc(s.err.om)}</div>`:'<div class="mute">Loading…</div>'}
+   <div style="margin-top:8px">${tags.join('')}</div>
+   ${s.nws?s.nws.periods.map(p=>`<div class="per"><b>${esc(p.name)}:</b> ${esc(p.shortForecast)}, ${esc(p.temperature)}°</div>`).join('')+(s.nws.gridFt?`<div class="mute" style="font-size:12px">NWS point forecast at grid elevation ~${s.nws.gridFt} ft</div>`:''):s.err&&s.err.nws?`<div class="err">NWS: ${esc(s.err.nws)}</div>`:''}
+   ${items.length?`<div style="margin-top:8px">${items.slice(0,4).map(i=>`<div class="per">${alertRe.test(i.text)?'⚠️ ':''}<b>${esc(i.kind)}:</b> ${esc(i.text)}</div>`).join('')}</div>`:''}
+   <div class="links">${r.snotel?`<a target="_blank" rel="noopener" href="https://wcc.sc.egov.usda.gov/nwcc/site?sitenum=${esc(parseInt(r.snotel))}">SNOTEL ${esc(r.snotelName||r.snotel)}</a>`:''}${safeUrl(r.report)?`<a target="_blank" rel="noopener" href="${esc(r.report)}">Resort report</a>`:''}<a target="_blank" rel="noopener" href="https://forecast.weather.gov/MapClick.php?lat=${r.lat}&lon=${r.lon}">NWS forecast</a><button type="button" class="chip" data-del="${esc(r.id)}" style="margin-left:auto">Remove</button></div>
+  </article>`}).join('');
+ // roads box
+ const ud=settings.udotKey?(udotErr?`<p class="err">UDOT API: ${esc(udotErr)} (the key may be wrong, or UDOT may block requests from browsers).</p>`:udot?'<p class="mute" style="margin-top:0">Live UDOT events and conditions are shown on each Utah resort card.</p>':'<p class="mute">Loading UDOT…</p>'):'<p class="mute" style="margin-top:0">Add a free UDOT Traffic API key in Settings to pull live closures and road conditions onto each card.</p>';
+ $('#roadbox').innerHTML=ud+`<div class="links"><a target="_blank" rel="noopener" href="https://udottraffic.utah.gov">UDOT Traffic map &amp; cameras</a><a target="_blank" rel="noopener" href="https://x.com/UDOTcottonwoods">@UDOTcottonwoods (LCC/BCC closures, traction law)</a><a target="_blank" rel="noopener" href="https://www.wyoroad.info">WYDOT 511 (Teton Pass, US-89)</a></div>`;
+ if(snotelErr)$('#status').textContent+=' · SNOTEL unavailable from browser: '+snotelErr;
+}
+async function drawAFD(){
+ const offices=[...new Set(resorts.map(r=>state[r.id]&&state[r.id].nws&&state[r.id].nws.cwa).filter(Boolean))];
+ const parts=await Promise.all(offices.map(async c=>{try{const a=await loadAFD(c);const m=a.text.match(/\.(KEY MESSAGES|SYNOPSIS)[^\n]*\n([\s\S]*?)(?:\n&&|\n\.[A-Z]{3,})/);
+  return `<div class="card" style="margin-bottom:12px"><h3>NWS ${esc(c)} forecaster discussion</h3><div class="mute">Issued ${esc(new Date(a.time).toLocaleString([],{weekday:'short',hour:'numeric',minute:'2-digit'}))}</div><p>${esc(m?m[2].trim():'')}</p><details><summary>Full discussion</summary><pre>${esc(a.text)}</pre></details></div>`}catch(e){return `<div class="err">NWS ${esc(c)} discussion unavailable: ${esc(e.message)}</div>`}}));
+ $('#afd').innerHTML=parts.join('');
+}
+async function refreshAll(){
+ const ts=Date.now();$('#rSLC').src='https://radar.weather.gov/ridge/standard/KMTX_loop.gif?t='+ts;$('#rJAC').src='https://radar.weather.gov/ridge/standard/KSFX_loop.gif?t='+ts;
+ for(const k in afd)delete afd[k];snotelErr='';udotErr='';
+ const jobs=resorts.map(async r=>{const s=state[r.id]=Object.assign(state[r.id]||{},{err:{}});
+  await Promise.all([loadOM(r).then(d=>{s.days=d}).catch(e=>{s.err.om=e.message}),loadNWS(r).then(n=>{s.nws=n}).catch(e=>{s.err.nws=e.message})]);render()});
+ jobs.push(loadSnotel().then(v=>{snotel=v}).catch(e=>{snotelErr=e.message}));
+ jobs.push(loadUDOT().then(v=>{udot=v}).catch(e=>{udotErr=e.message}));
+ await Promise.allSettled(jobs);
+ for(const r of resorts)if(state[r.id])state[r.id].roadAlert=roadItems(r).some(i=>alertRe.test(i.text));
+ lastUpdated=new Date();render();drawAFD();
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+ const d=e.target.closest('[data-day]');if(d){dayPick=d.dataset.day;render();return}
+ const x=e.target.closest('[data-del]');if(x){if(x.dataset.armed){resorts=resorts.filter(r=>r.id!==x.dataset.del);store.set('sd.resorts',resorts);render()}else{x.dataset.armed='1';x.textContent='Tap again to remove'}}
+});
+$('#refresh').addEventListener('click',refreshAll);
+$('#toManage').addEventListener('click',()=>$('#manage').scrollIntoView({behavior:'smooth'}));
+const sf=$('#setForm');for(const k of ['driveWeight','windLimit','udotKey'])sf.elements[k].value=settings[k];
+sf.addEventListener('submit',e=>{e.preventDefault();settings={driveWeight:+sf.elements.driveWeight.value||0,windLimit:+sf.elements.windLimit.value||40,udotKey:sf.elements.udotKey.value.trim()};store.set('sd.settings',settings);refreshAll()});
+$('#reset').addEventListener('click',()=>{resorts=JSON.parse(JSON.stringify(DEFAULTS));store.set('sd.resorts',resorts);refreshAll()});
+/* ---------- add a resort by name ---------- */
+// [name, state, lat, lon, base ft, summit ft, site, access roads (UDOT matching)]
+const CATALOG=[
+ ['Powder Mountain','UT',41.3795,-111.7810,6900,9422,'powdermountain.com',['SR-158']],['Nordic Valley','UT',41.3100,-111.8640,5400,6400,'nordicvalley.ski',['SR-162']],
+ ['Beaver Mountain','UT',41.9680,-111.5440,7232,8860,'skithebeav.com',['US-89']],['Cherry Peak','UT',41.9270,-111.7590,5775,7050,'cherrypeakresort.com',['SR-142']],
+ ['Park City Mountain','UT',40.6514,-111.5080,6800,10000,'parkcitymountain.com',['I-80','SR-224','SR-248']],['Sundance','UT',40.3930,-111.5880,6100,8250,'sundanceresort.com',['SR-92']],
+ ['Brian Head','UT',37.7020,-112.8500,9600,11307,'brianhead.com',['SR-143']],['Eagle Point','UT',38.3200,-112.3840,9100,10600,'eaglepointresort.com',['SR-153']],
+ ['Snowbasin','UT',41.2160,-111.8569,6400,9570,'snowbasin.com',['I-84','SR-167','SR-226']],['Snowbird','UT',40.5810,-111.6570,7760,11000,'snowbird.com',['SR-210']],
+ ['Alta','UT',40.5884,-111.6386,8530,10550,'alta.com',['SR-210']],['Brighton','UT',40.5980,-111.5832,8755,10500,'brightonresort.com',['SR-190']],
+ ['Solitude','UT',40.6199,-111.5919,7988,10488,'solitudemountain.com',['SR-190']],['Deer Valley','UT',40.6374,-111.4783,6570,9570,'deervalley.com',['I-80','US-40','SR-224','SR-248']],
+ ['Jackson Hole','WY',43.5875,-110.8279,6311,10450,'jacksonhole.com'],['Grand Targhee','WY',43.7880,-110.9580,7851,10230,'grandtarghee.com'],['Snow King','WY',43.4700,-110.7560,6237,7808,'snowking.com'],
+ ['Sun Valley','ID',43.6710,-114.3660,5750,9150,'sunvalley.com'],['Schweitzer','ID',48.3680,-116.6230,4000,6400,'schweitzer.com'],['Tamarack','ID',44.6710,-116.1230,4900,7700,'tamarackidaho.com'],
+ ['Brundage','ID',45.0040,-116.1550,5882,7640,'brundage.com'],['Bogus Basin','ID',43.7640,-116.1020,5800,7582,'bogusbasin.org'],
+ ['Big Sky','MT',45.2840,-111.4010,6800,11166,'bigskyresort.com'],['Whitefish Mountain','MT',48.4830,-114.3550,4464,6817,'skiwhitefish.com'],['Bridger Bowl','MT',45.8170,-110.8970,6100,8700,'bridgerbowl.com'],
+ ['Vail','CO',39.6400,-106.3740,8120,11570,'vail.com'],['Beaver Creek','CO',39.6040,-106.5170,8100,11440,'beavercreek.com'],['Breckenridge','CO',39.4800,-106.0670,9600,12998,'breckenridge.com'],
+ ['Keystone','CO',39.6050,-105.9540,9280,12408,'keystoneresort.com'],['Arapahoe Basin','CO',39.6420,-105.8720,10780,13050,'arapahoebasin.com'],['Copper Mountain','CO',39.5020,-106.1510,9712,12313,'coppercolorado.com'],
+ ['Loveland','CO',39.6800,-105.8980,10800,13010,'skiloveland.com'],['Winter Park','CO',39.8870,-105.7630,9000,12060,'winterparkresort.com'],['Steamboat','CO',40.4570,-106.8040,6900,10568,'steamboat.com'],
+ ['Aspen Snowmass','CO',39.2090,-106.9500,8104,12510,'aspensnowmass.com'],['Crested Butte','CO',38.8990,-106.9650,9375,12162,'skicb.com'],['Telluride','CO',37.9370,-107.8120,8725,13150,'tellurideskiresort.com'],
+ ['Wolf Creek','CO',37.4720,-106.7930,10300,11904,'wolfcreekski.com'],['Purgatory','CO',37.6300,-107.8140,8793,10822,'purgatory.ski'],['Taos Ski Valley','NM',36.5960,-105.4540,9207,12481,'skitaos.com'],
+ ['Palisades Tahoe','CA',39.1970,-120.2350,6200,9050,'palisadestahoe.com'],['Northstar','CA',39.2740,-120.1210,6330,8610,'northstarcalifornia.com'],['Kirkwood','CA',38.6850,-120.0650,7800,9800,'kirkwood.com'],
+ ['Heavenly','CA',38.9350,-119.9400,6540,10067,'skiheavenly.com'],['Mammoth Mountain','CA',37.6510,-119.0370,7953,11053,'mammothmountain.com'],
+ ['Mt. Bachelor','OR',43.9790,-121.6880,5700,9065,'mtbachelor.com'],['Crystal Mountain','WA',46.9350,-121.4750,4400,7012,'crystalmountainresort.com'],['Mt. Baker','WA',48.8570,-121.6650,3500,5089,'mtbaker.us']
+].map(([name,st,lat,lon,base,top,site,roads])=>({name,st,lat,lon,base,top,report:'https://www.'+site,roads:roads||[]}));
+const STATES={Utah:'UT',Wyoming:'WY',Idaho:'ID',Montana:'MT',Colorado:'CO','New Mexico':'NM',California:'CA',Nevada:'NV',Oregon:'OR',Washington:'WA',Arizona:'AZ',Alaska:'AK'};
+const HOME={lat:41.223,lon:-111.974}; // Ogden
+const miles=(a,b,c,d)=>{const R=3959,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x))};
+const estDrive=(lat,lon)=>Math.max(15,Math.round((miles(HOME.lat,HOME.lon,lat,lon)*1.15+15)/5)*5);
+async function nearestSnotel(lat,lon,st){
+ if(!st)return null;
+ try{const list=await getJSON(`https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/stations?networkCds=SNTL&stateCds=${st}&returnStationElements=false&activeOnly=true`);
+  let best=null;for(const s of list){const d=miles(lat,lon,s.latitude,s.longitude);if(d<15&&(!best||d<best.d))best={d,trip:String(s.stationTriplet).toUpperCase(),name:s.name}}return best}catch(e){return null}
+}
+let geoHits=[];
+const norm2=s=>s.toLowerCase().replace(/[^a-z0-9]/g,'');
+function showSugg(){
+ const raw=$('#q').value.trim(),q=norm2(raw),box=$('#sugg');geoHits=[];
+ if(q.length<2){box.innerHTML='';return}
+ const have=new Set(resorts.map(r=>norm2(r.name)));
+ const hits=CATALOG.filter(c=>norm2(c.name).includes(q)).slice(0,6);
+ box.innerHTML=hits.map(c=>{const h=have.has(norm2(c.name));return `<button type="button" data-add="${CATALOG.indexOf(c)}" ${h?'disabled':''}><b>${esc(c.name)}</b> <span class="mute">${esc(c.st)} · ${c.base.toLocaleString()}–${c.top.toLocaleString()} ft${h?' · already added':''}</span></button>`}).join('')
+  +`<button type="button" data-geo="1">${hits.length?'Not it? ':''}Search maps for “${esc(raw)}”</button>`;
+}
+async function geoSearch(){
+ const raw=$('#q').value.trim(),box=$('#sugg');box.innerHTML='<div class="mute">Searching…</div>';
+ try{const j=await getJSON(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(raw)}&count=6&language=en&format=json`);
+  geoHits=(j.results||[]).filter(x=>x.country_code==='US'||x.country_code==='CA');
+  box.innerHTML=geoHits.length?geoHits.map((g,i)=>`<button type="button" data-geopick="${i}"><b>${esc(g.name)}</b> <span class="mute">${esc([g.admin1,g.country_code].filter(Boolean).join(', '))} · ${Math.round((g.elevation||0)*3.281).toLocaleString()} ft</span></button>`).join(''):'<div class="mute">No matches. Try the resort’s full name.</div>';
+ }catch(e){box.innerHTML=`<div class="err">Map search failed: ${esc(e.message)}</div>`}
+}
+async function addResort(c){
+ $('#addMsg').textContent=`Adding ${c.name}: finding the nearest SNOTEL station…`;
+ const r={id:'r'+Date.now(),name:c.name,lat:c.lat,lon:c.lon,base:c.base,top:c.top,drive:estDrive(c.lat,c.lon),roads:c.roads||[],report:c.report||''};
+ if(c.st!=='UT')r.dot='other';if(c.approx)r.approx=true;
+ const sn=await nearestSnotel(c.lat,c.lon,c.st);if(sn){r.snotel=sn.trip;r.snotelName=sn.name}
+ resorts.push(r);store.set('sd.resorts',resorts);$('#q').value='';$('#sugg').innerHTML='';
+ $('#addMsg').textContent=`Added ${c.name} · ${r.base.toLocaleString()}–${r.top.toLocaleString()} ft · ~${r.drive} min drive · SNOTEL: ${sn?sn.name:'none found nearby'}.`;
+ await refreshAll();const el=$('#card-'+r.id);if(el)el.scrollIntoView({behavior:'smooth'});
+}
+$('#q').addEventListener('input',showSugg);
+$('#q').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const b=$('#sugg button:not(:disabled)');if(b)b.click()}});
+$('#sugg').addEventListener('click',e=>{
+ const a=e.target.closest('[data-add]'),g=e.target.closest('[data-geo]'),p=e.target.closest('[data-geopick]');
+ if(a)addResort(CATALOG[+a.dataset.add]);else if(g)geoSearch();
+ else if(p){const h=geoHits[+p.dataset.geopick],base=Math.round((h.elevation||1500)*3.281);addResort({name:h.name,st:STATES[h.admin1]||'',lat:h.latitude,lon:h.longitude,base,top:base+2000,approx:true})}
+});
+render();refreshAll();
+setInterval(()=>{if(document.visibilityState==='visible')refreshAll()},30*60*1000);
+}
+</script>
+</body>
+</html>
