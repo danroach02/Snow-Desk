@@ -66,6 +66,7 @@ form .f{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));ga
 label{font-size:13px;color:var(--mute);display:grid;gap:4px}
 input{min-height:44px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
 .err{color:var(--hot);font-size:13px}
+.obs{background:var(--ice);border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:14px}
 .sugg{display:grid;gap:6px;margin-top:8px}.sugg button{text-align:left;height:auto;padding:10px 14px}.sugg button:disabled{opacity:.55}
 details summary{cursor:pointer;font-weight:600;min-height:32px}
 @media(prefers-reduced-motion:no-preference){.bar i,.col .b{transition:height .4s,width .4s}}
@@ -112,6 +113,7 @@ details summary{cursor:pointer;font-weight:600;min-height:32px}
   <div class="f">
    <label>Drive weight (points per hour)<input name="driveWeight" inputmode="decimal"></label>
    <label>Wind limit (mph gust)<input name="windLimit" inputmode="numeric"></label>
+   <label style="grid-column:1/-1">Synoptic token (optional; unlocks resort study plots: Snowbasin, Alta-Collins, Deer Valley, Jackson Hole)<input name="synToken" autocomplete="off"></label>
    <label style="grid-column:1/-1">UDOT Traffic API key (optional, free at udottraffic.utah.gov developer page)<input name="udotKey" autocomplete="off"></label>
   </div>
   <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="pri" type="submit">Save</button><button type="button" id="reset">Reset resorts to default</button></div>
@@ -119,18 +121,41 @@ details summary{cursor:pointer;font-weight:600;min-height:32px}
  </form>
  </div>
 </section>
-<footer class="band mute">Data: NOAA/NWS (api.weather.gov), Open-Meteo (GFS, ECMWF, ICON, GEM), USDA NRCS SNOTEL, UDOT Traffic. Forecasts are guidance; check avalanche and road conditions before you go.</footer>
+<footer class="band mute">Data: NOAA/NWS (api.weather.gov), Open-Meteo (GFS, ECMWF, ICON, GEM), USDA NRCS SNOTEL, Synoptic/MesoWest (optional), UDOT Traffic. Forecasts are guidance; check avalanche and road conditions before you go.</footer>
 
 <script>
 {
+const DATA_VERSION=2;
+/* Audited 2026-11-25. fc* = forecast point (lat, lon, elevation ft): on-mountain, at the observing plot where one exists.
+   snotel = snowpack vs. median (SNOTEL); obs = on-mountain new-snow sources in priority order. */
 const DEFAULTS=[
- {id:'snowbasin',name:'Snowbasin',lat:41.2160,lon:-111.8569,base:6400,top:9570,drive:35,snotel:'332:UT:SNTL',snotelName:'Ben Lomond Peak',roads:['I-84','SR-167','SR-226'],report:'https://www.snowbasin.com'},
- {id:'snowbird',name:'Snowbird',lat:40.5810,lon:-111.6570,base:7760,top:11000,drive:70,snotel:'766:UT:SNTL',snotelName:'Snowbird',roads:['SR-210'],report:'https://www.snowbird.com'},
- {id:'alta',name:'Alta',lat:40.5884,lon:-111.6386,base:8530,top:10550,drive:75,snotel:'1308:UT:SNTL',snotelName:'Atwater',roads:['SR-210'],report:'https://www.alta.com'},
- {id:'brighton',name:'Brighton',lat:40.5980,lon:-111.5832,base:8755,top:10500,drive:75,snotel:'366:UT:SNTL',snotelName:'Brighton',roads:['SR-190'],report:'https://www.brightonresort.com'},
- {id:'solitude',name:'Solitude',lat:40.6199,lon:-111.5919,base:7988,top:10488,drive:70,snotel:'628:UT:SNTL',snotelName:'Mill-D North',roads:['SR-190'],report:'https://www.solitudemountain.com'},
- {id:'deervalley',name:'Deer Valley',lat:40.6374,lon:-111.4783,base:6570,top:9570,drive:60,snotel:'814:UT:SNTL',snotelName:'Thaynes Canyon',roads:['I-80','US-40','SR-224','SR-248'],report:'https://www.deervalley.com'},
- {id:'jackson',name:'Jackson Hole',lat:43.5875,lon:-110.8279,base:6311,top:10450,drive:270,snotel:'689:WY:SNTL',snotelName:'Phillips Bench',roads:['US-89','WY-22'],dot:'wydot',report:'https://www.jacksonhole.com'}
+ {id:'snowbasin',name:'Snowbasin',lat:41.2160,lon:-111.8569,base:6391,top:9570,drive:35,fcLat:41.1957,fcLon:-111.8701,fcElev:8297,
+  snotel:'332:UT:SNTL',snotelName:'Ben Lomond Peak',snotel2:'474:UT:SNTL',snotel2Name:'Farmington',snotelNote:'Regional: no SNOTEL on Snowbasin; average of Ben Lomond Peak (13 mi N) and Farmington (S)',
+  obs:[{src:'synoptic',match:['snowbasin','study'],lat:41.1957,lon:-111.8701,label:'Snowbasin Study Plot · 8,297 ft'},{src:'synoptic',match:['snowbasin','mid'],lat:41.1995,lon:-111.859,label:'Snowbasin Mid Bowl · 7,402 ft'}],
+  stations:'https://opensnow.com/location/snowbasin/weather-stations',roads:['I-84','SR-167','SR-226'],report:'https://www.snowbasin.com'},
+ {id:'snowbird',name:'Snowbird',lat:40.5810,lon:-111.6570,base:7760,top:11000,drive:70,fcElev:9200,
+  snotel:'766:UT:SNTL',snotelName:'Snowbird · 9,177 ft',obs:[{src:'snotel',t:'766:UT:SNTL',label:'Snowbird SNOTEL · 9,177 ft (on-mountain)'}],
+  stations:'https://opensnow.com/location/snowbird/weather-stations',roads:['SR-210'],report:'https://www.snowbird.com'},
+ {id:'alta',name:'Alta',lat:40.5884,lon:-111.6386,base:8530,top:10550,drive:75,fcLat:40.57607,fcLon:-111.63889,fcElev:9662,
+  snotel:'1308:UT:SNTL',snotelName:'Atwater · 8,753 ft',
+  obs:[{src:'synoptic',match:['collins'],lat:40.57607,lon:-111.63889,label:'Alta-Collins study plot · 9,662 ft'},{src:'snotel',t:'1308:UT:SNTL',label:'Atwater SNOTEL · 8,753 ft (Alta)'}],
+  stations:'https://opensnow.com/location/alta/weather-stations',roads:['SR-210'],report:'https://www.alta.com'},
+ {id:'brighton',name:'Brighton',lat:40.5980,lon:-111.5832,base:8755,top:10500,drive:75,fcElev:9500,
+  snotel:'366:UT:SNTL',snotelName:'Brighton · 8,766 ft',
+  obs:[{src:'synoptic',match:['brighton','crest'],lat:40.59,lon:-111.58,label:'Brighton Crest'},{src:'snotel',t:'366:UT:SNTL',label:'Brighton SNOTEL · 8,766 ft (base area)'}],
+  stations:'https://opensnow.com/location/brighton/weather-stations',roads:['SR-190'],report:'https://www.brightonresort.com'},
+ {id:'solitude',name:'Solitude',lat:40.6199,lon:-111.5919,base:7988,top:10488,drive:70,fcElev:9200,
+  snotel:'366:UT:SNTL',snotelName:'Brighton · 8,766 ft',snotelNote:'Brighton SNOTEL (≈1.5 mi, same upper canyon) fits better than Mill-D North (lower canyon)',
+  obs:[{src:'synoptic',match:['solitude'],lat:40.61,lon:-111.59,label:'Solitude Summit'},{src:'snotel',t:'366:UT:SNTL',label:'Brighton SNOTEL · 8,766 ft (≈1.5 mi)'}],
+  stations:'https://opensnow.com/location/solitude/weather-stations',roads:['SR-190'],report:'https://www.solitudemountain.com'},
+ {id:'deervalley',name:'Deer Valley',lat:40.6374,lon:-111.4783,base:6570,top:9570,drive:60,fcLat:40.611,fcLon:-111.4999,fcElev:8888,
+  snotel:'814:UT:SNTL',snotelName:'Thaynes Canyon · 9,230 ft',snotelNote:'Nearest SNOTEL is above Park City Mountain, ≈3 mi from Deer Valley',
+  obs:[{src:'synoptic',match:['ontario'],lat:40.611,lon:-111.4999,label:'DV – Ontario'},{src:'synoptic',match:['park','peak'],lat:40.60,lon:-111.50,label:'DV – Park Peak'}],
+  stations:'https://opensnow.com/location/deervalley/weather-stations',roads:['I-80','US-40','SR-224','SR-248'],report:'https://www.deervalley.com'},
+ {id:'jackson',name:'Jackson Hole',lat:43.5875,lon:-110.8279,base:6311,top:10450,drive:270,fcLat:43.5915,fcLon:-110.8745,fcElev:9634,
+  snotel:'689:WY:SNTL',snotelName:'Phillips Bench · 8,200 ft',snotelNote:'Nearest SNOTEL is on Teton Pass, ≈5 mi south',
+  obs:[{src:'synoptic',match:['rendezvous'],lat:43.5915,lon:-110.8745,label:'JH Rendezvous Bowl · 9,634 ft'},{src:'synoptic',match:['mid'],lat:43.5974,lon:-110.8479,label:'JH Mid Mountain · 8,225 ft'}],
+  stations:'https://opensnow.com/location/jackson-wy-us/weather-stations',roads:['US-89','WY-22'],dot:'wydot',report:'https://www.jacksonhole.com'}
 ];
 const TZ='America/Denver';
 const MODELS=[['gfs_seamless','GFS'],['ecmwf_ifs025','ECMWF'],['icon_seamless','ICON'],['gem_seamless','GEM']];
@@ -139,8 +164,10 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const safeUrl=u=>/^https?:\/\//i.test(u||'')?u:'';
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 let resorts=store.get('sd.resorts',null)||JSON.parse(JSON.stringify(DEFAULTS));
-let settings=Object.assign({udotKey:'',driveWeight:6,windLimit:40},store.get('sd.settings',{}));
-const state={};let snotel={},snotelErr='',udot=null,udotErr='',lastUpdated=null,dayPick=null;const afd={};
+if(store.get('sd.dataVersion',1)<DATA_VERSION){const fresh=Object.fromEntries(DEFAULTS.map(d=>[d.id,d]));resorts=resorts.map(r=>fresh[r.id]?JSON.parse(JSON.stringify(fresh[r.id])):r);store.set('sd.resorts',resorts);store.set('sd.dataVersion',DATA_VERSION)}
+const fc=r=>({lat:r.fcLat??r.lat,lon:r.fcLon??r.lon,elev:r.fcElev??Math.round((r.base+r.top)/2)});
+let settings=Object.assign({synToken:'',udotKey:'',driveWeight:6,windLimit:40},store.get('sd.settings',{}));
+const state={};let snotel={},snHourly={},snotelErr='',udot=null,udotErr='',lastUpdated=null,dayPick=null;const afd={};
 const localDate=d=>d.toLocaleDateString('en-CA',{timeZone:TZ});
 const dayName=s=>new Date(s+'T12:00').toLocaleDateString('en-US',{weekday:'short'});
 const dayLong=s=>new Date(s+'T12:00').toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
@@ -150,8 +177,8 @@ async function getJSON(url,opts){const r=await fetch(url,opts);if(!r.ok)throw ne
 
 /* ---------- loaders ---------- */
 async function loadOM(r){
- const elev=Math.round((r.base+r.top)/2*0.3048);
- const base=`https://api.open-meteo.com/v1/forecast?latitude=${r.lat}&longitude=${r.lon}&elevation=${elev}&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=${encodeURIComponent(TZ)}&forecast_days=7&past_days=2`;
+ const F=fc(r),elev=Math.round(F.elev*0.3048);
+ const base=`https://api.open-meteo.com/v1/forecast?latitude=${F.lat}&longitude=${F.lon}&elevation=${elev}&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=${encodeURIComponent(TZ)}&forecast_days=7&past_days=2`;
  const [h,m]=await Promise.allSettled([
   getJSON(base+'&hourly=snowfall,precipitation,temperature_2m,freezing_level_height,wind_gusts_10m&daily=snowfall_sum,wind_gusts_10m_max,temperature_2m_max,temperature_2m_min'),
   getJSON(base+'&daily=snowfall_sum&models='+MODELS.map(x=>x[0]).join(','))]);
@@ -178,7 +205,7 @@ function processOM(r,main,models){
 }
 async function loadNWS(r){
  const H={headers:{Accept:'application/geo+json'}};
- const p=(await getJSON(`https://api.weather.gov/points/${r.lat.toFixed(4)},${r.lon.toFixed(4)}`,H)).properties;
+ const F=fc(r),p=(await getJSON(`https://api.weather.gov/points/${(+F.lat).toFixed(4)},${(+F.lon).toFixed(4)}`,H)).properties;
  const [g,f]=await Promise.allSettled([getJSON(p.forecastGridData,H),getJSON(p.forecast,H)]);
  const daily={};let gridFt=null;
  if(g.status==='fulfilled'){const gp=g.value.properties;gridFt=gp.elevation?Math.round(gp.elevation.value*3.281):null;
@@ -193,13 +220,45 @@ function loadAFD(cwa){
  return afd[cwa];
 }
 async function loadSnotel(){
- const trips=[...new Set(resorts.map(r=>(r.snotel||'').trim().toUpperCase()).filter(Boolean))];if(!trips.length)return {};
+ const up=x=>(x||'').trim().toUpperCase();
+ const trips=[...new Set(resorts.flatMap(r=>[up(r.snotel),up(r.snotel2)]).filter(Boolean))];if(!trips.length)return {};
  const url=`https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/data?stationTriplets=${trips.join(',')}&elements=SNWD,WTEQ&duration=DAILY&beginDate=${localDate(new Date(Date.now()-8*864e5))}&endDate=${localDate(new Date())}&centralTendencyType=MEDIAN`;
  const res=await getJSON(url),out={};
  for(const st of res){const o={};for(const el of st.data||[]){const v=(el.values||[]).filter(x=>x.value!=null);if(!v.length)continue;const L=v[v.length-1],P=v[v.length-2];
   o[el.stationElement.elementCode]={value:L.value,date:L.date,median:L.median,d24:P?L.value-P.value:null,d7:L.value-v[0].value}}
-  out[String(st.stationTriplet).toUpperCase()]=o}
+  out[up(st.stationTriplet)]=o}
+ // hourly snow depth for on-mountain SNOTEL obs
+ const ob=[...new Set(resorts.flatMap(r=>(r.obs||[]).filter(o=>o.src==='snotel').map(o=>up(o.t))))];
+ if(ob.length){try{const h=await getJSON(`https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/data?stationTriplets=${ob.join(',')}&elements=SNWD&duration=HOURLY&beginDate=${localDate(new Date(Date.now()-3*864e5))}&endDate=${localDate(new Date(Date.now()+864e5))}`);
+  for(const st of h){const el=(st.data||[])[0];snHourly[up(st.stationTriplet)]=((el&&el.values)||[]).filter(x=>x.value!=null).map(x=>({t:new Date(String(x.date).replace(' ','T')).getTime(),v:+x.value}))}}catch(e){}}
  return out;
+}
+/* new snow from an hourly depth series: smooth (median of 3), sum rises >= 0.5" */
+function newSnow(series){
+ if(!series||series.length<3)return null;
+ const a=series.slice().sort((x,y)=>x.t-y.t),sm=a.map((p,i)=>{const w=a.slice(Math.max(0,i-1),i+2).map(q=>q.v).sort((x,y)=>x-y);return {t:p.t,v:w[Math.floor(w.length/2)]}});
+ const last=sm[sm.length-1],win=h=>{let tot=0;const from=last.t-h*36e5;for(let i=1;i<sm.length;i++){if(sm[i].t<=from)continue;const d=sm[i].v-sm[i-1].v;if(d>=0.5)tot+=d}return tot};
+ return {n12:win(12),n24:win(24),n48:win(48),depth:a[a.length-1].v,at:last.t,ageH:(Date.now()-last.t)/36e5};
+}
+async function loadSynoptic(r,o){
+ const tok=encodeURIComponent(settings.synToken),b='https://api.synopticdata.com/v2/stations/';
+ if(!o.stid){const j=await getJSON(`${b}metadata?token=${tok}&radius=${o.lat},${o.lon},4&limit=25&vars=snow_depth&status=active`);
+  if(j.SUMMARY&&j.SUMMARY.RESPONSE_CODE!==1)throw new Error(j.SUMMARY.RESPONSE_MESSAGE||'Synoptic error');
+  const m=(j.STATION||[]).find(st=>o.match.every(k=>String(st.NAME).toLowerCase().includes(k)));if(!m)throw new Error('station not found');
+  o.stid=m.STID;o.found=m.NAME;o.elev=m.ELEVATION;store.set('sd.resorts',resorts)}
+ const t=await getJSON(`${b}timeseries?token=${tok}&stid=${encodeURIComponent(o.stid)}&recent=2880&vars=snow_depth&units=english`);
+ if(t.SUMMARY&&t.SUMMARY.RESPONSE_CODE!==1)throw new Error(t.SUMMARY.RESPONSE_MESSAGE||'Synoptic error');
+ const st=(t.STATION||[])[0];if(!st)throw new Error('no data');const O=st.OBSERVATIONS||{},v=O.snow_depth_set_1||[];
+ return (O.date_time||[]).map((d,i)=>({t:Date.parse(d),v:v[i]})).filter(x=>x.v!=null&&!isNaN(x.t));
+}
+async function loadObs(r){
+ const notes=[];
+ for(const o of r.obs||[]){
+  if(o.src==='synoptic'){if(!settings.synToken){notes.push(o.label+': needs Synoptic token');continue}
+   try{const ns=newSnow(await loadSynoptic(r,o));if(ns&&ns.ageH<6)return {...ns,label:o.found||o.label,src:'Synoptic/MesoWest',notes};notes.push(o.label+': no recent data')}catch(e){notes.push(o.label+': '+e.message)}}
+  else{const ns=newSnow(snHourly[(o.t||'').toUpperCase()]);if(ns&&ns.ageH<8)return {...ns,label:o.label,src:'NRCS SNOTEL',notes};notes.push(o.label+': no recent data')}
+ }
+ return {notes};
 }
 async function loadUDOT(){
  if(!settings.udotKey)return null;const k=encodeURIComponent(settings.udotKey),b='https://www.udottraffic.utah.gov/api/v2/get/';
@@ -221,7 +280,9 @@ const alertRe=/clos|chain|traction|restrict|avalanche|interlodge/i;
 /* ---------- scoring ---------- */
 function score(r,date){
  const s=state[r.id];const d=s&&s.days&&s.days.find(x=>x.date===date);if(!d)return null;
- const fresh=d.overnight+0.5*d.daySnow;let sc=fresh*10+d.consensus*2;const notes=[];
+ const notes=[],ob=s.obs;let over=d.overnight;
+ if(date===localDate(new Date())&&ob&&ob.n12!=null&&new Date().getHours()<12&&ob.n12>over){over=ob.n12;notes.push(`${inch(ob.n12)} observed overnight`)}
+ const fresh=over+0.5*d.daySnow;let sc=fresh*10+d.consensus*2;
  if(d.gust>settings.windLimit){sc-=(d.gust-settings.windLimit)*1.5;notes.push(`gusts ${Math.round(d.gust)} mph`)}
  if(d.rain){sc-=15;notes.push('rain/mix at base')}
  if(s.roadAlert){sc-=8;notes.push('road alert')}
@@ -236,7 +297,7 @@ function upcomingDates(){const t=localDate(new Date());const any=resorts.map(r=>
 let raf=0;function render(){if(!raf)raf=requestAnimationFrame(()=>{raf=0;draw()})}
 function draw(){
  const dates=upcomingDates();if(!dayPick||!dates.includes(dayPick))dayPick=dates[new Date().getHours()>=12?1:0]||dates[0];
- $('#status').textContent=lastUpdated?`Updated ${lastUpdated.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})} · forecasts at mid-mountain`:'Loading forecasts…';
+ $('#status').textContent=lastUpdated?`Updated ${lastUpdated.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})} · forecasts at on-mountain points`:'Loading forecasts…';
  // best bet across next 5 days
  let best=null;for(const dt of dates)for(const r of resorts){const s=score(r,dt);if(s&&s.fresh>=2&&(!best||s.sc>best.sc))best=s}
  const B=$('#best');
@@ -251,8 +312,10 @@ function draw(){
  // cards
  const t=localDate(new Date());
  $('#cards').innerHTML=resorts.map(r=>{
-  const s=state[r.id]||{},days=(s.days||[]).filter(x=>x.date>=t).slice(0,7),sn=snotel[(r.snotel||'').toUpperCase()]||{};
-  const dp=sn.SNWD,swe=sn.WTEQ,pct=swe&&swe.median?Math.round(swe.value/swe.median*100):null;
+  const s=state[r.id]||{},days=(s.days||[]).filter(x=>x.date>=t).slice(0,7),sn=snotel[(r.snotel||'').toUpperCase()]||{},sn2=r.snotel2?snotel[r.snotel2.toUpperCase()]||{}:null;
+  const pctOf=x=>x&&x.WTEQ&&x.WTEQ.median?x.WTEQ.value/x.WTEQ.median*100:null;
+  const pcts=[pctOf(sn),sn2?pctOf(sn2):null].filter(v=>v!=null),pct=pcts.length?Math.round(sum(pcts)/pcts.length):null;
+  const ob=s.obs||{},hasOb=ob.depth!=null,dp=hasOb?{value:ob.depth}:null;
   const m72=sum(days.slice(0,3).map(x=>x.consensus)),n72=s.nws?sum(days.slice(0,3).map(x=>s.nws.daily[x.date]||0)):null;
   const top=Math.max(12,...days.map(x=>Math.max(x.consensus,...Object.values(x.models))));
   const strip=days.map(x=>{const mv=Object.values(x.models);const lo=mv.length?Math.min(...mv):x.consensus,hi=mv.length?Math.max(...mv):x.consensus;
@@ -260,15 +323,16 @@ function draw(){
   const items=roadItems(r);
   const tags=[];if(days[0]&&days[0].rain)tags.push('<span class="tag warn">Rain/mix risk today</span>');if(s.roadAlert)tags.push('<span class="tag warn">Road alert</span>');if(r.approx)tags.push('<span class="tag">Elevations estimated</span>');
   if(days[0])tags.push(`<span class="tag">Snow line ~${Math.round((days[0].flMax-1000)/100)*100} ft</span>`,`<span class="tag">${Math.round(days[0].lo)}–${Math.round(days[0].hi)}°F</span>`);
-  return `<article class="card" id="card-${esc(r.id)}"><div class="top"><h3>${esc(r.name)}</h3><span class="mute">${esc(r.base)}–${esc(r.top)} ft · ${esc(r.drive)} min</span></div>
-   <div class="stats"><div class="stat"><div class="v">${dp?inch(dp.value):'–'}</div><div class="l">Snow depth${dp&&dp.d24!=null?` (${dp.d24>=0?'+':''}${Math.round(dp.d24)}" 24h)`:''}</div></div>
-    <div class="stat"><div class="v">${pct!=null?pct+'%':'–'}</div><div class="l">SWE vs median</div></div>
+  return `<article class="card" id="card-${esc(r.id)}"><div class="top"><h3>${esc(r.name)}</h3><span class="mute">${esc(r.base.toLocaleString())}–${esc(r.top.toLocaleString())} ft · ${esc(r.drive)} min · forecast at ${esc(Math.round(fc(r).elev).toLocaleString())} ft</span></div>
+   <div class="stats"><div class="stat"><div class="v">${dp?inch(dp.value):'–'}</div><div class="l">On-mountain depth</div></div>
+    <div class="stat"><div class="v">${pct!=null?pct+'%':'–'}</div><div class="l">Snowpack vs median${sn2?' (regional)':''}</div></div>
     <div class="stat"><div class="v">${s.days?inch(m72):'–'}</div><div class="l">Next 72h models${n72!=null?` · NWS ${inch(n72)}`:''}</div></div></div>
+   <div class="obs">${hasOb?`<b>Observed new snow:</b> ${inch(ob.n12)} 12h · ${inch(ob.n24)} 24h · ${inch(ob.n48)} 48h<div class="mute" style="font-size:12px">${esc(ob.label)} · ${esc(ob.src)} · ${esc(new Date(ob.at).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}))} · estimated from hourly depth sensor</div>`:s.obs?`<span class="mute">No on-mountain station data. ${esc((ob.notes||[]).join(' · '))}</span>`:'<span class="mute">Loading station data…</span>'}</div>
    ${s.days?`<div class="strip">${strip}</div><div class="dl">${days.map(x=>`<span>${esc(dayName(x.date))}</span>`).join('')}</div><div class="mute" style="font-size:12px">Bars: model consensus · orange line: GFS/ECMWF/ICON/GEM range</div>`:s.err&&s.err.om?`<div class="err">Forecast failed: ${esc(s.err.om)}</div>`:'<div class="mute">Loading…</div>'}
    <div style="margin-top:8px">${tags.join('')}</div>
    ${s.nws?s.nws.periods.map(p=>`<div class="per"><b>${esc(p.name)}:</b> ${esc(p.shortForecast)}, ${esc(p.temperature)}°</div>`).join('')+(s.nws.gridFt?`<div class="mute" style="font-size:12px">NWS point forecast at grid elevation ~${s.nws.gridFt} ft</div>`:''):s.err&&s.err.nws?`<div class="err">NWS: ${esc(s.err.nws)}</div>`:''}
    ${items.length?`<div style="margin-top:8px">${items.slice(0,4).map(i=>`<div class="per">${alertRe.test(i.text)?'⚠️ ':''}<b>${esc(i.kind)}:</b> ${esc(i.text)}</div>`).join('')}</div>`:''}
-   <div class="links">${r.snotel?`<a target="_blank" rel="noopener" href="https://wcc.sc.egov.usda.gov/nwcc/site?sitenum=${esc(parseInt(r.snotel))}">SNOTEL ${esc(r.snotelName||r.snotel)}</a>`:''}${safeUrl(r.report)?`<a target="_blank" rel="noopener" href="${esc(r.report)}">Resort report</a>`:''}<a target="_blank" rel="noopener" href="https://forecast.weather.gov/MapClick.php?lat=${r.lat}&lon=${r.lon}">NWS forecast</a><button type="button" class="chip" data-del="${esc(r.id)}" style="margin-left:auto">Remove</button></div>
+   ${r.snotelNote?`<div class="mute" style="font-size:12px;margin-top:6px">Snowpack: ${esc(r.snotelNote)}</div>`:''}<div class="links">${[[r.snotel,r.snotelName],[r.snotel2,r.snotel2Name]].filter(x=>x[0]).map(([t,n])=>`<a target="_blank" rel="noopener" href="https://wcc.sc.egov.usda.gov/nwcc/site?sitenum=${esc(parseInt(t))}">SNOTEL ${esc(n||t)}</a>`).join('')}${safeUrl(r.stations)?`<a target="_blank" rel="noopener" href="${esc(r.stations)}">Live stations</a>`:''}${safeUrl(r.report)?`<a target="_blank" rel="noopener" href="${esc(r.report)}">Resort report</a>`:''}<a target="_blank" rel="noopener" href="https://forecast.weather.gov/MapClick.php?lat=${fc(r).lat}&lon=${fc(r).lon}">NWS forecast</a><button type="button" class="chip" data-del="${esc(r.id)}" style="margin-left:auto">Remove</button></div>
   </article>`}).join('');
  // roads box
  const ud=settings.udotKey?(udotErr?`<p class="err">UDOT API: ${esc(udotErr)} (the key may be wrong, or UDOT may block requests from browsers).</p>`:udot?'<p class="mute" style="margin-top:0">Live UDOT events and conditions are shown on each Utah resort card.</p>':'<p class="mute">Loading UDOT…</p>'):'<p class="mute" style="margin-top:0">Add a free UDOT Traffic API key in Settings to pull live closures and road conditions onto each card.</p>';
@@ -286,7 +350,7 @@ async function refreshAll(){
  for(const k in afd)delete afd[k];snotelErr='';udotErr='';
  const jobs=resorts.map(async r=>{const s=state[r.id]=Object.assign(state[r.id]||{},{err:{}});
   await Promise.all([loadOM(r).then(d=>{s.days=d}).catch(e=>{s.err.om=e.message}),loadNWS(r).then(n=>{s.nws=n}).catch(e=>{s.err.nws=e.message})]);render()});
- jobs.push(loadSnotel().then(v=>{snotel=v}).catch(e=>{snotelErr=e.message}));
+ jobs.push(loadSnotel().then(v=>{snotel=v}).catch(e=>{snotelErr=e.message}).then(()=>Promise.all(resorts.map(async r=>{const s=state[r.id]=state[r.id]||{err:{}};s.obs=await loadObs(r);render()}))));
  jobs.push(loadUDOT().then(v=>{udot=v}).catch(e=>{udotErr=e.message}));
  await Promise.allSettled(jobs);
  for(const r of resorts)if(state[r.id])state[r.id].roadAlert=roadItems(r).some(i=>alertRe.test(i.text));
@@ -300,8 +364,8 @@ document.addEventListener('click',e=>{
 });
 $('#refresh').addEventListener('click',refreshAll);
 $('#toManage').addEventListener('click',()=>$('#manage').scrollIntoView({behavior:'smooth'}));
-const sf=$('#setForm');for(const k of ['driveWeight','windLimit','udotKey'])sf.elements[k].value=settings[k];
-sf.addEventListener('submit',e=>{e.preventDefault();settings={driveWeight:+sf.elements.driveWeight.value||0,windLimit:+sf.elements.windLimit.value||40,udotKey:sf.elements.udotKey.value.trim()};store.set('sd.settings',settings);refreshAll()});
+const sf=$('#setForm');for(const k of ['driveWeight','windLimit','udotKey','synToken'])sf.elements[k].value=settings[k];
+sf.addEventListener('submit',e=>{e.preventDefault();settings={driveWeight:+sf.elements.driveWeight.value||0,windLimit:+sf.elements.windLimit.value||40,udotKey:sf.elements.udotKey.value.trim(),synToken:sf.elements.synToken.value.trim()};store.set('sd.settings',settings);refreshAll()});
 $('#reset').addEventListener('click',()=>{resorts=JSON.parse(JSON.stringify(DEFAULTS));store.set('sd.resorts',resorts);refreshAll()});
 /* ---------- add a resort by name ---------- */
 // [name, state, lat, lon, base ft, summit ft, site, access roads (UDOT matching)]
@@ -356,7 +420,7 @@ async function addResort(c){
  $('#addMsg').textContent=`Adding ${c.name}: finding the nearest SNOTEL station…`;
  const r={id:'r'+Date.now(),name:c.name,lat:c.lat,lon:c.lon,base:c.base,top:c.top,drive:estDrive(c.lat,c.lon),roads:c.roads||[],report:c.report||''};
  if(c.st!=='UT')r.dot='other';if(c.approx)r.approx=true;
- const sn=await nearestSnotel(c.lat,c.lon,c.st);if(sn){r.snotel=sn.trip;r.snotelName=sn.name}
+ const sn=await nearestSnotel(c.lat,c.lon,c.st);if(sn){r.snotel=sn.trip;r.snotelName=sn.name;r.obs=[{src:'synoptic',match:[c.name.toLowerCase().split(' ')[0]],lat:c.lat,lon:c.lon,label:c.name+' station'},{src:'snotel',t:sn.trip,label:sn.name+' SNOTEL'}]}
  resorts.push(r);store.set('sd.resorts',resorts);$('#q').value='';$('#sugg').innerHTML='';
  $('#addMsg').textContent=`Added ${c.name} · ${r.base.toLocaleString()}–${r.top.toLocaleString()} ft · ~${r.drive} min drive · SNOTEL: ${sn?sn.name:'none found nearby'}.`;
  await refreshAll();const el=$('#card-'+r.id);if(el)el.scrollIntoView({behavior:'smooth'});
