@@ -1,5 +1,5 @@
 {
- "at": "2026-11-27T03:51:45.064Z",
+ "at": "2026-11-27T03:52:24.683Z",
  "resorts": {
   "snowbasin": {
    "overnight": 0,
@@ -74,7 +74,8 @@
    "base": 0,
    "where": "Mid mountain",
    "updated": null,
-   "ok": true
+   "ok": false,
+   "error": "no snow numbers found in the report"
   }
  }
 }
