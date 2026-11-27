@@ -1,0 +1,26 @@
+{
+ "jackson": {
+  "keys": [
+   "respTimestamp",
+   "lastModified",
+   "lastSnowFallDate",
+   "snow",
+   "weather",
+   "forecast",
+   "liftStatus",
+   "trailStatus",
+   "lifts",
+   "trails",
+   "summerTrailStatus",
+   "summerHikingTrails",
+   "summerBikeTrails",
+   "other",
+   "webcams"
+  ],
+  "snow": "{\"lastModified\":\"11/26/26, 7:03 AM\",\"lastSnowFallDate\":\"November 24, 2026\",\"psa\":\"\",\"inversion\":false,\"inversionMessage\":\"INVERSION ALERT! The Upper Mountain is warmer than the base. Head up high to stay warm.\",\"midMountain\":{\"name\":\"Mid-Mountain\",\"altitude\":{\"unit\":\"FOOT\",\"unitSymbol\":\"ft\",\"value\":\"10,000\"},\"seasonTotalSnow\":{\"unit\":\"INCH\",\"unitSymbol\":\"\\\"\",\"value\":\"23\"},\"newSnowLast48H\":{\"unit\":\"INCH\",\"unitSymbol\":\"\\\"\",\"value\":\"0\"},\"newSnowLast24H\":{\"unit\":\"INCH\",\"unitSymbol\":\"\\\"\",\"value\":\"0\"},\"newSnowLast7D\":{},\"totalSnowDepth\":{\"unit\":\"INCH\",\"unitSymbol\":\"\\\"\",\"value\":\"9\"},\"newSnowLast72H\":{},\"newSnowSinceLiftsClosed\":{\"unit\":\"INCH\",\"unitSymbol\":\"\\\"\",\"value\":\"0\"}},\"tramSummit\":{\"name\":\"Tram Summit\",\"altitude\":{\"unit\":\"FOOT\",\"unitSymbol\":\"ft\",\"value\":\"0\"},\"seasonTotalSnow\":{\"unit\":\"INCH\",\"unitSymbol\":\"\\\"\",\"value\":\"49\"},\"newSnowLast48H\":{\"unit\":\"INCH\",\"unitSymbol\":\"\\\"\",\"value\":\"0\"},\"newSnowLast24H\":{\"unit\":\"INCH\",\"unitSymbol\":\"\\\"\",\"value\":\"0\"},\"newSnowSince6am\":{\"unit\":\"INCH\",\"unitSymbol\":\"\\\"\",\"value\":\"0\"},\"newSnowLast7D\":{\"unit\":\"INCH\",\"unitSymbol\":\"\\\"\",\"value\":\"24\"},\"totalSnowDepth\":{\"unit\":\"INCH\",\"unitSymbol\":\"\\\"\",\"value\":\"21\"},\"newSnowLast72H\":{},\"newSnowSinceLiftsClosed\":{\"unit\":\"INCH\",\"unitSymbol\":\"\\\"\",\"value\":\"0\"}},\"base\":{}}"
+ },
+ "brighton": {
+  "updated": "2026-11-26T23:00:04Z",
+  "loc": "{\"name\":\"Brighton\",\"elevation\":null,\"primarySurface\":\"Packed Powder\",\"secondarySurface\":\"Packed Powder\",\"snowOverNight\":{\"inches\":\"0\",\"centimeters\":\"0\"},\"snowOverNightLabel\":\"Snow Overnight\",\"snowSince5am\":null,\"snowSince5amLabel\":\"Snow Since 5am\",\"snow12Hours\":{\"inches\":\"0\",\"centimeters\":\"0\"},\"snow12HoursLabel\":\"Snow 12 Hrs.\",\"snow24Hours\":{\"inches\":\"0\",\"centimeters\":\"0\"},\"snow24HoursLabel\":\"Snow 24 Hrs.\",\"snow48Hours\":{\"inches\":\"0\",\"centimeters\":\"0\"},\"snow48HoursLabel\":\"Snow 48 Hrs.\",\"snow72Hours\":{\"inches\":\"0\",\"centimeters\":\"0\"},\"snow72HoursLabel\":\"Snow 72 Hrs.\",\"snow7Days\":{\"inches\":\"40\",\"centimeters\":\"102\"},\"snow7DaysLabel\":\"Snow 7 Days\",\"snowSeasonTotal\":{\"inches\":\"77\",\"centimeters\":\"196\"},\"snowSeasonTotalLabel\":\"Snow Season Total\",\"base\":{\"inches\":\"30\",\"centimeters\":\"76\"},\"baseLabel\":\"Base Depth\",\"baseMin\":{\"inches\":\"30\",\"centimeters\":\"76\"},\"baseMinLabel\":\"Base Depth\",\"baseMax\":{\"inches\":\"30\",\"centimeters\":\"76\"},\"baseMaxLabel\":\"Base Depth\",\"tracksetOpen\":null,\"tracksetOpenLabel\":\"Trackset Open\",\"skateGroomed\":null,\"skateGroomedLabel\":\"Skate Groomed\",\"snowshoeGroomed\":null,\"snowshoeGroomedLabel\":\"Snowshoe Groomed\",\"fatTireOpen\":null,\"fatTireOpenLabel\":\"Fat Tire Open\"}"
+ }
+}
