@@ -1,0 +1,61 @@
+{
+ "at": "2026-11-27T03:50:44.472Z",
+ "resorts": {
+  "snowbasin": {
+   "overnight": 0,
+   "h24": 0,
+   "since5": 0,
+   "d7": 16,
+   "base": 21,
+   "season": 33,
+   "updated": "2026-11-26T14:33:00.000Z",
+   "ok": true
+  },
+  "snowbird": {
+   "ok": false,
+   "error": "no snow numbers found in the report"
+  },
+  "alta": {
+   "ok": false,
+   "error": "no snow numbers found in the report"
+  },
+  "brighton": {
+   "ok": false,
+   "error": "no snow numbers found in the report"
+  },
+  "solitude": {
+   "overnight": 0,
+   "h24": 0,
+   "h48": 0,
+   "h72": 0,
+   "d7": 17,
+   "base": 26,
+   "season": 60,
+   "where": "Mid-Mountain",
+   "lifts": "3/9",
+   "trails": "8/82",
+   "status": "Open",
+   "updated": "2026-11-26T08:07:54-0700",
+   "ok": true
+  },
+  "deervalley": {
+   "overnight": 0,
+   "h24": 0,
+   "h48": 0,
+   "h72": 0,
+   "d7": 15,
+   "base": 18,
+   "season": 27,
+   "where": "Mid-Mountain",
+   "lifts": "0/32",
+   "trails": "0/209",
+   "status": "Closed",
+   "updated": "2026-11-25T05:38:35-0700",
+   "ok": true
+  },
+  "jackson": {
+   "ok": false,
+   "error": "no snow numbers found in the report"
+  }
+ }
+}
