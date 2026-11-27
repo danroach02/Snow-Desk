@@ -22,7 +22,7 @@ function resp(url){
  if(url.includes('awdbRestApi'))return url.match(/stationTriplets=([^&]+)/)[1].split(',').map(s=>({stationTriplet:s,data:[{stationElement:{elementCode:'WTEQ'},values:[{date:'a',value:4,median:4},{date:'b',value:5,median:4}]}]}));
  throw new Error('unexpected '+url)}
 const dom=new JSDOM(html,{url:'https://example.org/',runScripts:'dangerously',pretendToBeVisual:true,beforeParse(w){
- w.ResizeObserver=class{observe(){}};w.matchMedia=()=>({matches:true});w.HTMLCanvasElement.prototype.getContext=()=>new Proxy({},{get:()=>()=>{}});
+ w.ResizeObserver=class{observe(){}};w.matchMedia=q=>({matches:/reduce/.test(q)});w.HTMLCanvasElement.prototype.getContext=()=>new Proxy({},{get:()=>()=>{}});
  w.fetch=async u=>{try{return {ok:true,status:200,json:async()=>resp(u)}}catch(e){return {ok:false,status:500,statusText:e.message}}};
  w.addEventListener('error',e=>{console.error('PAGE ERROR',e.message);process.exitCode=1})}});
 setTimeout(()=>{const d=dom.window.document,txt=s=>d.querySelector(s).textContent.replace(/\s+/g,' ').trim();
@@ -30,8 +30,11 @@ setTimeout(()=>{const d=dom.window.document,txt=s=>d.querySelector(s).textConten
  // 17 storm hours x 0.06" at 20F (15:1) = 15.3" overnight
  d.querySelector('[data-day="'+D[3]+'"]').click();
  setTimeout(()=>{
-  assert.match(txt('#rank details.row .in'),/^15"forecast overnight/,'overnight number: '+txt('#rank details.row .in'));
-  assert.match(txt('#pick'),/15"/,'pick shows overnight snow');
+  assert.match(txt('#rank details.row .c-ov'),/^15"forecast/,'overnight number: '+txt('#rank details.row .c-ov'));
+  assert.match(txt('#rank details.row .c-storm'),/^1[3-6]"/,'storm column: '+txt('#rank details.row .c-storm'));
+  assert.match(txt('#headline'),/15" forecast overnight/,'the answer names the overnight forecast: '+txt('#headline'));
+  d.querySelector('[data-sort="drive"]').click();assert.strictEqual(d.querySelector('#rank details.row').id,'row-snowbasin','sorting by drive puts the closest first');
+  d.querySelector('[data-sort="rec"]').click();
   assert.match(txt('#storm'),/Snowbasin1[3-6]"/,'headline uses consensus: '+txt('#storm'));
   d.querySelector('#row-snowbird').open=true;d.querySelector('#row-snowbird').dispatchEvent(new dom.window.Event('toggle'));
   assert.match(txt('#row-snowbird .detail'),/Snow line ~5,500 ft/,'snow line in feet, not double converted');
