@@ -1,170 +1,99 @@
 {
- "snowbasin": [
-  {
-   "url": "https://www.snowbasin.com/the-mountain/mountain-report/",
-   "status": 200,
-   "final": "https://www.snowbasin.com/the-mountain/mountain-report/",
-   "len": 710203,
-   "endpoints": [
-    "https://app-snowbasin-prod.azurewebsites.net/The-Mountain/Mountain-Report",
-    "https://auth.snowbasin.com/authorize?client_id=4kGUfFLf1EjOEr9d0LMowbsnjBKPGDCW&amp;redirect_uri=https://www.snowbasin.com&amp;response_type=code%20id_token&amp;scope=openid%20profile%20email&amp;nonce=101",
-    "https://shop.snowbasin.com",
-    "https://www.snowbasin.com/Events/Opening-Day",
-    "https://www.snowbasin.com/Events/Opening-Day?lid=3232r93aimc0",
-    "https://www.facebook.com/snowbasin",
-    "http://instagram.com/snowbasinresort",
-    "https://twitter.com/snowbasinresort",
-    "https://www.youtube.com/user/snowbasin",
-    "https://signup.grandamericahotelsandresorts.com/snowbasin"
-   ],
-   "snips": [
-    "SE Lens Recommendation AMP LS Bronze Chrome (Shield) Snowfall 0&#8221; Since 5am 0&#8221; Overnight 0&#8221; 24 hours 16&#8221; 7 days 21&#8221; Base 33&#8221; Season Last Updated: Nov 26 7:33 AM MT C",
-    "ion AMP LS Bronze Chrome (Shield) Snowfall 0&#8221; Since 5am 0&#8221; Overnight 0&#8221; 24 hours 16&#8221; 7 days 21&#8221; Base 33&#8221; Season Last Updated: Nov 26 7:33 AM MT Current 37&#176;F Mo",
-    "pdated Nov 25, 3:32 PM MT Last Updated: Nov 26, 7:33 AM MT Snow Report Since 5am 0&#8221; Overnight 0&#8221; Base 21&#8221; 24 hours 0&#8221; Season 33&#8221; 7 days 16&#8221; Conditions Base 28&#176;",
-    "ated: Nov 26, 7:33 AM MT Snow Report Since 5am 0&#8221; Overnight 0&#8221; Base 21&#8221; 24 hours 0&#8221; Season 33&#8221; 7 days 16&#8221; Conditions Base 28&#176;F Mostly Cloudy Wind 4 mph W Mid M"
-   ],
-   "json": []
-  }
- ],
- "snowbird": [
-  {
-   "url": "https://www.snowbird.com/the-mountain/mountain-report/current-conditions-weather/",
-   "status": 200,
-   "final": "https://www.snowbird.com/the-mountain/mountain-report/current-conditions-weather/",
-   "len": 508544,
-   "endpoints": [
-    "https://www.snowbird.com/_bluedrop/images/sites/default/files/2024-09/Reed-Tyler_2024_7789-crp_about-snowbird_trams_1000x667.jpg?u=aHR0cHM6Ly9jbXMuc25vd2JpcmQuY29tL3NpdGVzL2RlZmF1bHQvZmlsZXMvMjAyNC0wOS9SZWVkLVR5bGVyXzIwMjRfNzc4OS1jcnBfYWJvdXQtc25vd2JpcmRfdHJhbXNfMTAwMHg2NjcuanBn&amp;d=5778d69ca89a53fec2a30cffd39377c4&amp;q=75&amp;w=1000&amp;h=667",
-    "https://www.snowbird.com/the-mountain/mountain-report/current-conditions-weather/",
-    "https://www.snowbird.com",
-    "https://pass.snowbird.com/l/lift-access/c/full-day-winter-lift-ticket",
-    "https://pass.snowbird.com/s/pass",
-    "https://pass.snowbird.com/l/pass/p/flex-5-pass",
-    "https://api.snowbird.com/api/v1/dor/agent-friendly/snow-reports",
-    "https://facebook.com/SnowbirdUT",
-    "https://instagram.com/snowbird",
-    "https://twitter.com/Snowbird",
-    "https://www.youtube.com/@SnowbirdUT"
-   ],
-   "snips": [],
-   "json": []
-  }
- ],
- "alta": [
-  {
-   "url": "https://www.alta.com/weather",
-   "status": 200,
-   "final": "https://www.alta.com/weather",
-   "len": 181956,
-   "endpoints": [
-    "https://bots.getskitickets.com/api"
-   ],
-   "snips": [
-    " and forecasts. Snow Report Conditions Observation Forecast Mountain Cams Road Conditions Season Totals Monthly Averages 1980 - Present Monthly Snow Totals Weather Observation Road &amp; Parking Highw"
-   ],
-   "json": [
-    "026-11-21 08:57:06\",\"last_updated\":\"08:57 am\"}],\"conditions\":{\"id\":8216,\"dated_at\":\"2026-11-26 20:00:00\",\"last12\":\"0.0\",\"last24\":\"0.0\",\"base_depth\":\"36.0\",\"storm_total\":\"0.0\",\"year_to_date\":\"71.0\",\"base_temp\":\"26.6\",\"mid_temp\":\"29.0\",\"top_temp\":\"29.3\",\"wind_direction\":\"288.9\",\"wind_speed\":\"13.6\",\"icon\":\"icon-weather-partly-cloudy-day\",\"sky_cover\":\"Partly Cloudy\",\"goggles\":\"Low ",
-    ":06\",\"last_updated\":\"08:57 am\"}],\"conditions\":{\"id\":8216,\"dated_at\":\"2026-11-26 20:00:00\",\"last12\":\"0.0\",\"last24\":\"0.0\",\"base_depth\":\"36.0\",\"storm_total\":\"0.0\",\"year_to_date\":\"71.0\",\"base_temp\":\"26.6\",\"mid_temp\":\"29.0\",\"top_temp\":\"29.3\",\"wind_direction\":\"288.9\",\"wind_speed\":\"13.6\",\"icon\":\"icon-weather-partly-cloudy-day\",\"sky_cover\":\"Partly Cloudy\",\"goggles\":\"Low Light Lens\",\"ex",
-    "ns\",\"slug\":\"top_of_collins\",\"elevation\":10443,\"created_at\":\"2019-11-06 20:28:02\",\"updated_at\":\"2019-11-06 20:28:02\"}}]},\"snowfall\":{\"seasons\":[{\"value\":20262027,\"text\":\"2026-27 Season\",\"short\":\"26-27\"},{\"value\":20252026,\"text\":\"2025-26 Season\",\"short\":\"25-26\"},{\"value\":20242025,\"text\":\"2024-25 Season\",\"short\":\"24-25\"},{\"value\":20232024,\"text\":\"2023-24 Season\",\"short\":\"23-24\"},{",
-    ".5\",\"snow8\":\"542.0\",\"snow9\":\"626.0\",\"snow10\":\"388.0\"}]},\"monthlySnowAverages\":[{\"id\":1,\"month\":10,\"monthName\":\"October\",\"snowfall\":\"26.6\",\"water\":\"3.26\",\"density\":\"11.43\",\"snowOnGround\":32,\"avgHighTemp\":null,\"avgLowTemp\":null,\"avgTemp\":null,\"maxSnowOnGround\":78,\"createdAt\":\"2023-08-31 15:19:02\",\"updatedAt\":\"2023-08-31 15:19:02\"},{\"id\":2,\"month\":11,\"monthName\":\"November\",\"snowfa",
-    "ound\":78,\"createdAt\":\"2023-08-31 15:19:02\",\"updatedAt\":\"2023-08-31 15:19:02\"},{\"id\":2,\"month\":11,\"monthName\":\"November\",\"snowfall\":\"71.3\",\"water\":null,\"density\":\"8.60\",\"snowOnGround\":39,\"avgHighTemp\":28,\"avgLowTemp\":16,\"avgTemp\":22,\"maxSnowOnGround\":49,\"createdAt\":\"2023-08-31 15:19:02\",\"updatedAt\":\"2023-08-31 15:19:02\"},{\"id\":3,\"month\":12,\"monthName\":\"December\",\"snowfall\":\"90.6",
-    "ound\":49,\"createdAt\":\"2023-08-31 15:19:02\",\"updatedAt\":\"2023-08-31 15:19:02\"},{\"id\":3,\"month\":12,\"monthName\":\"December\",\"snowfall\":\"90.6\",\"water\":\"7.30\",\"density\":\"7.93\",\"snowOnGround\":58,\"avgHighTemp\":24,\"avgLowTemp\":12,\"avgTemp\":18,\"maxSnowOnGround\":112,\"createdAt\":\"2023-08-31 15:19:02\",\"updatedAt\":\"2023-08-31 15:19:02\"},{\"id\":4,\"month\":1,\"monthName\":\"January\",\"snowfall\":\"94."
-   ]
-  }
- ],
- "brighton": [
-  {
-   "url": "https://www.brightonresort.com/conditions",
-   "status": 200,
-   "final": "https://www.brightonresort.com/conditions",
-   "len": 364487,
-   "endpoints": [
-    "https://www.brightonresort.com/conditions",
-    "https://www.brightonresort.com/conditions/#webpage",
-    "https://www.brightonresort.com/conditions/#breadcrumbs"
-   ],
-   "snips": [],
-   "json": []
-  }
- ],
- "solitude": [
-  {
-   "url": "https://www.solitudemountain.com/mountain-and-village/conditions-and-maps",
-   "status": 200,
-   "final": "https://www.solitudemountain.com/mountain-and-village/conditions-and-maps",
-   "len": 71565,
-   "endpoints": [
-    "https://www.solitudemountain.com/mountain-and-village/conditions-and-maps",
-    "https://amc-p-001.sitecorecontenthub.cloud/api/public/content/8302d31804a144c5a89301bd51adb733?v=abb7fc7b",
-    "https://www.solitudemountain.com/plan-your-trip/snowboarding-ski-lift-tickets-passes",
-    "https://www.solitudemountain.com/plan-your-trip/snowboarding-ski-lessons",
-    "https://www.solitudemountain.com/plan-your-trip/snowboard-ski-rentals",
-    "https://www.solitudemountain.com/things-to-do/nordic-and-snowshoe",
-    "https://v4.mtnfeed.com/",
-    "https://v4.mtnfeed.com/static/js/main.js",
-    "https://v4.mtnfeed.com/static/css/main.css",
-    "https://www.snowshoemtn.com/"
-   ],
-   "snips": [],
-   "json": []
-  }
- ],
- "deervalley": [
-  {
-   "url": "https://www.deervalley.com/explore-the-mountain/mountain-report",
-   "status": 200,
-   "final": "https://www.deervalley.com/explore-the-mountain/mountain-report",
-   "len": 83920,
-   "endpoints": [
-    "https://v4.mtnfeed.com/",
-    "https://v4.mtnfeed.com/static/js/main.js",
-    "https://v4.mtnfeed.com/static/css/main.css",
-    "http://www.snowshoemtn.com/"
-   ],
-   "snips": [],
-   "json": []
-  }
- ],
- "jackson": [
-  {
-   "url": "https://www.jacksonhole.com/snow-report",
-   "status": 404,
-   "final": "https://www.jacksonhole.com/snow-report",
-   "len": 10206,
-   "endpoints": [
-    "https://www.jacksonhole.com/terms-and-conditions",
-    "https://bots.getskitickets.com/api"
-   ],
-   "snips": [],
-   "json": []
-  },
-  {
-   "url": "https://www.jacksonhole.com/mountain-report",
-   "status": 200,
-   "final": "https://www.jacksonhole.com/mountain-report",
-   "len": 214876,
-   "endpoints": [
-    "https://www.jacksonhole.com/terms-and-conditions",
-    "https://bots.getskitickets.com/api",
-    "https://www.datocms-assets.com/50871/1792108454-skier_blasting_deep_powder_between_snowy_evergreen_trees_773kb.jpg?crop=focalpoint&dpr=0.25&fit=crop&fm=webp&fp-x=0.63&fp-y=0.46&h=787.22&w=2048",
-    "https://www.datocms-assets.com/50871/1792108454-skier_blasting_deep_powder_between_snowy_evergreen_trees_773kb.jpg?crop=focalpoint&dpr=0.5&fit=crop&fm=webp&fp-x=0.63&fp-y=0.46&h=787.22&w=2048",
-    "https://www.datocms-assets.com/50871/1792108454-skier_blasting_deep_powder_between_snowy_evergreen_trees_773kb.jpg?crop=focalpoint&dpr=0.75&fit=crop&fm=webp&fp-x=0.63&fp-y=0.46&h=787.22&w=2048",
-    "https://www.datocms-assets.com/50871/1792108454-skier_blasting_deep_powder_between_snowy_evergreen_trees_773kb.jpg?crop=focalpoint&fit=crop&fm=webp&fp-x=0.63&fp-y=0.46&h=787.22&w=2048",
-    "https://www.datocms-assets.com/50871/1792108454-skier_blasting_deep_powder_between_snowy_evergreen_trees_773kb.jpg?crop=focalpoint&dpr=0.25&fit=crop&fp-x=0.63&fp-y=0.46&h=787.22&w=2048",
-    "https://www.datocms-assets.com/50871/1792108454-skier_blasting_deep_powder_between_snowy_evergreen_trees_773kb.jpg?crop=focalpoint&dpr=0.5&fit=crop&fp-x=0.63&fp-y=0.46&h=787.22&w=2048",
-    "https://www.datocms-assets.com/50871/1792108454-skier_blasting_deep_powder_between_snowy_evergreen_trees_773kb.jpg?crop=focalpoint&dpr=0.75&fit=crop&fp-x=0.63&fp-y=0.46&h=787.22&w=2048",
-    "https://www.datocms-assets.com/50871/1792108454-skier_blasting_deep_powder_between_snowy_evergreen_trees_773kb.jpg?crop=focalpoint&fit=crop&fp-x=0.63&fp-y=0.46&h=787.22&w=2048",
-    "https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/soundcloud%253Atracks%253A2445179748&color=%23fc1d1d&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true",
-    "https://soundcloud.com/jackson-hole-snow-report",
-    "https://soundcloud.com/jackson-hole-snow-report/thanksgiving-2026",
-    "https://www.datocms-assets.com/50871/1698351841-current-conditions-winter-bg.jpg?fit=crop&h=740&w=740"
-   ],
-   "snips": [
-    "ns Lift status Terrain Mountain Report Snow Totals Updated Prepared for the weather? Past 24 Hours SUMMIT MID MOUNTAIN SINCE 6AM 0\" OVERNIGHT 0\" 0\" 48 HOURS 0\" 0\" SNOW DEPTH 0\" 0\" Season Totals Prepar",
-    "w Totals Updated Prepared for the weather? Past 24 Hours SUMMIT MID MOUNTAIN SINCE 6AM 0\" OVERNIGHT 0\" 0\" 48 HOURS 0\" 0\" SNOW DEPTH 0\" 0\" Season Totals Prepared for the weather? Snow Report Purchase L",
-    " Prepared for the weather? Past 24 Hours SUMMIT MID MOUNTAIN SINCE 6AM 0\" OVERNIGHT 0\" 0\" 48 HOURS 0\" 0\" SNOW DEPTH 0\" 0\" Season Totals Prepared for the weather? Snow Report Purchase Lift Tickets Trai",
-    "24 Hours SUMMIT MID MOUNTAIN SINCE 6AM 0\" OVERNIGHT 0\" 0\" 48 HOURS 0\" 0\" SNOW DEPTH 0\" 0\" Season Totals Prepared for the weather? Snow Report Purchase Lift Tickets Trail Status Jackson Hole Snow Repor"
-   ],
-   "json": []
-  }
- ]
+ "snowbirdApi": {
+  "status": 200,
+  "body": "Snow reports are manually written by employee's of Snowbird on a daily basis.\nThe following text includes all of the data from Snowbird's most recent snow report.\n\nReport title: Snow Report 2026-11-26 05:42:00\nPublished Date: 2026-11-26 05:42:00\nAuthor: Tucker Kavanagh\n\n**Snow Report Measurements:**\nReported snow amount: 0\nOvernight snow amount: 0\nBase Depth: 38\n\nWritten Report Information:\n**Happy Thanksgiving!**\n\n**Resort Update:**\n\nThe Aerial Tram, Little Cloud, Gadzoom, Wilbere and Chickadee are scheduled to start spinning at 9 a.m., conditions permitting.\n\nAll uphill travel is closed and early-season conditions exist. Please be aware of objects at or below the snow surface.\n\n**Mountain Report:**\n\nWhether you're sitting down to Thanksgiving dinner or joining us on the slopes, there are four magic words today... GIVE ME THE BIRD!\n\nOn this Turkey Day, boy oh boy am I grateful we're out skiing again! Opening Day was phenomenal and the mountain is skiing great and, spoiler alert, more of the same is in store for today. Expect a mix of sunshine and clouds with upper-mountain temps in the 30s. It could be a little windy at the top with gusts near 30mph, so it might be a good day for a buff or extra layer before you've built up your mid-winter cold tolerance.\n\nOur Tramsgiving event is from 12 to 3:45p, bring 3 non-perishable canned goods in exchange for one free scenic ride up the tram! All proceeds will benefit the Utah Food Bank. Great cause. Great views. What could be better? [Snowbird Tramsgiving](https://www.snowbird.com/activities-events/events/events-calendar/tramsgiving/)\n\nIt’s early season, so take it easy out there. Ski and ride in control, respect closures and rope lines, and remember that lift and terrain availability can change throughout the day.\n\nGive me The Bird.\n\n**Snowbird's Snow Totals:**\n24 Hour Total: 0 inches\n48 Hour Total: 0 inches\n72 Hour Total: 0 inches\n7 Day Total: 17 inches\n30 Day Total: 61 inches\nPast Month Total: 59 inches\nSeason Total: 80 inches"
+ },
+ "solitude": {
+  "mtn": [
+   "in-content\"> <div class=\"raw-html\"> <div id=\"root\"></div> <script src=\"https://kit.fontawesome.com/a899312b8a.js\" crossorigin=\"anonymous\"></script> <script type=\"text/javascript\" class=\"optanon-category-C0001\"> liftsAndTrailsConfig = { liftsAndTrailsBuilderBasePath: \"https://v4.mtnfeed.com/ \", resortPath: \"solitude\", } </script> <script defer=\"\" src=\"https://v4.mtnfeed.com/static/js/main.js\" class=\"dom-loader coptanon-category-C0001\"></script> <link href=\"https://v4.mtnfeed.com/static/css/main.css\" rel=\"stylesheet\"> </div> <var aria-hidden=\"true\" class=\"js_components hidden\"> </var> </div> </main> </div> <var aria-hidden=\"true\" class=\"js_components hidden\"> button-links </var> <!-- New Foo",
+   "https://kit.fontawesome.com/a899312b8a.js\" crossorigin=\"anonymous\"></script> <script type=\"text/javascript\" class=\"optanon-category-C0001\"> liftsAndTrailsConfig = { liftsAndTrailsBuilderBasePath: \"https://v4.mtnfeed.com/ \", resortPath: \"solitude\", } </script> <script defer=\"\" src=\"https://v4.mtnfeed.com/static/js/main.js\" class=\"dom-loader coptanon-category-C0001\"></script> <link href=\"https://v4.mtnfeed.com/static/css/main.css\" rel=\"stylesheet\"> </div> <var aria-hidden=\"true\" class=\"js_components hidden\"> </var> </div> </main> </div> <var aria-hidden=\"true\" class=\"js_components hidden\"> button-links </var> <!-- New Footer --> <footer aria-label=\"Site Footer\"> <div class=\"footer-email-signup-wrapp",
+   " class=\"optanon-category-C0001\"> liftsAndTrailsConfig = { liftsAndTrailsBuilderBasePath: \"https://v4.mtnfeed.com/ \", resortPath: \"solitude\", } </script> <script defer=\"\" src=\"https://v4.mtnfeed.com/static/js/main.js\" class=\"dom-loader coptanon-category-C0001\"></script> <link href=\"https://v4.mtnfeed.com/static/css/main.css\" rel=\"stylesheet\"> </div> <var aria-hidden=\"true\" class=\"js_components hidden\"> </var> </div> </main> </div> <var aria-hidden=\"true\" class=\"js_components hidden\"> button-links </var> <!-- New Footer --> <footer aria-label=\"Site Footer\"> <div class=\"footer-email-signup-wrapper-v2\"> <div class=\"email-signup-v2 footer footer-email-signup\"> <div class=\"container\"> "
+  ]
+ },
+ "deervalley": {
+  "mtn": [
+   " <div class=\"main-content\"> <div class=\"raw-html\"> <div id=\"root\"></div> <script src=\"https://kit.fontawesome.com/a899312b8a.js\" crossorigin=\"anonymous\"></script> <script type=\"text/javascript\"> liftsAndTrailsConfig = { liftsAndTrailsBuilderBasePath: \"https://v4.mtnfeed.com/\", resortPath: \"deer-valley\", } </script> <script defer=\"\" src=\"https://v4.mtnfeed.com/static/js/main.js\" class=\"dom-loader\"></script> <link href=\"https://v4.mtnfeed.com/static/css/main.css\" rel=\"stylesheet\"> </div> <var aria-hidden=\"true\" class=\"js_components hidden\"> </var> </div> </main> </div> <var aria-hidden=\"true\" class=\"js_components hidden\"> button-links </var> <!-- New Footer --> <foo",
+   "cript src=\"https://kit.fontawesome.com/a899312b8a.js\" crossorigin=\"anonymous\"></script> <script type=\"text/javascript\"> liftsAndTrailsConfig = { liftsAndTrailsBuilderBasePath: \"https://v4.mtnfeed.com/\", resortPath: \"deer-valley\", } </script> <script defer=\"\" src=\"https://v4.mtnfeed.com/static/js/main.js\" class=\"dom-loader\"></script> <link href=\"https://v4.mtnfeed.com/static/css/main.css\" rel=\"stylesheet\"> </div> <var aria-hidden=\"true\" class=\"js_components hidden\"> </var> </div> </main> </div> <var aria-hidden=\"true\" class=\"js_components hidden\"> button-links </var> <!-- New Footer --> <footer aria-label=\"Site Footer\"> <div class=\"footer-email-signup-wrapper-v2\"> <di",
+   "pt> <script type=\"text/javascript\"> liftsAndTrailsConfig = { liftsAndTrailsBuilderBasePath: \"https://v4.mtnfeed.com/\", resortPath: \"deer-valley\", } </script> <script defer=\"\" src=\"https://v4.mtnfeed.com/static/js/main.js\" class=\"dom-loader\"></script> <link href=\"https://v4.mtnfeed.com/static/css/main.css\" rel=\"stylesheet\"> </div> <var aria-hidden=\"true\" class=\"js_components hidden\"> </var> </div> </main> </div> <var aria-hidden=\"true\" class=\"js_components hidden\"> button-links </var> <!-- New Footer --> <footer aria-label=\"Site Footer\"> <div class=\"footer-email-signup-wrapper-v2\"> <div class=\"email-signup-v2 footer footer-email-signup\"> <div class=\"container\"> "
+  ]
+ },
+ "brighton": {
+  "scripts": [
+   "/_next/static/chunks/3516nv78vffqj.js",
+   "/_next/static/chunks/2f5u1p0apixjd.js",
+   "/_next/static/chunks/29c-wq48_8rj6.js",
+   "/_next/static/chunks/2pqy0mda1v6h4.js",
+   "/_next/static/chunks/turbopack-2u1d16houkiyo.js",
+   "/_next/static/chunks/2gotiy7kne034.js",
+   "/_next/static/chunks/2_3o92zb83owt.js",
+   "/_next/static/chunks/0i9vnnz_q04wa.js",
+   "/_next/static/chunks/0g270201vamda.js",
+   "/_next/static/chunks/41s3y7kdh42ao.js",
+   "/_next/static/chunks/3y062_ezdt1u-.js",
+   "/_next/static/chunks/15vftsfvaocsy.js",
+   "/_next/static/chunks/2xu8zaj_ymi5f.js",
+   "/_next/static/chunks/0ujz6vofgm9-y.js",
+   "/_next/static/chunks/1xf5uaoykkt3z.js",
+   "/_next/static/chunks/0u6hz6seo9vz4.js",
+   "/_next/static/chunks/32dw3bh2-pypt.js",
+   "/_next/static/chunks/1cf-nuwbdlb9y.js",
+   "/_next/static/chunks/35o-smmqaoj59.js",
+   "/_next/static/chunks/3_w-8f0bd0h2-.js",
+   "/_next/static/chunks/33l43qkchy1rr.js",
+   "/_next/static/chunks/2yfamovbezmsc.js",
+   "/_next/static/chunks/1msgacoabfxrj.js",
+   "/_next/static/chunks/3ia0bv_sub4oi.js",
+   "/_next/static/chunks/2rrwmi-hrof-k.js",
+   "/_next/static/chunks/08ld-r-8rflq5.js",
+   "/_next/static/chunks/0nscog-itrxs2.js",
+   "/_next/static/chunks/15qi5mq3nmjd3.js",
+   "/_next/static/chunks/0ec7wsanr_xea.js",
+   "/_next/static/chunks/40h8vp8uq49fp.js",
+   "/_next/static/chunks/1wd8jxfg3ckdt.js",
+   "/_next/static/chunks/0cz1d0mv5g_q7.js",
+   "/_next/static/chunks/27rh-60tkjy0k.js"
+  ],
+  "snow": [
+   "bove the base, accessible by hiking up or skiing down from Crest 6. A cozy alpine setting for dining, events, and mountain memories.\\\",\\\"pageTitle\\\":\\\"Snow Blossom Bistro | Historic Alpine Dining at Brighton Resort\\\"}},{\\\"_id\\\":\\\"552c93c3-f914-424b-95d0-84ffb0818ab1\\\",\\\"_type\\\":\\\"diningDetailsPage\\\",\\\"path\\\":\\\"/mountain-dining/milly-chalet\\\",\\\"_updatedAt\\\":\\\"2026-11-20T19:58:32Z\\\",\\\"metadata\\\":{\\\"_type\\\":\\\"metadata\\\",\\\"metaImage\\\":{\\\"_type\\\":\\\"image\\\",\\\"asset\\\":{\\\"_ref\\\":\\\"image-b307079a37e0a3b9",
+   "geDescription\\\":\\\"Download the Brighton Resort App for live conditions, lift updates, trail maps, and run tracking. Stay ahead with notifications for snowfall and mountain news.\\\",\\\"pageTitle\\\":\\\"Brighton Resort App | Plan Your Ski Day in Utah\\\"}},{\\\"_id\\\":\\\"a6f686b3-32fa-429a-ae08-b38f794ac184\\\",\\\"_type\\\":\\\"page\\\",\\\"path\\\":\\\"/winter-operations\\\",\\\"_updatedAt\\\":\\\"2026-11-20T19:23:48Z\\\",\\\"metadata\\\":{\\\"_type\\\":\\\"metadata\\\",\\\"metaImage\\\":{\\\"_type\\\":\\\"image\\\",\\\"asset\\\":{\\\"_ref\\\":\\\"image-b96b42800f9",
+   "es-or-chains-to-get-up-the-canyon\\\"},{\\\"_id\\\":\\\"kA05Y000001eXRfSAM\\\",\\\"isDeleted\\\":false,\\\"isPublished\\\":\\\"Online\\\",\\\"urlName\\\":\\\"What-is-the-average-snowfall-per-season\\\"},{\\\"_id\\\":\\\"kA05Y000001eXRgSAM\\\",\\\"isDeleted\\\":false,\\\"isPublished\\\":\\\"Online\\\",\\\"urlName\\\":\\\"Are-there-any-ADA-accessible-parking-spaces\\\"},{\\\"_id\\\":\\\"kA05Y000001eXRkSAM\\\",\\\"isDeleted\\\":false,\\\"isPublished\\\":\\\"Online\\\",\\\"urlName\\\":\\\"Do-you-sell-gift-cards\\\"},{\\\"_id\\\":\\\"kA05Y000001eXRlSAM\\\",\\\"isDeleted\\\":false,\\\"isPublished\\\":",
+   "\\\"isPublished\\\":\\\"Online\\\",\\\"urlName\\\":\\\"What-hours-is-my-season-pass-valid-for\\\"}],\\\"topics\\\":[{\\\"_id\\\":\\\"0TO5Y000003cxvRWAQ\\\",\\\"id\\\":null,\\\"slug\\\":\\\"snowsports-school\\\"},{\\\"_id\\\":\\\"0TO5Y000003cxvSWAQ\\\",\\\"id\\\":null,\\\"slug\\\":\\\"lift-ticket-season-passes\\\"},{\\\"_id\\\":\\\"0TO5Y000003cxvTWAQ\\\",\\\"id\\\":null,\\\"slug\\\":\\\"rentals-tuning\\\"},{\\\"_id\\\":\\\"0TO5Y000003cxvVWAQ\\\",\\\"id\\\":null,\\\"slug\\\":\\\"lodging\\\"},{\\\"_id\\\":\\\"0TO5Y000003cxvWWAQ\\\",\\\"id\\\":null,\\\"slug\\\":\\\"retail\\\"},{\\\"_id\\\":\\\"0TO5Y000003cxvXWAQ\\\",\\\"id\\\":n",
+   "l,\\\"slug\\\":\\\"ticket-packages\\\"},{\\\"_id\\\":\\\"0TOUa0000003FqXOAU\\\",\\\"id\\\":null,\\\"slug\\\":\\\"flex-passes\\\"},{\\\"_id\\\":\\\"BR_Snow_Bike\\\",\\\"id\\\":null,\\\"slug\\\":\\\"snow-bike\\\"}]}},\\\"children\\\":\\\"$L2a\\\"}]}]]}]}]}]\\n2b:\\\"PhoneTrackingProvider\\\"\\n2c:I[320540,[\\\"$4\\\",\\\"$5\\\",\\\"$6\\\",\\\"$7\\\",\\\"$8\\\",\\\"$9\\\",\\\"$a\\\",\\\"$b\\\",\\\"$c\\\",\\\"$d\\\",\\\"$e\\\",\\\"$f\\\",\\\"$10\\\"],\\\"$2b\\\"]\\n2d:\\\"UnitConversionProvider\\\"\\n2e:I[288175,[\\\"$4\\\",\\\"$5\\\",\\\"$6\\\",\\\"$7\\\",\\\"$8\\\",\\\"$9\\\",\\\"$a\\\",\\\"$b\\\",\\\"$c\\\",\\\"$d\\\",\\\"$e\\\",\\\"$f\\\",\\\"$10\\\"],\\\"$2d\\\"]\\n2f:I[4",
+   "Reference\\\":null,\\\"internalReference\\\":{\\\"_id\\\":\\\"c0118d8c-81e0-4a0f-bcaa-6117dadcf580\\\",\\\"slug\\\":\\\"conditions\\\"},\\\"linkType\\\":\\\"internal\\\",\\\"text\\\":\\\"Snow Conditions\\\"},{\\\"_key\\\":\\\"82f20d3e1d8c\\\",\\\"_type\\\":\\\"link\\\",\\\"fileReference\\\":null,\\\"internalReference\\\":{\\\"_id\\\":\\\"31584ced-36c1-420a-8848-b98e7c30427f\\\",\\\"slug\\\":\\\"getting-here-and-parking\\\"},\\\"linkType\\\":\\\"internal\\\",\\\"text\\\":\\\"Parking \\u0026 Road Info\\\"},{\\\"_key\\\":\\\"b05f4fb49371\\\",\\\"_type\\\":\\\"link\\\",\\\"fileReference\\\":null,\\\"internalRefere",
+   "$L5d\\\",\\\"$L5e\\\"]}],\\\"$L5f\\\"]}]}]\\n5c:[\\\"$\\\",\\\"$L60\\\",null,{\\\"hasConditionsTrails\\\":true,\\\"conditionsTrailsNavGroup\\\":{\\\"conditionsTrailsMetricType\\\":\\\"snowfall-condition\\\",\\\"openSummaryPanelFlyout\\\":true,\\\"overrideNavLabel\\\":\\\"Snow\\\",\\\"showUnitToggle\\\":false,\\\"snowfallLocation\\\":\\\"Brighton\\\",\\\"snowfallStat\\\":\\\"snow24Hours\\\",\\\"summaryPanel\\\":null,\\\"summaryPanels\\\":[{\\\"_createdAt\\\":\\\"2024-11-08T05:00:00Z\\\",\\\"_id\\\":\\\"708f42f4-63af-4fcd-a08a-6e38ac5f5e34\\\",\\\"_rev\\\":\\\"GUa2UfCcVl2fsIlnNqddSi\\\",\\\"_syst",
+   "ails\\\":true,\\\"conditionsTrailsNavGroup\\\":{\\\"conditionsTrailsMetricType\\\":\\\"snowfall-condition\\\",\\\"openSummaryPanelFlyout\\\":true,\\\"overrideNavLabel\\\":\\\"Snow\\\",\\\"showUnitToggle\\\":false,\\\"snowfallLocation\\\":\\\"Brighton\\\",\\\"snowfallStat\\\":\\\"snow24Hours\\\",\\\"summaryPanel\\\":null,\\\"summaryPanels\\\":[{\\\"_createdAt\\\":\\\"2024-11-08T05:00:00Z\\\",\\\"_id\\\":\\\"708f42f4-63af-4fcd-a08a-6e38ac5f5e34\\\",\\\"_rev\\\":\\\"GUa2UfCcVl2fsIlnNqddSi\\\",\\\"_system\\\":{\\\"base\\\":{\\\"id\\\":\\\"708f42f4-63af-4fcd-a08a-6e38ac5f5e34\\\",\\\"rev\\\":\\\"R4"
+  ],
+  "iframes": [
+   "https://www.youtube.com/embed/4a-3iEM7bHk?autoplay=0&amp;controls=1&amp;fs=1&amp;loop=0",
+   "https://www.youtube.com/embed/uZ24vqOWEkQ?autoplay=0&amp;controls=1&amp;fs=1&amp;loop=0",
+   "https://www.youtube.com/embed/Zv8HYwaXjBg?autoplay=0&amp;controls=1&amp;fs=1&amp;loop=0",
+   "https://www.youtube.com/embed/Y4jUF38n3gM?autoplay=0&amp;controls=1&amp;fs=1&amp;loop=0",
+   "https://www.youtube.com/embed/vMwQRjlfqtA?autoplay=0&amp;controls=1&amp;fs=1&amp;loop=0",
+   "https://www.youtube.com/embed/N-d3MuOagLg?autoplay=0&amp;controls=1&amp;fs=1&amp;loop=0"
+  ]
+ },
+ "jackson": {
+  "raw": [
+   "-grid\" data-v-219e1d8e data-v-4936052f><div data-v-219e1d8e data-v-4936052f>SINCE 6AM</div> <div class=\"total-small\" data-v-219e1d8e data-v-4936052f> 0\" </div> <div class=\"total-small\" data-v-219e1d8e data-v-4936052f> </div> <div data-v-219e1d8e data-v-4936052f>OVERNIGHT</div> <div class=\"total-small\" data-v-219e1d8e data-v-4936052f> 0\" </div> <div class=\"total-small\" data-v-219e1d8e data-v-4936052f> 0\" </div> <div data-v-219e1d8e data-v-4936052f>48 HOURS</div> <div class=\"total-small\" data-v-219e1d8e data-v-4936052f> 0\" </div> <div class=\"total-small\" data-v-219e1d8e data-v-4936052f> 0\" </div> <div data-v-219e1d8e data-v-4936052f>SNOW DEPTH</div> <div class=\"total-small\" data-v-219e1d8e data-v-4936052f> 0\" </div> <div class=\"total-small\" data-v-219e1d8e data-v-4936052f> 0\" </div></div></div> <div class=\"snow-col\" data-v-219e1d8e data-v-49360"
+  ],
+  "next": false,
+  "nuxt": false,
+  "apis": [
+   "https://graphql.datocms.com",
+   "https://bots.getskitickets.com/api",
+   "https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/soundcloud%253Atracks%253A2445179748&color=%23fc1d1d&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"
+  ]
+ },
+ "https://mtnpowder.com/feed?resortId=65": {
+  "status": 200,
+  "body": "{\"Name\":\"Solitude\",\"LastUpdate\":\"2026-11-26T20:42:45-0700\",\"GettingHere\":\"--\",\"OperatingStatus\":\"Open\",\"SnowReport\":{\"LastUpdate\":\"2026-11-26T08:07:54-0700\",\"BaseConditions\":\"Machine Groomed\",\"Report\":\"\\u003cdiv\\u003e\\u003cem\\u003eNovember 26, 2026 at 5:35 a.m. — \\u003c/em\\u003eHappy Thanksgiving from Solitude! Come feast on some tasty laps before the big meal. Moonbeam Express, Apex Express, Link, and the Magic Carpet are up and running, providing access to 7 trails. More terrain is expected soon! Start your day with the \\u003ca href=\\\"https://www.solitudemountain.com/things-to-do/events-and-"
+ },
+ "https://mtnpowder.com/feed?resortId=13": {
+  "status": 404,
+  "body": "{\"error\":\"Unable to return Feed for id=13. Resort does not exist.\"}"
+ },
+ "https://www.mtnpowder.com/feed/v3.json?resortId[]=65": {
+  "status": 401,
+  "body": ""
+ }
 }
