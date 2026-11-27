@@ -1,23 +1,14 @@
-// One-off probe: what does each resort's snow report page expose to a plain fetch?
 import fs from 'node:fs';
-const URLS={
- snowbasin:['https://www.snowbasin.com/the-mountain/mountain-report/'],
- snowbird:['https://www.snowbird.com/the-mountain/mountain-report/current-conditions-weather/'],
- alta:['https://www.alta.com/weather'],
- brighton:['https://www.brightonresort.com/conditions'],
- solitude:['https://www.solitudemountain.com/mountain-and-village/conditions-and-maps'],
- deervalley:['https://www.deervalley.com/explore-the-mountain/mountain-report'],
- jackson:['https://www.jacksonhole.com/snow-report','https://www.jacksonhole.com/mountain-report']};
 const UA='Mozilla/5.0 (compatible; SnowDesk personal dashboard; hourly; github.com/danroach02/Snow-Desk)';
+const get=async(url,accept='text/html')=>{const r=await fetch(url,{headers:{'User-Agent':UA,'Accept':accept},signal:AbortSignal.timeout(20000)});return {status:r.status,text:await r.text()}};
+const ctx=(t,re,n=6,b=200,a=500)=>{const o=[];for(const m of t.matchAll(re)){o.push(t.slice(Math.max(0,m.index-b),m.index+a).replace(/\s+/g,' '));if(o.length>=n)break}return o};
 const out={};
-for(const [id,urls] of Object.entries(URLS)){out[id]=[];
- for(const url of urls){const o={url};
-  try{const r=await fetch(url,{headers:{'User-Agent':UA,'Accept':'text/html'},redirect:'follow',signal:AbortSignal.timeout(20000)});
-   o.status=r.status;o.final=r.url;const t=await r.text();o.len=t.length;
-   o.endpoints=[...new Set((t.match(/https?:\/\/[^"'\s<>\\]*(?:mtnpowder|api|feed|json|conditions|snow)[^"'\s<>\\]*/gi)||[]))].slice(0,40);
-   const text=t.replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ');
-   o.snips=[];for(const m of text.matchAll(/(24[ -]?h(?:ou)?rs?|overnight|48[ -]?h|base depth|season total|settled base|storm total)/gi)){o.snips.push(text.slice(Math.max(0,m.index-90),m.index+110));if(o.snips.length>=8)break}
-   o.json=[];for(const m of t.matchAll(/(?:"|\b)(?:snow24|last24|twentyFour|newSnow|overnight|snowfall|baseDepth|base_depth|snowDepth|SnowReport|snowReport)[A-Za-z_]*"?\s*[:=]/g)){o.json.push(t.slice(Math.max(0,m.index-120),m.index+260).replace(/\s+/g,' '));if(o.json.length>=6)break}
-  }catch(e){o.error=String(e)}
-  out[id].push(o)}}
-fs.mkdirSync('data',{recursive:true});fs.writeFileSync('data/probe.json',JSON.stringify(out,null,1));console.log('probed');
+try{const r=await get('https://api.snowbird.com/api/v1/dor/agent-friendly/snow-reports','application/json');out.snowbirdApi={status:r.status,body:r.text.slice(0,3000)}}catch(e){out.snowbirdApi=String(e)}
+for(const [id,url] of [['solitude','https://www.solitudemountain.com/mountain-and-village/conditions-and-maps'],['deervalley','https://www.deervalley.com/explore-the-mountain/mountain-report']]){
+ try{const r=await get(url);out[id]={mtn:ctx(r.text,/mtnfeed|mtnpowder|resortId|data-resort/gi,6,300,500)}}catch(e){out[id]=String(e)}}
+try{const r=await get('https://www.brightonresort.com/conditions');const t=r.text;
+ out.brighton={scripts:[...t.matchAll(/<script[^>]*src="([^"]+)"/g)].map(m=>m[1]).slice(0,40),snow:ctx(t,/snowfall|new snow|base depth|24 ?hr|"snow/gi,8,150,350),iframes:[...t.matchAll(/<iframe[^>]*src="([^"]+)"/g)].map(m=>m[1])}}catch(e){out.brighton=String(e)}
+try{const r=await get('https://www.jacksonhole.com/mountain-report');const t=r.text;
+ out.jackson={raw:ctx(t,/OVERNIGHT|overnight|sinceSix|since6|snowDepth|fortyEight/g,6,300,700),next:t.includes('__NEXT_DATA__'),nuxt:t.includes('__NUXT__'),apis:[...new Set(t.match(/https?:\/\/[^"'\s<>\\]*(?:api|graphql|feed)[^"'\s<>\\]*/gi)||[])].slice(0,20)}}catch(e){out.jackson=String(e)}
+for(const u of ['https://mtnpowder.com/feed?resortId=65','https://mtnpowder.com/feed?resortId=13','https://www.mtnpowder.com/feed/v3.json?resortId[]=65']){try{const r=await get(u,'application/json');out[u]={status:r.status,body:r.text.slice(0,600)}}catch(e){out[u]=String(e)}}
+fs.writeFileSync('data/probe.json',JSON.stringify(out,null,1));console.log('probed');
