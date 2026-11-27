@@ -22,7 +22,9 @@
 :root{color-scheme:dark;--bg:#000;--panel:#0b0d12;--panel2:#11151d;--line:#ffffff17;--line2:#ffffff2b;--ink:#f3f6fb;--mute:#a3aec0;--dim:#8b96a9;
  --ice:#9cc9ff;--ice2:#cfe5ff;--red:#ff4d4f;--green:#2bc26b;--blue:#3b82f6;--diamond:#f3f6fb;--glass:rgba(14,17,24,.72)}
 *{box-sizing:border-box;min-width:0}
-html{scroll-padding-top:80px}
+html{scroll-padding-top:80px;background:#000;-webkit-text-size-adjust:100%}
+button,a,summary,.chip{-webkit-tap-highlight-color:transparent;touch-action:manipulation}button,.chip,summary{-webkit-user-select:none;user-select:none}
+.bar2,.days{-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}.bar2 .chip,.days .chip{scroll-snap-align:start}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Archivo,system-ui,sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased}
 #snowfx{position:fixed;inset:0;z-index:0;pointer-events:none}
 header,main,footer,.drawer{position:relative;z-index:1}
@@ -122,7 +124,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .slbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:4px 0 12px}
 .slbar input[type=range]{flex:1 1 220px;accent-color:var(--red);min-height:44px}
 .sl{font-family:"Big Shoulders Display";font-weight:900;font-size:32px;white-space:nowrap}
-.mapbox{position:relative;height:min(75vh,760px);border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#05070a}
+.mapbox{position:relative;height:min(68vh,760px);border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#05070a}
 #map{position:absolute;inset:0}
 .sw{width:14px;height:14px;border-radius:3px;display:inline-block}
 .radar{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
@@ -133,7 +135,7 @@ pre{white-space:pre-wrap;font-size:13px;max-height:360px;overflow:auto;backgroun
 /* drawer */
 .drawer{position:fixed;inset:0;z-index:40;display:flex;justify-content:flex-end;background:rgba(0,0,0,.6)}
 .drawer[hidden]{display:none}
-.drawer .sheet{width:min(460px,100%);height:100%;overflow-y:auto;background:#07090d;border-left:1px solid var(--line2);padding:20px}
+.drawer .sheet{width:min(460px,100%);height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:#07090d;border-left:1px solid var(--line2);padding:20px 20px calc(30px + env(safe-area-inset-bottom))}
 .sheet h3{margin:22px 0 10px}
 .f{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 label{font-size:13px;color:var(--mute);display:grid;gap:4px}
@@ -142,7 +144,7 @@ input,select{min-height:44px;padding:0 12px;border-radius:10px;border:1px solid 
 .myr button{font-size:14px}.myr input{min-height:44px;text-align:right}
 .sugg{display:grid;gap:6px;margin-top:8px}.sugg button{text-align:left;padding:10px 14px;height:auto}.sugg button:disabled{opacity:.5}
 .err{color:var(--red);font-size:13px}
-footer{border-top:1px solid var(--line);padding:30px 0 60px;color:var(--dim);font-size:13.5px}
+footer{border-top:1px solid var(--line);padding:30px 0 calc(60px + env(safe-area-inset-bottom));color:var(--dim);font-size:13.5px}
 footer .links{margin-top:10px}
 .view[hidden]{display:none}
 @media(prefers-reduced-motion:no-preference){.col .b{transition:height .5s}}
@@ -184,7 +186,7 @@ footer .links{margin-top:10px}
   <h2 id="mvTitle" style="font-size:clamp(26px,3.6vw,36px);margin-bottom:6px">Mountain view</h2>
   <div class="mute" id="mvTotals" style="margin-bottom:8px"></div>
   <div class="mvfig"><svg id="mvSvg" role="img" aria-label="Snow line, snow and rain by elevation over the next 72 hours"></svg></div>
-  <div class="legend" style="margin-top:6px"><span><i class="sw" style="background:#4f8cff"></i>Snowing</span><span><i class="sw" style="background:#2fa36b"></i>Rain or mix</span><span><i class="sw" style="background:#ff4d4f"></i>Snow line</span><span><i class="sw" style="background:#ff4d4f33"></i>Lifts 9–4</span><span><i class="sw" style="background:#2bc26b"></i><i class="sw" style="background:#f59e0b"></i><i class="sw" style="background:#ff4d4f"></i>Summit gusts</span></div>
+  <div class="legend" style="margin-top:6px"><span><i class="sw" style="background:#4f8cff"></i>Snowing</span><span><i class="sw" style="background:#2fa36b"></i>Rain or mix</span><span><i class="sw" style="background:#ff4d4f"></i>Snow line</span><span><i class="sw" style="background:#ffffff26"></i>Lifts open 9–4</span><span><i class="sw" style="background:#2bc26b"></i><i class="sw" style="background:#f59e0b"></i><i class="sw" style="background:#ff4d4f"></i>Summit gusts</span></div>
   <p class="mute" style="margin:10px 0 0;font-size:13px">One model. It gives the same precipitation at every elevation, so base, mid and summit differ only by temperature. Real summit totals often run higher.</p>
  </div>
  <div class="sec-head" style="margin:36px 0 12px"><h2>3D mountain</h2><div class="bar2" id="mapLayers" style="margin:0"></div></div>
@@ -192,7 +194,7 @@ footer .links{margin-top:10px}
  <div class="slbar"><div><span class="sl" id="slVal">– ft</span><div class="mute" id="slNote"></div></div><input type="range" id="slRange" min="4000" max="12000" step="100" aria-label="Snow line elevation"><button type="button" id="slAuto">Use forecast</button><button type="button" id="spin">Rotate</button></div>
  <div class="mapbox"><div id="map"></div></div>
  <div class="legend" style="margin-top:10px"><span><i class="sw" style="background:#21c463"></i>Green</span><span><i class="sw" style="background:#3b82f6"></i>Blue</span><span><i class="sw" style="background:#0b0f16;border:1px solid #fff"></i>Black</span><span><i class="sw" style="background:#ff8a00"></i>Freeride</span><span><i class="sw" style="background:#ffd60a"></i>Lifts (dashed)</span><span><i class="sw" style="background:#ff3b30"></i>Snow line</span></div>
- <p class="mute" id="mapmsg">Drag to pan; two fingers to tilt and rotate.</p>
+ <p class="mute" id="mapmsg">On a phone, use two fingers to move the map, so one finger still scrolls the page.</p>
 </div></div></section>
 
 <section class="view" id="v-storm" hidden><div class="section"><div class="wrap">
@@ -649,11 +651,11 @@ async function loadProfile(r){
 function drawProfile(){
  const r=curRes(),svg=$('#mvSvg');if(!r||!svg||$('#v-mountain').hidden)return;
  const P=state[r.id]&&state[r.id].profile,W=svg.clientWidth||700,Hh=svg.clientHeight||460;
- $('#mvTitle').textContent=`${r.name}: next 72 hours, base to summit`;
+ $('#mvTitle').textContent=innerWidth<600?`${r.name} · next 72 hours`:`${r.name}: next 72 hours, base to summit`;
  if(!P){svg.innerHTML=`<text x="12" y="30" fill="currentColor">${esc(state[r.id]&&state[r.id].err&&state[r.id].err.profile?'Forecast failed: '+state[r.id].err.profile:'Loading base-to-summit forecast…')}</text>`;$('#mvTotals').textContent='';return}
  const L=54,R=8,n=P.hours.length,cw=(W-L-R)/n,x=i=>L+i*cw,narrow=W<600;
  const top1=24,h1=Math.round(Hh*.42),lo=r.base-500,hi=r.top+500,y=e=>top1+h1-(Math.max(lo,Math.min(hi,e))-lo)/(hi-lo)*h1;
- const lift=(top,h)=>{let o2='',st=-1;P.hours.forEach((hh,i)=>{const on=+hh.t.slice(11,13)>=9&&+hh.t.slice(11,13)<16;if(on&&st<0)st=i;if((!on||i===n-1)&&st>=0){const e=on?i+1:i;o2+=`<rect x="${x(st)}" y="${top}" width="${x(e)-x(st)}" height="${h}" fill="#ff4d4f" opacity=".10"/>`;st=-1}});return o2};
+ const lift=(top,h)=>{let o2='',st=-1;P.hours.forEach((hh,i)=>{const on=+hh.t.slice(11,13)>=9&&+hh.t.slice(11,13)<16;if(on&&st<0)st=i;if((!on||i===n-1)&&st>=0){const e=on?i+1:i;o2+=`<rect x="${x(st)}" y="${top}" width="${x(e)-x(st)}" height="${h}" fill="#ffffff" opacity=".07"/>`;st=-1}});return o2};
  let o=lift(top1,h1);
  P.hours.forEach((hh,i)=>{const hr=+hh.t.slice(11,13);if(hr===0||(i===0&&hr<=14)){const d=hh.t.slice(0,10);o+=`<line x1="${x(i)}" x2="${x(i)}" y1="${top1-14}" y2="${Hh-22}" stroke="currentColor" opacity=".18"/><text x="${x(i)+3}" y="${top1-6}" font-size="12" font-weight="700" fill="currentColor">${esc(d===today()?'Today':dayName(d))}</text>`}});
  // precipitation: snow above the snow line, rain below
@@ -700,7 +702,7 @@ function initMap(){
  const ml=window.maplibregl;
  const dem=new window.mlcontour.DemSource({url:TERR,encoding:'terrarium',maxzoom:13,worker:true});dem.setupMaplibre(ml);
  const r=curRes(),F=fc(r);
- map=new ml.Map({container:'map',center:[F.lon,F.lat],zoom:13,pitch:62,bearing:-20,maxPitch:80,minZoom:9.5,attributionControl:{compact:true},
+ map=new ml.Map({container:'map',center:[F.lon,F.lat],zoom:13,pitch:62,bearing:-20,maxPitch:80,minZoom:9.5,cooperativeGestures:matchMedia('(pointer:coarse)').matches,attributionControl:{compact:true},
   style:{version:8,glyphs:'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
    sources:{
     sat:{type:'raster',tiles:['https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:16,attribution:'Imagery: USGS The National Map'},

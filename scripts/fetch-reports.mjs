@@ -8,10 +8,10 @@ export const RESORTS=[
  {id:'snowbasin',lat:41.1957,lon:-111.8701,elev:8297,page:'https://www.snowbasin.com/the-mountain/mountain-report/'},
  {id:'snowbird',lat:40.5810,lon:-111.6570,elev:9200,page:'https://api.snowbird.com/api/v1/dor/agent-friendly/snow-reports',accept:'text/plain'},
  {id:'alta',lat:40.57607,lon:-111.63889,elev:9662,page:'https://www.alta.com/weather'},
- {id:'brighton',lat:40.5980,lon:-111.5832,elev:9500,feed:66}, // brightonresort.com loads its numbers in the browser; nothing readable in the page itself
+ {id:'brighton',lat:40.5980,lon:-111.5832,elev:9500,page:'https://www.brightonresort.com/api/reportpal?resortName=brighton&useReportPal=true',accept:'application/json',feed:66},
  {id:'solitude',lat:40.6199,lon:-111.5919,elev:9200,feed:65},
  {id:'deervalley',lat:40.611,lon:-111.4999,elev:8888,feed:49},
- {id:'jackson',lat:43.5915,lon:-110.8745,elev:9634,page:'https://www.jacksonhole.com/mountain-report',feed:67}];
+ {id:'jackson',lat:43.5915,lon:-110.8745,elev:9634,page:'https://jacksonhole-prod.zaneray.com/api/all.json',accept:'application/json',feed:67}];
 const num=v=>{const n=parseFloat(String(v??'').replace(/[^\d.\-]/g,''));return Number.isFinite(n)?n:null};
 const mtDate=(d=new Date())=>d.toLocaleDateString('en-CA',{timeZone:TZ});
 const mtHour=(d=new Date())=>+d.toLocaleString('en-US',{hour:'numeric',hour12:false,timeZone:TZ})%24;
@@ -52,6 +52,17 @@ export function parseJackson(html){ // summit and mid-mountain columns; mid-moun
  if(!dp[1]&&!dp[0]&&!updated)return {}; // all zeros with no depth and no timestamp = the page's empty placeholders, not a report
  return {overnight:on[1],summitOvernight:on[0],since6:num(s6),h48:h48[1],base:dp[1],where:'Mid mountain',updated};
 }
+export function parseBrighton(body){ // JSON behind brightonresort.com/conditions
+ const j=JSON.parse(body),l=(((j.currentConditions||{}).resortLocations||{}).location||[])[0]||{},w=(j.currentConditions||{}).resortwide||{},v=k=>l[k]?num(l[k].inches):null;
+ return {overnight:v('snowOverNight'),h24:v('snow24Hours'),h48:v('snow48Hours'),h72:v('snow72Hours'),d7:v('snow7Days'),base:v('base'),season:v('snowSeasonTotal'),
+  lifts:w.numLiftsTotal!=null?`${w.numLiftsOpen}/${w.numLiftsTotal}`:null,trails:w.numTrailsTotal!=null?`${w.numTrailsOpen}/${w.numTrailsTotal}`:null,updated:j.commentsUpdated||j.updated||null};
+}
+export function parseJacksonJson(body){ // JSON behind jacksonhole.com/mountain-report; upper mountain (tram summit) used, mid-mountain kept
+ const j=JSON.parse(body),sn=j.snow||{},a=sn.tramSummit||{},m=sn.midMountain||{},v=(o,k)=>o[k]&&o[k].value!=null?num(o[k].value):null;
+ const d=new Date(j.lastModified);
+ return {overnight:v(a,'newSnowSinceLiftsClosed'),h24:v(a,'newSnowLast24H'),h48:v(a,'newSnowLast48H'),d7:v(a,'newSnowLast7D'),base:v(a,'totalSnowDepth'),season:v(a,'seasonTotalSnow'),
+  midOvernight:v(m,'newSnowSinceLiftsClosed'),midBase:v(m,'totalSnowDepth'),where:'Upper mountain',updated:isNaN(d)?null:d.toISOString()};
+}
 // same temperature table the app uses for snow-to-liquid ratio
 const slr=t=>t>34?0:t>32.5?7:t>29?10:t>25?12.5:t>18?15:t>8?17:15;
 async function forecastOvernight(r,date){ // snow from 4 pm the day before to 9 am on `date`
@@ -61,7 +72,7 @@ async function forecastOvernight(r,date){ // snow from 4 pm the day before to 9 
 }
 const read=(f,d)=>{try{return JSON.parse(fs.readFileSync(f,'utf8'))}catch(e){return d}};
 
-const PARSERS={snowbasin:parseSnowbasin,snowbird:parseSnowbird,alta:parseAlta,jackson:parseJackson};
+const PARSERS={snowbasin:parseSnowbasin,snowbird:parseSnowbird,alta:parseAlta,brighton:parseBrighton,jackson:parseJacksonJson};
 async function main(){
  fs.mkdirSync('data',{recursive:true});
  const old=read('data/reports.json',{resorts:{}}),resorts={};
