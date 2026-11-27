@@ -8,10 +8,10 @@ export const RESORTS=[
  {id:'snowbasin',lat:41.1957,lon:-111.8701,elev:8297,page:'https://www.snowbasin.com/the-mountain/mountain-report/'},
  {id:'snowbird',lat:40.5810,lon:-111.6570,elev:9200,page:'https://api.snowbird.com/api/v1/dor/agent-friendly/snow-reports',accept:'text/plain'},
  {id:'alta',lat:40.57607,lon:-111.63889,elev:9662,page:'https://www.alta.com/weather'},
- {id:'brighton',lat:40.5980,lon:-111.5832,elev:9500,page:'https://www.brightonresort.com/conditions'},
+ {id:'brighton',lat:40.5980,lon:-111.5832,elev:9500,feed:66}, // brightonresort.com loads its numbers in the browser; nothing readable in the page itself
  {id:'solitude',lat:40.6199,lon:-111.5919,elev:9200,feed:65},
  {id:'deervalley',lat:40.611,lon:-111.4999,elev:8888,feed:49},
- {id:'jackson',lat:43.5915,lon:-110.8745,elev:9634,page:'https://www.jacksonhole.com/mountain-report'}];
+ {id:'jackson',lat:43.5915,lon:-110.8745,elev:9634,page:'https://www.jacksonhole.com/mountain-report',feed:67}];
 const num=v=>{const n=parseFloat(String(v??'').replace(/[^\d.\-]/g,''));return Number.isFinite(n)?n:null};
 const mtDate=(d=new Date())=>d.toLocaleDateString('en-CA',{timeZone:TZ});
 const mtHour=(d=new Date())=>+d.toLocaleString('en-US',{hour:'numeric',hour12:false,timeZone:TZ})%24;
@@ -49,6 +49,7 @@ export function parseJackson(html){ // summit and mid-mountain columns; mid-moun
  const on=two('OVERNIGHT'),h48=two('48 HOURS'),dp=two('SNOW DEPTH'),s6=(t.match(/SINCE 6AM\s*([\d.]+)"/i)||[])[1];
  const up=t.match(/Updated\s*:?\s*([A-Za-z]{3,9}\.? \d{1,2},? ?\d{0,4},?\s*(?:at\s*)?\d{1,2}:\d{2}\s*[AP]M)/i);let updated=null;
  if(up){const d=new Date(up[1].replace(/\bat\b/i,'').replace(/(\d{1,2}:\d{2})\s*([AP]M)/i,' $1 $2')+(/\d{4}/.test(up[1])?'':' '+new Date().getFullYear())+' GMT-0700');if(!isNaN(d))updated=d.toISOString()}
+ if(!dp[1]&&!dp[0]&&!updated)return {}; // all zeros with no depth and no timestamp = the page's empty placeholders, not a report
  return {overnight:on[1],summitOvernight:on[0],since6:num(s6),h48:h48[1],base:dp[1],where:'Mid mountain',updated};
 }
 // same temperature table the app uses for snow-to-liquid ratio
@@ -60,14 +61,14 @@ async function forecastOvernight(r,date){ // snow from 4 pm the day before to 9 
 }
 const read=(f,d)=>{try{return JSON.parse(fs.readFileSync(f,'utf8'))}catch(e){return d}};
 
-const PARSERS={snowbasin:parseSnowbasin,snowbird:parseSnowbird,alta:parseAlta,jackson:parseJackson,brighton:()=>({})};
-const ctx=(t,re,n=8,b=160,a=320)=>{const o=[];for(const m of t.matchAll(re)){o.push(t.slice(Math.max(0,m.index-b),m.index+a).replace(/\s+/g,' '));if(o.length>=n)break}return o};
-const DEBUG={jackson:h=>ctx(text(h),/Updated/g,4,120,200),brighton:h=>({len:h.length,hits:ctx(h,/overnight|24 ?h(?:ou)?r|base ?depth|newSnow|snowfall|inches|mtnpowder|feed|api\./gi,14,140,260)})};const debug={};
+const PARSERS={snowbasin:parseSnowbasin,snowbird:parseSnowbird,alta:parseAlta,jackson:parseJackson};
 async function main(){
  fs.mkdirSync('data',{recursive:true});
  const old=read('data/reports.json',{resorts:{}}),resorts={};
  for(const r of RESORTS){
-  try{let rep;if(r.feed)rep=parseFeed(await (await get('https://mtnpowder.com/feed?resortId='+r.feed,'application/json')).json());else{const body=await (await get(r.page,r.accept||'text/html')).text();rep=PARSERS[r.id](body);if(DEBUG[r.id])debug[r.id]=DEBUG[r.id](body)}
+  try{let rep={};if(r.page){const body=await (await get(r.page,r.accept||'text/html')).text();rep=PARSERS[r.id](body)}
+   // fall back to the shared feed when the resort's own page has no readable numbers
+   if(r.feed&&rep.h24==null&&rep.overnight==null&&rep.base==null)rep=parseFeed(await (await get('https://mtnpowder.com/feed?resortId='+r.feed,'application/json')).json());
    if(rep.h24==null&&rep.overnight==null&&rep.base==null)throw new Error('no snow numbers found in the report');
    resorts[r.id]={...rep,ok:true}}
   catch(e){const prev={...(old.resorts[r.id]||{})};delete prev.error;resorts[r.id]={...prev,ok:false,error:String(e.message||e)};console.log(r.id,'failed:',e.message)}
@@ -86,7 +87,6 @@ async function main(){
  for(const d of Object.keys(acc.pending))if(d<today){delete acc.pending[d];changed=true}
  if(acc.rows.length>1500){acc.rows=acc.rows.slice(-1500);changed=true}
  if(changed)fs.writeFileSync('data/accuracy.json',JSON.stringify(acc));
- fs.writeFileSync('data/debug.json',JSON.stringify(debug,null,1));
  console.log(JSON.stringify(resorts,null,1));
 }
 if(process.argv[1]&&process.argv[1].endsWith('fetch-reports.mjs'))main();
