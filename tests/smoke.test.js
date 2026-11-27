@@ -32,7 +32,7 @@ setTimeout(()=>{const d=dom.window.document,txt=s=>d.querySelector(s).textConten
  setTimeout(()=>{
   assert.match(txt('#rank details.row .in'),/^15"overnight/,'overnight number: '+txt('#rank details.row .in'));
   assert.match(txt('#pick'),/15"/,'pick shows overnight snow');
-  assert.match(txt('#storm'),/about 1[3-6]"/,'headline uses consensus: '+txt('#storm'));
+  assert.match(txt('#storm'),/Snowbasin1[3-6]"/,'headline uses consensus: '+txt('#storm'));
   d.querySelector('#row-snowbird').open=true;d.querySelector('#row-snowbird').dispatchEvent(new dom.window.Event('toggle'));
   assert.match(txt('#row-snowbird .detail'),/Snow line ~5,500 ft/,'snow line in feet, not double converted');
   assert.match(txt('#row-snowbird .detail'),/[78]\.0" in 12h/,'sensor estimate ignores 1-inch noise: '+txt('#row-snowbird .obs'));

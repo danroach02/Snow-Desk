@@ -4,156 +4,164 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#000000">
+<meta name="description" content="Powder forecast for the Wasatch and the Tetons.">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Snow Desk">
-<title>Snow Desk · Wasatch & Tetons powder forecast</title>
+<title>Snow Desk</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
 <style>
-/* VOICE: a premium mountain-weather service at 5 a.m. — calm, exact, numbers first
-   IDEA: a night storm board; ratings use the trail-sign system
-   PICTURE: falling snow over a black sky, the ridge of every resort drawn to elevation with snow caps and snow lines
-   COLOUR and TYPE: pure black, snow white, ice blue accent, patrol red for warnings; Big Shoulders Display + Archivo
-   LAYOUT: Today (forecast → pick → one ranked list) · Mountain · Storm · settings drawer */
-:root{color-scheme:dark;--bg:#000;--panel:#0b0d12;--panel2:#11151d;--line:#ffffff17;--line2:#ffffff2b;--ink:#f3f6fb;--mute:#a3aec0;--dim:#8b96a9;
- --ice:#9cc9ff;--ice2:#cfe5ff;--red:#ff4d4f;--green:#2bc26b;--blue:#3b82f6;--diamond:#f3f6fb;--glass:rgba(14,17,24,.72)}
+/* VOICE: quiet confidence. An instrument, not a billboard.
+   IDEA: a precision weather instrument on black glass; numbers set large and light, everything else recedes
+   PICTURE: an elevation instrument: one fine line per resort from base to summit, snow line ticked in red
+   COLOUR and TYPE: black, near-white, one grey, red only for warnings; the system typeface (San Francisco on Apple devices), Inter elsewhere
+   LAYOUT: statement, the pick, one list separated by hairlines. No boxes unless something is a control. */
+:root{color-scheme:dark;--bg:#000;--ink:#f5f5f7;--mute:#a1a1a6;--dim:#86868b;--line:rgba(255,255,255,.12);--line2:rgba(255,255,255,.22);--fill:#1c1c1e;--fill2:#2c2c2e;
+ --ice:#f5f5f7;--red:#ff453a;--green:#30d158;--amber:#ffd60a;--blue:#2997ff;--diamond:#f5f5f7;
+ --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,"Helvetica Neue",Arial,sans-serif}
 *{box-sizing:border-box;min-width:0}
-html{scroll-padding-top:80px;background:#000;-webkit-text-size-adjust:100%}
+html{scroll-padding-top:72px;background:#000;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.47 var(--font);letter-spacing:-.011em;overflow-x:clip;-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 0}
 button,a,summary,.chip{-webkit-tap-highlight-color:transparent;touch-action:manipulation}button,.chip,summary{-webkit-user-select:none;user-select:none}
-.bar2,.days{-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}.bar2 .chip,.days .chip{scroll-snap-align:start}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Archivo,system-ui,sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased}
-#snowfx{position:fixed;inset:0;z-index:0;pointer-events:none}
+#snowfx{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.55}
 header,main,footer,.drawer{position:relative;z-index:1}
-h1,h2,h3,.num{font-family:"Big Shoulders Display","Arial Narrow",sans-serif;font-weight:800;line-height:1.02;margin:0;letter-spacing:.01em}
-h2{font-size:clamp(30px,4vw,42px)}h3{font-size:24px}
-a{color:var(--ice)}a:hover{color:#fff}
-.wrap{max-width:1180px;margin:0 auto;padding:0 max(4vw,16px)}
-button,input,select{font:inherit;font-size:16px}
-button{min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line2);background:var(--panel2);color:var(--ink);cursor:pointer;font-weight:600}
-button:hover{border-color:#ffffff55}
-button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--ice);outline-offset:2px}
-.btn-pri{background:#fff;color:#000;border-color:#fff}
-.mute{color:var(--mute);font-size:14px}
-.kicker{color:var(--mute);font-size:13.5px;font-weight:600;letter-spacing:.02em}
-.glass{background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:16px}
+h1,h2,h3{font-family:var(--font);margin:0;font-weight:600;letter-spacing:-.022em;line-height:1.1}
+h2{font-size:clamp(28px,3.4vw,40px)}h3{font-size:21px;letter-spacing:-.015em}
+.num,.in,.stat .v,.sl{font-family:var(--font);font-variant-numeric:tabular-nums}
+a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:1080px;margin:0 auto;padding:0 max(5vw,22px)}
+button,input,select{font:inherit;font-size:17px;letter-spacing:inherit}
+button{min-height:44px;padding:0 18px;border-radius:980px;border:0;background:var(--fill);color:var(--ink);cursor:pointer;font-weight:500}
+button:hover{background:var(--fill2)}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible,.pick:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:6px}
+.btn-pri{background:var(--ink);color:#000}.btn-pri:hover{background:#fff}
+.mute{color:var(--mute);font-size:14px;letter-spacing:-.006em}
+.kicker{color:var(--dim);font-size:14px;font-weight:500;letter-spacing:-.006em}
 /* header */
-.bar{position:sticky;top:0;z-index:20;background:rgba(0,0,0,.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-.bar .wrap{display:flex;align-items:center;gap:14px;min-height:64px}
-.logo{display:flex;align-items:center;gap:10px;font-family:"Big Shoulders Display";font-weight:900;font-size:26px;letter-spacing:.04em;color:#fff;text-decoration:none;white-space:nowrap}
-.logo svg{width:26px;height:26px}
-.nav{display:flex;gap:2px;margin-left:auto}
-.nav a{color:var(--mute);text-decoration:none;font-weight:600;font-size:15px;padding:10px 14px;border-radius:8px;white-space:nowrap}
-.nav a[aria-current=true]{color:#fff;background:#ffffff12}
-.nav a:hover{color:#fff}
-.gear{min-height:40px;width:40px;padding:0;display:grid;place-items:center;border-radius:10px}
-@media(max-width:640px){.bar .wrap{gap:8px}.logo span{display:none}.nav{margin-left:0;flex:1;justify-content:center}.nav a{padding:10px 10px}}
+.bar{position:sticky;top:0;z-index:20;background:rgba(0,0,0,.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;gap:8px;min-height:52px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:600;font-size:17px;letter-spacing:-.02em;color:var(--ink);white-space:nowrap}
+.logo:hover{text-decoration:none}.logo svg{width:18px;height:18px}
+.nav{display:flex;gap:4px;margin-left:auto}
+.nav a{color:var(--mute);font-size:14px;font-weight:400;padding:14px 12px;white-space:nowrap;transition:color .2s}
+.nav a:hover{color:var(--ink);text-decoration:none}.nav a[aria-current=true]{color:var(--ink)}
+.gear{min-height:44px;width:44px;padding:0;display:grid;place-items:center;background:transparent;color:var(--mute)}.gear:hover{background:transparent;color:var(--ink)}
+@media(max-width:640px){.logo span{display:none}.nav{margin-left:0;flex:1;justify-content:center}}
 /* hero */
-.hero{padding:clamp(28px,5vw,64px) 0 10px}
-.hero-top{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:28px;align-items:end}
+.hero{padding:clamp(40px,7vw,96px) 0 0}
+.hero-top{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:clamp(28px,5vw,72px);align-items:end}
 @media(max-width:860px){.hero-top{grid-template-columns:1fr}}
-.headline{font-size:clamp(46px,7.2vw,88px);font-weight:900;margin:8px 0 12px;text-wrap:balance;text-shadow:0 0 40px #9cc9ff33}
-.headline em{font-style:normal;color:var(--ice)}
-.storm{font-size:17px;color:#c9d4e4;max-width:60ch;margin:0}
-.storm b{color:#fff;font-weight:600}
-.pick[data-goto]{cursor:pointer}.pick[data-goto]:hover{border-color:var(--line2)}
+.headline{font-size:clamp(40px,6.4vw,80px);font-weight:600;letter-spacing:-.035em;line-height:1.04;margin:10px 0 18px;text-wrap:balance}
+.headline em{font-style:normal;color:var(--dim)}
+.storm{font-size:clamp(17px,1.6vw,21px);line-height:1.42;color:var(--mute);max-width:56ch;margin:0;letter-spacing:-.014em}
+.storm b{color:var(--ink);font-weight:500}.storm p{margin:18px 0 0;font-size:15px;line-height:1.5;color:var(--dim);max-width:52ch}
+.regions{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:18px 22px;max-width:560px}
+.reg .k{font-size:13px;color:var(--dim)}.reg .v{font-weight:300;font-size:40px;letter-spacing:-.04em;line-height:1.1;color:var(--ink);font-variant-numeric:tabular-nums}.reg .v small{font-size:.5em;color:var(--dim);margin-left:1px}.reg .r{font-size:13px;color:var(--dim);font-variant-numeric:tabular-nums}
+.pick{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 20px;align-items:center;padding:22px 0 0;border-top:1px solid var(--line2)}
+.pick[data-goto]{cursor:pointer}
+.pick .num{font-weight:200;font-size:clamp(88px,11vw,132px);line-height:.9;letter-spacing:-.05em;grid-row:span 3}
+.pick .num small{font-size:.36em;font-weight:300;color:var(--dim);letter-spacing:0;margin-left:2px}
+.pick .who{font-size:28px;font-weight:600;letter-spacing:-.025em;display:flex;align-items:center;gap:10px;margin:2px 0}
+.pick .sub{color:var(--mute);font-size:14px}
+.pick .tags{grid-column:1/-1;margin-top:14px;font-size:14px}
+.pick .sub:last-child{color:var(--blue)!important}
+/* segmented controls */
+.days,.bar2{display:inline-flex;max-width:100%;gap:2px;overflow-x:auto;scrollbar-width:none;background:var(--fill);border-radius:11px;padding:3px;-webkit-overflow-scrolling:touch}
+.days::-webkit-scrollbar,.bar2::-webkit-scrollbar{display:none}
+.days{margin:clamp(30px,4vw,48px) 0 0}.bar2{margin-bottom:18px}
+.chip{flex:none;min-height:38px;border-radius:8px;padding:0 16px;background:transparent;color:var(--mute);font-size:14px;font-weight:500}
+.chip:hover{background:transparent;color:var(--ink)}
+.chip[aria-pressed=true]{background:#636366;color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35)}
+/* elevation instrument */
 #v-today{display:flex;flex-direction:column}#v-today[hidden]{display:none}
-@media(max-width:760px){.ridgeband{order:3;padding-bottom:30px}}
-.pick{padding:18px 20px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 18px;align-items:center}
-.pick .num{font-weight:900;font-size:clamp(80px,11vw,120px);line-height:.82;grid-row:span 3;color:#fff;text-shadow:0 0 30px #cfe5ff55}
-.pick .num small{font-size:.42em;color:var(--ice2)}
-.pick .who{font-family:"Big Shoulders Display";font-weight:800;font-size:34px;display:flex;align-items:center;gap:10px}
-.pick .sub{color:#c3cede;font-size:14px}
-.pick .tags{grid-column:1/-1;margin-top:10px}
-.days{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:22px 0 6px}
-.chip{flex:none;min-height:44px;border-radius:999px;padding:0 16px;background:transparent;border:1px solid var(--line2);color:var(--ice2);font-weight:600}
-.chip[aria-pressed=true]{background:#fff;color:#000;border-color:#fff}
-.ridge{position:relative;height:clamp(230px,30vw,320px);margin-top:10px}
+.ridgeband{padding-top:clamp(20px,3vw,36px)}
+@media(max-width:760px){.ridgeband{order:3;padding-bottom:40px}}
+.ridge{position:relative;height:clamp(220px,26vw,300px)}
 .ridge svg{position:absolute;inset:0;width:100%;height:100%}
-.ridge-note{color:var(--dim);font-size:12.5px;margin-top:8px}
+.ridge-note{color:var(--dim);font-size:12px;margin-top:10px}
 /* list */
-.section{padding:clamp(34px,5vw,64px) 0}
-.sec-head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:10px 24px;margin-bottom:16px}
-.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--mute);align-items:center}
+.section{padding:clamp(44px,6vw,88px) 0}
+.sec-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:10px 24px;margin-bottom:10px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12px;color:var(--dim);align-items:center}
 .legend span{display:inline-flex;align-items:center;gap:6px}
-.list{display:grid;gap:10px}
-.row{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:border-color .2s}
-.row[open]{border-color:var(--line2);background:var(--panel2)}
-.row.top{border-color:#9cc9ff66;box-shadow:0 0 0 1px #9cc9ff22,0 10px 40px -20px #9cc9ff66}
-.row.off{opacity:.45}
-.row summary{list-style:none;display:grid;grid-template-columns:28px 34px minmax(0,1fr) auto 20px;gap:4px 14px;align-items:center;padding:14px 18px;cursor:pointer}
+.list{border-top:1px solid var(--line)}
+.row{border-bottom:1px solid var(--line)}
+.row.off{opacity:.4}
+.row summary{list-style:none;display:grid;grid-template-columns:22px 22px minmax(0,1fr) auto 16px;gap:2px 14px;align-items:center;padding:20px 0;cursor:pointer}
 .row summary::-webkit-details-marker{display:none}
-.rk{color:var(--dim);font-weight:700;font-size:14px}
-.nm{font-family:"Big Shoulders Display";font-weight:800;font-size:27px;line-height:1}
-.in{font-family:"Big Shoulders Display";font-weight:900;font-size:36px;text-align:right;white-space:nowrap;line-height:1}
-.in small{display:block;font-family:Archivo;font-size:11px;font-weight:600;color:var(--dim);letter-spacing:.02em}
-.chev{width:18px;height:18px;color:var(--dim);transition:transform .2s}
+.rk{color:var(--dim);font-size:13px;font-variant-numeric:tabular-nums}
+.nm{font-size:22px;font-weight:600;letter-spacing:-.022em;line-height:1.15}
+.row.top .nm::after{content:"Top pick";font-size:11px;font-weight:600;letter-spacing:.02em;color:#000;background:var(--ink);border-radius:5px;padding:2px 7px;margin-left:10px;vertical-align:3px}
+.in{font-weight:300;font-size:34px;letter-spacing:-.04em;text-align:right;white-space:nowrap;line-height:1}
+.in small{display:block;font-size:11px;font-weight:400;color:var(--dim);letter-spacing:0;margin-top:3px}
+.chev{width:14px;height:14px;color:var(--dim);transition:transform .25s}
 .row[open] .chev{transform:rotate(180deg)}
-.row .tg{grid-column:3/5;grid-row:2}
-.sym{width:26px;height:26px;display:block}
-.tag{display:inline-block;font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;background:#ffffff10;color:#d5deea;margin:3px 6px 1px 0;white-space:nowrap}
-.tag.good{background:#2bc26b1f;color:#7ee8a8}
-.tag.bad{background:#ff4d4f22;color:#ff9c9d}
-.detail{padding:4px 18px 18px;border-top:1px solid var(--line)}
-.dgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:14px}
-@media(max-width:760px){.dgrid{grid-template-columns:1fr}.row summary{grid-template-columns:22px 30px minmax(0,1fr) auto 18px;gap:4px 10px;padding:12px 14px}.nm{font-size:23px}.in{font-size:30px}.row .tg{grid-column:1/-1}}
-.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.stat{background:#ffffff08;border:1px solid var(--line);border-radius:12px;padding:10px}
-.stat .v{font-family:"Big Shoulders Display";font-weight:900;font-size:28px;line-height:1}
-.stat .l{font-size:12px;color:var(--mute);line-height:1.3;margin-top:3px}
-.obs{font-size:14px;color:#c9d4e4;margin-top:10px}
-.strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;align-items:end;height:112px}
+.row .tg{grid-column:3/5;grid-row:2;font-size:14px;line-height:1.5}
+.sym{width:14px!important;height:14px!important;display:block}.sym[viewBox="0 0 30 20"]{width:21px!important}
+.tag{display:inline;color:var(--mute);font-size:inherit;white-space:normal}
+.tag+.tag::before{content:"  ·  ";color:var(--dim);white-space:pre}
+.tag.good{color:var(--ink)}.tag.bad{color:var(--red)}
+.detail{padding:6px 0 30px 58px}
+.dgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,56px)}
+@media(max-width:760px){.dgrid{grid-template-columns:1fr}.detail{padding-left:0}.row summary{grid-template-columns:18px 20px minmax(0,1fr) auto 14px;gap:2px 10px}.nm{font-size:20px}.in{font-size:30px}.row .tg{grid-column:1/-1;margin-top:6px}}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.stat .v{font-weight:300;font-size:30px;letter-spacing:-.035em;line-height:1.05}
+.stat .l{font-size:12px;color:var(--dim);line-height:1.35;margin-top:5px}
+.obs{font-size:14px;color:var(--mute);margin-top:14px;line-height:1.5}.obs b{color:var(--ink);font-weight:500}
+.detail .tag{font-size:14px}
+.strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;align-items:end;height:120px}
 .col{display:flex;flex-direction:column;justify-content:flex-end;height:100%;position:relative}
-.col .b{border-radius:4px 4px 0 0;min-height:2px;background:var(--blue)}
-.col .b.blower{background:#cfe5ff}.col .b.light{background:#7fb3ff}.col .b.medium{background:#3b82f6}.col .b.heavy{background:#64748b}
-.col .rng{position:absolute;left:50%;width:2px;background:var(--red);transform:translateX(-50%)}
-.col .n{font-size:12px;text-align:center;font-weight:700;white-space:nowrap}
-.dl{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;font-size:12px;color:var(--mute);text-align:center;margin-top:4px}
-.per{font-size:14px;margin:4px 0;color:#d5deea}
-.links{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:14px;margin-top:14px;align-items:center}
-.go{margin-left:auto;font-weight:700;text-decoration:none}
-.how{margin-top:16px;color:var(--mute);font-size:14px}
-.how summary{cursor:pointer;font-weight:600;color:var(--ice2)}
-/* mountain + storm pages */
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
-.bar2{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin-bottom:12px}
+.col .b{border-radius:3px 3px 0 0;min-height:1px;background:#f5f5f7}
+.col .b.blower{background:#f5f5f7}.col .b.light{background:#c7c7cc}.col .b.medium{background:#8e8e93}.col .b.heavy{background:#48484a}
+.col .rng{position:absolute;left:50%;width:1px;background:var(--red);transform:translateX(-50%)}
+.col .n{font-size:12px;text-align:center;color:var(--mute);font-variant-numeric:tabular-nums;white-space:nowrap;margin-bottom:4px}
+.dl{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;font-size:12px;color:var(--dim);text-align:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
+.per{font-size:14px;margin:6px 0;color:var(--mute)}.per b{color:var(--ink);font-weight:500}
+.links{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:14px;margin-top:22px;align-items:center}
+.go{margin-left:auto;font-weight:500}
+.how{margin-top:26px;color:var(--mute);font-size:14px;max-width:70ch}
+.how summary{cursor:pointer;color:var(--blue);font-weight:400}
+/* mountain + storm */
+.panel{padding:0 0 clamp(28px,4vw,44px);margin-bottom:clamp(28px,4vw,44px);border-bottom:1px solid var(--line)}
+.panel:last-child{border-bottom:0}
 .mvfig{position:relative;height:470px;color:var(--ink)}.mvfig svg{position:absolute;inset:0;width:100%;height:100%}
-.slbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:4px 0 12px}
-.slbar input[type=range]{flex:1 1 220px;accent-color:var(--red);min-height:44px}
-.sl{font-family:"Big Shoulders Display";font-weight:900;font-size:32px;white-space:nowrap}
-.mapbox{position:relative;height:min(68vh,760px);border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#05070a}
+.slbar{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;margin:6px 0 16px}
+.slbar input[type=range]{flex:1 1 220px;accent-color:var(--ink);min-height:44px;padding:0;border:0;background:transparent}
+.sl{font-weight:300;font-size:40px;letter-spacing:-.04em;white-space:nowrap;line-height:1}
+.mapbox{position:relative;height:min(68vh,760px);border-radius:18px;overflow:hidden;background:#0a0a0a}
 #map{position:absolute;inset:0}
-.sw{width:14px;height:14px;border-radius:3px;display:inline-block}
-.radar{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
-.radar img{width:100%;border-radius:12px;display:block;background:#05070a;aspect-ratio:600/550;object-fit:cover}
-pre{white-space:pre-wrap;font-size:13px;max-height:360px;overflow:auto;background:#ffffff08;border:1px solid var(--line);padding:12px;border-radius:10px;color:#c9d4e4}
-.afd p{color:#c9d4e4}
-.tbl{width:100%;border-collapse:collapse;font-size:14px}.tbl th{text-align:right;color:var(--mute);font-weight:600;padding:6px 8px;white-space:nowrap}.tbl td{text-align:right;padding:8px;border-top:1px solid var(--line);white-space:nowrap}.tbl th:first-child,.tbl td:first-child{text-align:left}
-/* drawer */
-.drawer{position:fixed;inset:0;z-index:40;display:flex;justify-content:flex-end;background:rgba(0,0,0,.6)}
+.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.radar{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:18px}
+.radar img{width:100%;border-radius:14px;display:block;background:#0a0a0a;aspect-ratio:600/550;object-fit:cover}
+pre{white-space:pre-wrap;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;max-height:360px;overflow:auto;background:var(--fill);padding:16px;border-radius:12px;color:var(--mute)}
+.afd p{color:var(--mute);max-width:72ch}.afd details summary{cursor:pointer;color:var(--blue);font-size:14px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}.tbl th{text-align:right;color:var(--dim);font-weight:400;font-size:12px;padding:6px 8px;white-space:nowrap}.tbl td{text-align:right;padding:11px 8px;border-top:1px solid var(--line);white-space:nowrap}.tbl th:first-child,.tbl td:first-child{text-align:left;padding-left:0}
+/* settings sheet */
+.drawer{position:fixed;inset:0;z-index:40;display:flex;justify-content:flex-end;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .drawer[hidden]{display:none}
-.drawer .sheet{width:min(460px,100%);height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:#07090d;border-left:1px solid var(--line2);padding:20px 20px calc(30px + env(safe-area-inset-bottom))}
-.sheet h3{margin:22px 0 10px}
-.f{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-label{font-size:13px;color:var(--mute);display:grid;gap:4px}
-input,select{min-height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line2);background:#0f131a;color:var(--ink);width:100%}
-.myr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
-.myr button{font-size:14px}.myr input{min-height:44px;text-align:right}
-.sugg{display:grid;gap:6px;margin-top:8px}.sugg button{text-align:left;padding:10px 14px;height:auto}.sugg button:disabled{opacity:.5}
+.drawer .sheet{width:min(440px,100%);height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:#0d0d0f;border-left:1px solid var(--line);padding:22px 22px calc(34px + env(safe-area-inset-bottom))}
+.sheet h2{font-size:28px}.sheet h3{margin:30px 0 12px;font-size:13px;font-weight:500;color:var(--dim);letter-spacing:0;text-transform:none}
+.f{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{font-size:13px;color:var(--mute);display:grid;gap:6px}
+input,select{min-height:44px;padding:0 12px;border-radius:10px;border:0;background:var(--fill);color:var(--ink);width:100%}
+.myr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:16px}
+.myr button{font-size:14px;min-height:36px;padding:0 14px;color:var(--red);background:transparent}.myr input{min-height:38px;text-align:right}
+.sugg{display:grid;gap:6px;margin-top:8px}.sugg button{text-align:left;padding:12px 14px;height:auto;border-radius:12px}.sugg button:disabled{opacity:.45}
 .err{color:var(--red);font-size:13px}
-footer{border-top:1px solid var(--line);padding:30px 0 calc(60px + env(safe-area-inset-bottom));color:var(--dim);font-size:13.5px}
-footer .links{margin-top:10px}
+footer{border-top:1px solid var(--line);padding:26px 0 calc(56px + env(safe-area-inset-bottom));color:var(--dim);font-size:12px;line-height:1.6}
+footer .links{margin-top:6px;font-size:12px;gap:4px 18px}
 .view[hidden]{display:none}
-@media(prefers-reduced-motion:no-preference){.col .b{transition:height .5s}}
+@media(prefers-reduced-motion:no-preference){.col .b{transition:height .6s cubic-bezier(.2,.8,.2,1)}.view{animation:fade .5s ease both}@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}}
 </style>
 </head>
 <body>
 <canvas id="snowfx" aria-hidden="true"></canvas>
 <header class="bar"><div class="wrap">
- <a class="logo" href="#today" data-nav="today"><svg viewBox="0 0 24 24" fill="none" stroke="#cfe5ff" stroke-width="1.6" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M12 2l-2.2 2.2M12 2l2.2 2.2M12 22l-2.2-2.2M12 22l2.2-2.2"/></svg><span>SNOW DESK</span></a>
+ <a class="logo" href="#today" data-nav="today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M12 2l-2.2 2.2M12 2l2.2 2.2M12 22l-2.2-2.2M12 22l2.2-2.2"/></svg><span>Snow Desk</span></a>
  <nav class="nav" aria-label="Pages"><a href="#today" data-nav="today" aria-current="true">Today</a><a href="#mountain" data-nav="mountain">Mountain</a><a href="#storm" data-nav="storm">Storm</a></nav>
  <button class="gear" id="openSettings" aria-label="Settings and resorts"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
 </div></header>
@@ -162,18 +170,18 @@ footer .links{margin-top:10px}
 <section class="view" id="v-today">
  <div class="hero"><div class="wrap">
   <div class="hero-top">
-   <div><div class="kicker" id="status">Loading forecasts…</div><h1 class="headline" id="headline">Reading the storm…</h1><p class="storm" id="storm"></p></div>
-   <div class="pick glass" id="pick" tabindex="0" role="button" aria-label="The pick: open details"><div class="num">–</div><div class="who">The pick</div></div>
+   <div><div class="kicker" id="status">Loading forecasts…</div><h1 class="headline" id="headline">Snow Desk</h1><div class="storm" id="storm"></div></div>
+   <div class="pick" id="pick" tabindex="0" role="button" aria-label="The pick: open details"><div class="num">–</div><div class="who">The pick</div></div>
   </div>
   <div class="days" id="days"></div>
  </div></div>
  <div class="ridgeband"><div class="wrap">
   <div class="ridge"><svg id="ridgeSvg" role="img" aria-label="Resorts by elevation with overnight snow and forecast snow line"></svg></div>
-  <div class="ridge-note">Peaks to scale · white cap = overnight snow · red dash = snow line on storm days · flag = top of the list · tap a peak for details</div>
+  <div class="ridge-note">Each line runs from base to summit; the bold section is overnight snow. Red tick: snow line on storm days. Tap a resort for details.</div>
  </div></div>
  <div class="section"><div class="wrap">
   <div class="sec-head"><h2 id="rankTitle">Where to ski</h2>
-   <div class="legend"><span><svg class="sym" style="width:16px;height:16px" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#2bc26b"/></svg>&lt;2"</span><span><svg class="sym" style="width:16px;height:16px" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" fill="#3b82f6"/></svg>2–6"</span><span><svg class="sym" style="width:16px;height:16px" viewBox="0 0 20 20"><rect x="5" y="5" width="10" height="10" transform="rotate(45 10 10)" fill="#f3f6fb"/></svg>6–12"</span><span><svg class="sym" style="width:24px;height:16px" viewBox="0 0 30 20"><rect x="3" y="5" width="10" height="10" transform="rotate(45 8 10)" fill="#f3f6fb"/><rect x="15" y="5" width="10" height="10" transform="rotate(45 20 10)" fill="#f3f6fb"/></svg>12"+ overnight, by first chair</span></div>
+   <div class="legend"><span><svg class="sym" style="width:16px;height:16px" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#30d158"/></svg>&lt;2"</span><span><svg class="sym" style="width:16px;height:16px" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" fill="#2997ff"/></svg>2–6"</span><span><svg class="sym" style="width:16px;height:16px" viewBox="0 0 20 20"><rect x="5" y="5" width="10" height="10" transform="rotate(45 10 10)" fill="#f5f5f7"/></svg>6–12"</span><span><svg class="sym" style="width:24px;height:16px" viewBox="0 0 30 20"><rect x="3" y="5" width="10" height="10" transform="rotate(45 8 10)" fill="#f3f6fb"/><rect x="15" y="5" width="10" height="10" transform="rotate(45 20 10)" fill="#f3f6fb"/></svg>12"+ overnight, by first chair</span></div>
   </div>
   <div class="list" id="rank"></div>
   <details class="how"><summary>How the ranking works</summary><p>The big number is snow forecast between 4 pm and 9 am, so it is what should be waiting at first chair. Snow that falls during the day is shown separately and counts half as much. The consensus blends four weather models with the NWS forecasters' numbers. On the morning itself, the resort's own reported overnight total replaces the forecast. Snow is computed hour by hour from temperature (snow-to-liquid ratio), so cold, light storms rank higher than dense, warm ones. Points come off for gusts over your wind limit (lift holds), rain or mix at the base, road alerts, weekends and holidays (extra for the Cottonwood canyons on powder weekends) and drive time. Alta and Deer Valley drop out when Riding is set to snowboard. Tap a resort for measured snow, snowpack, the 7-day outlook and links; tune everything in settings.</p></details>
@@ -186,7 +194,7 @@ footer .links{margin-top:10px}
   <h2 id="mvTitle" style="font-size:clamp(26px,3.6vw,36px);margin-bottom:6px">Mountain view</h2>
   <div class="mute" id="mvTotals" style="margin-bottom:8px"></div>
   <div class="mvfig"><svg id="mvSvg" role="img" aria-label="Snow line, snow and rain by elevation over the next 72 hours"></svg></div>
-  <div class="legend" style="margin-top:6px"><span><i class="sw" style="background:#4f8cff"></i>Snowing</span><span><i class="sw" style="background:#2fa36b"></i>Rain or mix</span><span><i class="sw" style="background:#ff4d4f"></i>Snow line</span><span><i class="sw" style="background:#ffffff26"></i>Lifts open 9–4</span><span><i class="sw" style="background:#2bc26b"></i><i class="sw" style="background:#f59e0b"></i><i class="sw" style="background:#ff4d4f"></i>Summit gusts</span></div>
+  <div class="legend" style="margin-top:6px"><span><i class="sw" style="background:#64a8ff"></i>Snowing</span><span><i class="sw" style="background:#30d158"></i>Rain or mix</span><span><i class="sw" style="background:#ff453a"></i>Snow line</span><span><i class="sw" style="background:#ffffff26"></i>Lifts open 9–4</span><span><i class="sw" style="background:#30d158"></i><i class="sw" style="background:#ffd60a"></i><i class="sw" style="background:#ff453a"></i>Summit gusts</span></div>
   <p class="mute" style="margin:10px 0 0;font-size:13px">One model. It gives the same precipitation at every elevation, so base, mid and summit differ only by temperature. Real summit totals often run higher.</p>
  </div>
  <div class="sec-head" style="margin:36px 0 12px"><h2>3D mountain</h2><div class="bar2" id="mapLayers" style="margin:0"></div></div>
@@ -446,8 +454,8 @@ function busy(d){const [y,m,day]=d.split('-').map(Number),w=new Date(d+'T12:00')
 const CANYON=['SR-210','SR-190'];
 const rate=f=>f>=12?'dbl':f>=6?'black':f>=2?'blue':'green';
 function sym(k,size=26){
- if(k==='green')return `<svg class="sym" style="width:${size}px;height:${size}px" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#2bc26b"/></svg>`;
- if(k==='blue')return `<svg class="sym" style="width:${size}px;height:${size}px" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" fill="#3b82f6"/></svg>`;
+ if(k==='green')return `<svg class="sym" style="width:${size}px;height:${size}px" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#30d158"/></svg>`;
+ if(k==='blue')return `<svg class="sym" style="width:${size}px;height:${size}px" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" fill="#2997ff"/></svg>`;
  if(k==='black')return `<svg class="sym" style="width:${size}px;height:${size}px" viewBox="0 0 20 20"><rect x="5" y="5" width="10" height="10" transform="rotate(45 10 10)" fill="var(--diamond)" stroke="#fff" stroke-width=".8"/></svg>`;
  return `<svg class="sym" style="width:${size*1.5}px;height:${size}px" viewBox="0 0 30 20"><rect x="3" y="5" width="10" height="10" transform="rotate(45 8 10)" fill="var(--diamond)" stroke="#fff" stroke-width=".8"/><rect x="15" y="5" width="10" height="10" transform="rotate(45 20 10)" fill="var(--diamond)" stroke="#fff" stroke-width=".8"/></svg>`;
 }
@@ -495,10 +503,10 @@ function draw(){
  const chips=dates.map(d=>`<button class="chip" data-day="${esc(d)}" aria-pressed="${d===dayPick}">${esc(d===today()?'Today':dayName(d))}</button>`).join('');
  $('#days').innerHTML=chips;
  const rows=resorts.map(r=>score(r,dayPick)).filter(Boolean).sort((a,b)=>b.sc-a.sc);
- if(dayPick)$('#rankTitle').textContent=`Where to ski · ${dayPick===today()?'today':dayLong(dayPick)}`;
+ if(dayPick)$('#rankTitle').textContent=`${dayPick===today()?'Today':dayLong(dayPick)}`;
  const chev='<svg class="chev" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l5 5 5-5"/></svg>';
  const pending=resorts.filter(r=>!rows.some(x=>x.r.id===r.id));
- $('#rank').innerHTML=rows.map((x,i)=>{const tags=x.tags.slice(0,4);return `<details class="row${i===0&&!x.blocked&&x.pow>=2?' top':''}${x.blocked?' off':''}" id="row-${esc(x.r.id)}" data-row="${esc(x.r.id)}"${openRows.has(x.r.id)?' open':''}><summary><span class="rk">${i+1}</span>${sym(x.rating)}<span class="nm">${esc(x.r.name)}</span><span class="in">${inch(x.fresh)}<small>overnight</small></span>${chev}<span class="tg">${tags.map(t=>`<span class="tag ${t.k}">${esc(t.t)}</span>`).join('')}<span class="tag">${esc(x.r.drive)} min drive</span></span></summary><div class="detail">${openRows.has(x.r.id)?rowDetail(x.r):''}</div></details>`}).join('')
+ $('#rank').innerHTML=rows.map((x,i)=>{const tags=x.tags.slice(0,4);return `<details class="row${i===0&&!x.blocked&&x.pow>=2?' top':''}${x.blocked?' off':''}" id="row-${esc(x.r.id)}" data-row="${esc(x.r.id)}"${openRows.has(x.r.id)?' open':''}><summary><span class="rk">${i+1}</span>${sym(x.rating)}<span class="nm">${esc(x.r.name)}</span><span class="in">${inch(x.fresh)}<small>overnight</small></span>${chev}<span class="tg">${tags.map(t=>`<span class="tag ${t.k}">${esc(t.t)}</span>`).join('')}<span class="tag">${esc(x.r.drive)} min</span></span></summary><div class="detail">${openRows.has(x.r.id)?rowDetail(x.r):''}</div></details>`}).join('')
   +pending.map(r=>`<div class="row" style="padding:16px 18px"><span class="nm">${esc(r.name)}</span> <span class="mute">${state[r.id]&&state[r.id].err&&state[r.id].err.om?'forecast failed: '+esc(state[r.id].err.om):'loading…'}</span></div>`).join('');
  drawRoads();if($('#drawer').hidden)drawMyResorts();
  if(!$('#v-mountain').hidden)refreshMapUI();
@@ -506,30 +514,28 @@ function draw(){
 function drawPick(dates){
  let best=null;for(const dt of dates.slice(0,5))for(const r of resorts){const s=score(r,dt);if(s&&!s.blocked&&s.pow>=2&&(!best||s.sc>best.sc))best=s}
  const P=$('#pick');
- if(!best){P.removeAttribute('data-goto');P.innerHTML=`<div class="num">0<small>"</small></div><div class="kicker">The pick · next 5 days</div><div class="who">No powder day yet</div><div class="sub">Nothing over 2" at your resorts.</div>`;return}
+ if(!best){P.removeAttribute('data-goto');P.innerHTML=`<div class="num">0<small>"</small></div><div class="kicker">Best day · next 5 days</div><div class="who">No powder day yet</div><div class="sub">Nothing over 2" at your resorts.</div>`;return}
  P.dataset.goto=best.r.id+'|'+best.d.date;
- P.innerHTML=`<div class="num">${Math.round(best.fresh)}<small>"</small></div><div class="kicker">The pick · ${esc(best.d.date===today()?'today':dayLong(best.d.date))}</div><div class="who">${sym(best.rating,22)} ${esc(best.r.name)}</div><div class="sub">overnight, by first chair · ${esc(best.r.drive)} min drive · gusts ${Math.round(best.d.gust)} mph</div><div class="tags">${best.tags.map(t=>`<span class="tag ${t.k}">${esc(t.t)}</span>`).join('')}</div><div class="sub" style="grid-column:1/-1;margin-top:8px;color:var(--ice)">See the details →</div>`;
+ P.innerHTML=`<div class="num">${Math.round(best.fresh)}<small>"</small></div><div class="kicker">Best day · ${esc(best.d.date===today()?'Today':dayLong(best.d.date))}</div><div class="who">${sym(best.rating,22)} ${esc(best.r.name)}</div><div class="sub">overnight, by first chair · ${esc(best.r.drive)} min drive · gusts ${Math.round(best.d.gust)} mph</div><div class="tags">${best.tags.map(t=>`<span class="tag ${t.k}">${esc(t.t)}</span>`).join('')}</div><div class="sub" style="grid-column:1/-1;margin-top:10px">View details</div>`;
 }
 function drawRidge(){
- const svg=$('#ridgeSvg');if(!svg||$('#v-today').hidden)return;const W=svg.clientWidth||800,H=svg.clientHeight||300;if(!W)return;
+ const svg=$('#ridgeSvg');if(!svg||$('#v-today').hidden)return;const W=svg.clientWidth||800,H=svg.clientHeight||280;if(!W)return;
  const list=resorts.slice().sort((a,b)=>fc(b).lat-fc(a).lat),n=list.length;if(!n)return;
- const lo=5000,hi=11800,pad=28,y=e=>H-pad-(Math.max(lo,Math.min(hi,e))-lo)/(hi-lo)*(H-pad-46);
- const cw=W/n,hw=Math.min(cw*0.78,150),narrow=W<560;
- let out=`<defs><linearGradient id="rg" x1="0" x2="1"><stop offset="0" stop-color="#2a3243"/><stop offset=".5" stop-color="#181e2a"/><stop offset="1" stop-color="#0c1018"/></linearGradient><linearGradient id="fade" x1="0" x2="0" y1="0" y2="1"><stop offset=".65" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".9"/></linearGradient></defs>`;
- if(!narrow)for(let e=6000;e<=11000;e+=1000)out+=`<line x1="0" x2="${W}" y1="${y(e)}" y2="${y(e)}" stroke="#ffffff0f"/><text x="2" y="${y(e)-4}" fill="#5f6a7d" font-size="11">${e.toLocaleString()} ft</text>`;
+ const narrow=W<560,lo=5500,hi=11500,top=narrow?46:58,bot=30,y=e=>H-bot-(Math.max(lo,Math.min(hi,e))-lo)/(hi-lo)*(H-bot-top),cw=W/n;
  let pickId=null;{const rows=resorts.map(r=>score(r,dayPick)).filter(x=>x&&!x.blocked).sort((a,b)=>b.sc-a.sc);if(rows[0]&&rows[0].pow>=2)pickId=rows[0].r.id}
- let labels='',hits='';list.forEach((r,i)=>{
-  const cx=cw*(i+.5),yt=y(r.top),yb=H,M=meta(r),s=state[r.id],d=s&&s.days&&s.days.find(x=>x.date===dayPick),wAt=yy=>hw*(yy-yt)/(yb-yt);
-  out+=`<path d="M${cx-hw},${yb} L${cx},${yt} L${cx+hw},${yb} Z" fill="url(#rg)" stroke="#ffffff1c"/><path d="M${cx},${yt} L${cx+hw},${yb} L${cx+hw*.35},${yb} Z" fill="#00000055"/>`;
-  if(d){const wetDay=d.snowLine!=null,sl=Math.max(r.base,Math.min(r.top,wetDay?d.snowLine:r.base)),ys=y(sl),ws=wAt(ys),fresh=d.overnight,capH=Math.min(y(r.base)-yt,fresh>0.05?8+fresh*3.2:0),yc=yt+capH,wc=wAt(yc);
-   out+=`${wetDay?`<path d="M${cx},${yt} L${cx+ws},${ys} L${cx-ws},${ys} Z" fill="#eaf3ff" opacity=".16"/>`:''}<path d="M${cx},${yt} L${cx+wc},${yc} L${cx-wc},${yc} Z" fill="#f6faff"/>`;
-   if(wetDay&&d.snowLine>r.base&&d.snowLine<r.top)out+=`<line x1="${cx-ws-6}" x2="${cx+ws+6}" y1="${ys}" y2="${ys}" stroke="#ff4d4f" stroke-width="2.5" stroke-dasharray="6 4"/>`;
-   out+=`<text x="${cx}" y="${yt-10}" text-anchor="middle" fill="#fff" font-family="Big Shoulders Display, Arial Narrow, sans-serif" font-weight="900" font-size="${narrow?22:30}">${esc(inch(fresh))}</text>`}
-  hits+=`<rect x="${cx-cw/2}" y="0" width="${cw}" height="${H}" fill="transparent" style="cursor:pointer" data-goto="${esc(r.id)}|${esc(dayPick||'')}"><title>${esc(r.name)}</title></rect>`;
-  if(r.id===pickId)out+=`<path d="M${cx+3},${yt-48} l0,-20 l16,6 l-16,6" fill="#ff4d4f" stroke="#ff4d4f" stroke-width="2"/>`;
-  labels+=`<text x="${cx}" y="${H-8}" text-anchor="middle" fill="#dbe4f0" font-weight="600" font-size="${narrow?11:13}">${esc(narrow?M.short:r.name)}</text>`;
+ let out='';
+ for(let e=6000;e<=11000;e+=1000)out+=`<line x1="0" x2="${W}" y1="${y(e)}" y2="${y(e)}" stroke="#fff" stroke-opacity="${e%2000?.04:.08}"/>${!narrow&&e%2000===0?`<text x="0" y="${y(e)-5}" fill="#6e6e73" font-size="11">${e.toLocaleString()} ft</text>`:''}`;
+ list.forEach((r,i)=>{
+  const cx=cw*(i+.5),yt=y(r.top),yb=y(r.base),M=meta(r),s=state[r.id],d=s&&s.days&&s.days.find(x=>x.date===dayPick),snow=d?d.overnight:null,on=r.id===pickId;
+  out+=`<line x1="${cx}" x2="${cx}" y1="${yt}" y2="${yb}" stroke="#fff" stroke-opacity="${on?1:.38}" stroke-width="${on?2:1.25}" stroke-linecap="round"/>`;
+  if(snow!=null&&snow>=.05){const h=Math.min((yb-yt)*.85,4+snow*2.4);out+=`<line x1="${cx}" x2="${cx}" y1="${yt}" y2="${yt+h}" stroke="#fff" stroke-width="4" stroke-linecap="round"/>`}
+  out+=`<circle cx="${cx}" cy="${yt}" r="${on?4:2.5}" fill="#fff"/><circle cx="${cx}" cy="${yb}" r="1.5" fill="#fff" fill-opacity=".5"/>`;
+  if(d&&d.snowLine!=null&&d.snowLine>r.base&&d.snowLine<r.top)out+=`<line x1="${cx-9}" x2="${cx+9}" y1="${y(d.snowLine)}" y2="${y(d.snowLine)}" stroke="#ff453a" stroke-width="2" stroke-linecap="round"/>`;
+  if(snow!=null)out+=`<text x="${cx}" y="${yt-14}" text-anchor="middle" fill="#f5f5f7" fill-opacity="${snow>=.05?1:.45}" font-weight="${on?500:300}" font-size="${narrow?17:24}" letter-spacing="-.03em">${esc(inch(snow))}</text>`;
+  out+=`<text x="${cx}" y="${H-8}" text-anchor="middle" fill="${on?'#f5f5f7':'#86868b'}" font-weight="${on?500:400}" font-size="${narrow?10.5:12.5}">${esc(narrow?M.short:r.name)}</text>`;
+  out+=`<rect x="${cx-cw/2}" y="0" width="${cw}" height="${H}" fill="transparent" style="cursor:pointer" data-goto="${esc(r.id)}|${esc(dayPick||'')}"><title>${esc(r.name)}</title></rect>`;
  });
- svg.innerHTML=out+`<rect x="0" y="0" width="${W}" height="${H}" fill="url(#fade)" pointer-events="none"/>`+labels+hits;
+ svg.innerHTML=out;
 }
 function rowDetail(r){
  const M=meta(r),s=state[r.id]||{},t=today(),days=(s.days||[]).filter(x=>x.date>=t).slice(0,7),sn=snotel[(r.snotel||'').toUpperCase()]||{},sn2=r.snotel2?snotel[r.snotel2.toUpperCase()]||{}:null;
@@ -551,11 +557,11 @@ function rowDetail(r){
   ${s.nws?s.nws.periods.slice(0,2).map(p=>`<div class="per"><b>${esc(p.name)}:</b> ${esc(p.shortForecast)}, ${esc(p.temperature)}°</div>`).join(''):s.err&&s.err.nws?`<div class="err">NWS: ${esc(s.err.nws)}</div>`:''}
   ${items.slice(0,3).map(i=>`<div class="per"><b>${alertRe.test(i.text)?'Road alert':'Road'}:</b> ${esc(i.text)}</div>`).join('')}
  </div><div>
-  <div class="kicker" style="margin-bottom:6px">7-day snow · shade = density · red = range across models and NWS</div>
+  <div class="kicker" style="margin-bottom:10px">Seven days. Lighter bars are lighter snow; red marks the range across models.</div>
   ${days.length?`<div class="strip">${strip}</div><div class="dl">${days.map(x=>`<span>${esc(x.date===t?'Today':dayName(x.date))}</span>`).join('')}</div>`:s.err&&s.err.om?`<div class="err">Forecast failed: ${esc(s.err.om)}</div>`:'<div class="mute">Loading…</div>'}
   ${r.snotelNote?`<div class="mute" style="font-size:12.5px;margin-top:10px">Snowpack: ${esc(r.snotelNote)}</div>`:''}
  </div></div>
- <div class="links">${[[r.snotel,r.snotelName],[r.snotel2,r.snotel2Name]].filter(x=>x[0]).map(([t2,n])=>`<a target="_blank" rel="noopener" href="https://wcc.sc.egov.usda.gov/nwcc/site?sitenum=${esc(parseInt(t2))}">SNOTEL ${esc(n||t2)}</a>`).join('')}${safeUrl(r.stations)?`<a target="_blank" rel="noopener" href="${esc(r.stations)}">Live stations</a>`:''}${safeUrl(M.avy)?`<a target="_blank" rel="noopener" href="${esc(M.avy)}">Avalanche</a>`:''}${safeUrl(r.report)?`<a target="_blank" rel="noopener" href="${esc(r.report)}">Resort report</a>`:''}<a target="_blank" rel="noopener" href="https://forecast.weather.gov/MapClick.php?lat=${fc(r).lat}&lon=${fc(r).lon}">NWS</a><a class="go" href="#mountain" data-mapopen="${esc(r.id)}">Mountain view →</a></div>`;
+ <div class="links">${[[r.snotel,r.snotelName],[r.snotel2,r.snotel2Name]].filter(x=>x[0]).map(([t2,n])=>`<a target="_blank" rel="noopener" href="https://wcc.sc.egov.usda.gov/nwcc/site?sitenum=${esc(parseInt(t2))}">SNOTEL ${esc(n||t2)}</a>`).join('')}${safeUrl(r.stations)?`<a target="_blank" rel="noopener" href="${esc(r.stations)}">Live stations</a>`:''}${safeUrl(M.avy)?`<a target="_blank" rel="noopener" href="${esc(M.avy)}">Avalanche</a>`:''}${safeUrl(r.report)?`<a target="_blank" rel="noopener" href="${esc(r.report)}">Resort report</a>`:''}<a target="_blank" rel="noopener" href="https://forecast.weather.gov/MapClick.php?lat=${fc(r).lat}&lon=${fc(r).lon}">NWS</a><a class="go" href="#mountain" data-mapopen="${esc(r.id)}">Mountain view</a></div>`;
 }
 function drawRoads(){
  $('#roadbox').innerHTML=settings.udotKey?(udotErr?`<p class="err">UDOT API: ${esc(udotErr)}</p>`:udot?'<p class="mute" style="margin:0">Live UDOT closures and conditions appear inside each Utah resort on the Today list.</p>':'<p class="mute">Loading UDOT…</p>'):'<p class="mute" style="margin:0">Add a free UDOT Traffic API key in settings to show closures and road conditions inside each resort.</p>';
@@ -567,18 +573,18 @@ function drawMyResorts(){
 function drawHeadline(dates){
  if(!lastUpdated&&!resorts.some(r=>state[r.id]&&state[r.id].days))return;
  const storms=resorts.map(r=>({r,s:nextStorm(r)})).filter(x=>x.s);
- snowFX.set(storms.length?Math.min(240,60+storms.reduce((m,x)=>Math.max(m,x.s.total),0)*9):40);
- if(!storms.length){$('#headline').innerHTML='Dry spell. <em>Groomer laps.</em>';$('#storm').textContent='No storm with 1"+ in the next 6 days at any of your resorts. Look for soft snow on sheltered, shaded aspects and watch the long range.';return}
+ snowFX.set(storms.length?Math.min(150,40+storms.reduce((m,x)=>Math.max(m,x.s.total),0)*4):24);
+ if(!storms.length){$('#headline').innerHTML='No snow in sight. <em>A week for groomers.</em>';$('#storm').textContent='Nothing over an inch is forecast at your resorts in the next six days.';return}
  const first=storms.map(x=>x.s.from).sort()[0],big=storms.reduce((a,b)=>b.s.total>a.s.total?b:a);
  const g={};for(const x of storms){const k=meta(x.r).group;(g[k]=g[k]||[]).push(x.s)}
- const parts=Object.entries(g).map(([k,a])=>{const t=Math.max(...a.map(s=>s.total)),lo=Math.min(...a.map(s=>s.lo)),hi=Math.max(...a.map(s=>s.hi));return `<b>${esc(k)}</b> about ${Math.round(t)}" <span style="color:var(--mute)">(models ${rng(lo,hi)})</span>`});
+ const parts=Object.entries(g).map(([k,a])=>{const t=Math.max(...a.map(s=>s.total)),lo=Math.min(...a.map(s=>s.lo)),hi=Math.max(...a.map(s=>s.hi));return `<div class="reg"><div class="k">${esc(k)}</div><div class="v">${Math.round(t)}<small>"</small></div><div class="r">${rng(lo,hi)}</div></div>`});
  const when=first===today()?'today':dayName(first),last=storms.map(x=>x.s.to).sort().pop(),span=last!==first?`${when}–${dayName(last)}`:when;
- const word=big.s.total>=18?'Deep one':big.s.total>=10?'Real storm':big.s.total>=5?'Refresh':'Light snow';
+ const word=big.s.total>=18?'A major storm':big.s.total>=10?'Real snow':big.s.total>=5?'A refresh':'Light snow',wk=d=>d===today()?'Today':new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'long'});
  const others=Object.entries(g).filter(([k])=>k!==meta(big.r).group).map(([,a])=>Math.max(...a.map(s=>s.total))),lone=others.length&&Math.max(...others)<big.s.total/2;
  const bspan=big.s.from===big.s.to?(big.s.from===today()?'today':dayName(big.s.from)):`${big.s.from===today()?'today':dayName(big.s.from)}–${dayName(big.s.to)}`;
- $('#headline').innerHTML=lone?`${esc(word)} at ${esc(meta(big.r).group)} <em>${esc(bspan)}</em>`:`${esc(word)} <em>${esc(span)}</em>`;
+ $('#headline').innerHTML=lone?`${esc(word)} for ${esc(meta(big.r).group)}. <em>${esc(big.s.from===big.s.to?wk(big.s.from):wk(big.s.from)+' to '+wk(big.s.to))}.</em>`:`${esc(word)}. <em>${esc(first===last?wk(first):wk(first)+' to '+wk(last))}.</em>`;
  const dn=density(big.s.ratio),wide=big.s.hi>big.s.total*1.6&&big.s.hi-big.s.lo>=6;
- $('#storm').innerHTML=`Storm totals, consensus of four models plus the NWS forecast: ${parts.join(' · ')}.${wide?' The models are far apart, so treat the totals as low confidence.':''}${dn?` Expected density at ${esc(big.r.name)}: <b>${esc(dn.label.toLowerCase())}</b> (about ${Math.round(big.s.ratio)}:1).`:''}`;
+ $('#storm').innerHTML=`<div class="regions">${parts.join('')}</div><p>Storm totals: consensus of four models and the NWS forecast, with the range below each.${wide?' The models are far apart, so treat the totals as low confidence.':''}${dn?` Expected density at ${esc(big.r.name)}: <b>${esc(dn.label.toLowerCase())}</b> (about ${Math.round(big.s.ratio)}:1).`:''}</p>`;
 }
 async function drawAFD(){
  const offices=[...new Set(resorts.map(r=>state[r.id]&&state[r.id].nws&&state[r.id].nws.cwa).filter(Boolean))];
@@ -600,7 +606,6 @@ async function refreshAll(){
  const n=resorts.length,omOk=resorts.filter(r=>state[r.id]&&!state[r.id].err.om).length,nwsOk=resorts.filter(r=>state[r.id]&&!state[r.id].err.nws).length;
  setDiag('Model forecasts (Open-Meteo)',omOk===n,`${omOk} of ${n} resorts`);setDiag('NWS forecasts',nwsOk===n,`${nwsOk} of ${n} resorts`);
  setDiag('Depth sensors with fresh readings',true,`${resorts.filter(r=>state[r.id]&&state[r.id].obs&&state[r.id].obs.depth!=null).length} of ${n} resorts`);
- try{setDiag('Display font',document.fonts.check('800 20px "Big Shoulders Display"'))}catch(e){}
  for(const r of resorts)if(state[r.id])state[r.id].roadAlert=roadItems(r).some(i=>alertRe.test(i.text));
  if(omOk){lastUpdated=new Date();offline=false;saveCache()}else if(!lastUpdated)lastUpdated=new Date();
  refreshing=false;render();drawAFD();drawDiag();drawScore();
@@ -660,19 +665,19 @@ function drawProfile(){
  P.hours.forEach((hh,i)=>{const hr=+hh.t.slice(11,13);if(hr===0||(i===0&&hr<=14)){const d=hh.t.slice(0,10);o+=`<line x1="${x(i)}" x2="${x(i)}" y1="${top1-14}" y2="${Hh-22}" stroke="currentColor" opacity=".18"/><text x="${x(i)+3}" y="${top1-6}" font-size="12" font-weight="700" fill="currentColor">${esc(d===today()?'Today':dayName(d))}</text>`}});
  // precipitation: snow above the snow line, rain below
  P.hours.forEach((hh,i)=>{const p=hh.lv[1].p;if(p<0.004)return;const a=Math.min(.95,.3+p*9).toFixed(2),ys=y(hh.sl);
-  if(ys>top1)o+=`<rect x="${x(i)}" y="${top1}" width="${cw+.6}" height="${Math.min(h1,ys-top1)}" fill="#4f8cff" opacity="${a}"/>`;
-  if(ys<top1+h1)o+=`<rect x="${x(i)}" y="${Math.max(top1,ys)}" width="${cw+.6}" height="${top1+h1-Math.max(top1,ys)}" fill="#2fa36b" opacity="${a}"/>`});
+  if(ys>top1)o+=`<rect x="${x(i)}" y="${top1}" width="${cw+.6}" height="${Math.min(h1,ys-top1)}" fill="#64a8ff" opacity="${a}"/>`;
+  if(ys<top1+h1)o+=`<rect x="${x(i)}" y="${Math.max(top1,ys)}" width="${cw+.6}" height="${top1+h1-Math.max(top1,ys)}" fill="#30d158" opacity="${a}"/>`});
  [[r.top,'Summit'],[P.els[1],'Mid'],[r.base,'Base']].forEach(([e,l])=>{o+=`<line x1="${L}" x2="${W-R}" y1="${y(e)}" y2="${y(e)}" stroke="currentColor" stroke-dasharray="3 4" opacity=".5"/><text x="${L-6}" y="${y(e)-1}" text-anchor="end" font-size="11" font-weight="700" fill="currentColor">${l}</text><text x="${L-6}" y="${y(e)+11}" text-anchor="end" font-size="10" fill="currentColor" opacity=".7">${(e/1000).toFixed(1)}k</text>`});
- o+=`<path d="${P.hours.map((hh,i)=>(i?'L':'M')+(x(i)+cw/2).toFixed(1)+','+y(hh.sl).toFixed(1)).join(' ')}" fill="none" stroke="#e5322b" stroke-width="2.5"/>`;
+ o+=`<path d="${P.hours.map((hh,i)=>(i?'L':'M')+(x(i)+cw/2).toFixed(1)+','+y(hh.sl).toFixed(1)).join(' ')}" fill="none" stroke="#ff453a" stroke-width="2"/>`;
  // accumulation by elevation
  const top2=top1+h1+40,h2=Math.round(Hh*.28),cum=[0,1,2].map(k=>{let c=0;return P.hours.map(hh=>c+=hh.lv[k].sn)}),mx=Math.max(4,...cum.map(a=>a[a.length-1]));
  const y2=v=>top2+h2-v/mx*h2;o+=lift(top2,h2)+`<text x="${L}" y="${top2-8}" font-size="12" font-weight="700" fill="currentColor">Snow piling up</text>`;
  [0,mx/2,mx].forEach(v=>o+=`<line x1="${L}" x2="${W-R}" y1="${y2(v)}" y2="${y2(v)}" stroke="currentColor" opacity=".12"/><text x="${L-6}" y="${y2(v)+4}" text-anchor="end" font-size="11" fill="currentColor">${Math.round(v)}"</text>`);
- const cols=['#1d5fd6','#5aa2ff','#94a3b8'],nm=['Summit','Mid','Base'],ends=[];
- cum.forEach((a,k)=>{o+=`<path d="${a.map((v,i)=>(i?'L':'M')+(x(i)+cw).toFixed(1)+','+y2(v).toFixed(1)).join(' ')}" fill="none" stroke="${cols[k]}" stroke-width="${k?2:3}"/>`;let ly=y2(a[a.length-1])-4;for(const e of ends)if(Math.abs(e-ly)<13)ly=e+13;ends.push(ly);o+=`<text x="${W-R-2}" y="${ly}" text-anchor="end" font-size="12" font-weight="700" fill="${cols[k]}" paint-order="stroke" stroke="#0b0d12" stroke-width="3">${nm[k]} ${esc(inch(a[a.length-1]))}</text>`});
+ const cols=['#f5f5f7','#a1a1a6','#636366'],nm=['Summit','Mid','Base'],ends=[];
+ cum.forEach((a,k)=>{o+=`<path d="${a.map((v,i)=>(i?'L':'M')+(x(i)+cw).toFixed(1)+','+y2(v).toFixed(1)).join(' ')}" fill="none" stroke="${cols[k]}" stroke-width="${k?2:3}"/>`;let ly=y2(a[a.length-1])-4;for(const e of ends)if(Math.abs(e-ly)<13)ly=e+13;ends.push(ly);o+=`<text x="${W-R-2}" y="${ly}" text-anchor="end" font-size="12" font-weight="700" fill="${cols[k]}" paint-order="stroke" stroke="#000" stroke-width="4">${nm[k]} ${esc(inch(a[a.length-1]))}</text>`});
  // summit wind
  const top3=top2+h2+30,h3=16,step=narrow?24:12;o+=`<text x="${L}" y="${top3-6}" font-size="12" font-weight="700" fill="currentColor">Summit gusts &amp; temp</text>`;
- P.hours.forEach((hh,i)=>{const g=hh.lv[0].g;o+=`<rect x="${x(i)}" y="${top3}" width="${cw+.6}" height="${h3}" fill="${g>=settings.windLimit?'#ff4d4f':g>=25?'#f59e0b':'#2bc26b'}"/>`;if(i%step===0)o+=`<text x="${x(i)+2}" y="${top3+h3+14}" font-size="11" fill="currentColor">${Math.round(g)} mph · ${Math.round(hh.lv[0].T)}°F</text>`});
+ P.hours.forEach((hh,i)=>{const g=hh.lv[0].g;o+=`<rect x="${x(i)}" y="${top3}" width="${cw+.6}" height="${h3}" fill="${g>=settings.windLimit?'#ff453a':g>=25?'#ffd60a':'#30d158'}"/>`;if(i%step===0)o+=`<text x="${x(i)+2}" y="${top3+h3+14}" font-size="11" fill="currentColor">${Math.round(g)} mph · ${Math.round(hh.lv[0].T)}°F</text>`});
  svg.innerHTML=o;
  const tot=cum.map(a=>a[a.length-1]),rainBase=P.hours.some(hh=>hh.lv[2].p>0.02&&hh.lv[2].T>34),holds=P.hours.filter(hh=>+hh.t.slice(11,13)>=9&&+hh.t.slice(11,13)<16&&hh.lv[0].g>=settings.windLimit).length;
  $('#mvTotals').innerHTML=`<b>72-hour snow (one model):</b> summit ${esc(inch(tot[0]))} · mid ${esc(inch(tot[1]))} · base ${esc(inch(tot[2]))}${rainBase?' · <b style="color:var(--red)">rain or mix at the base</b>':''}${holds?` · <b style="color:var(--red)">${holds} lift hours with summit gusts over ${settings.windLimit} mph</b>`:''}`;
@@ -841,10 +846,10 @@ $('#sugg').addEventListener('click',e=>{
 /* ---------- falling snow (heavier when a storm is coming) ---------- */
 const snowFX=(()=>{const c=$('#snowfx'),g=c.getContext('2d'),rm=matchMedia('(prefers-reduced-motion: reduce)').matches;let W=0,H=0,dpr=1,fl=[],want=90;
  const size=()=>{dpr=Math.min(2,devicePixelRatio||1);W=c.width=innerWidth*dpr;H=c.height=innerHeight*dpr;c.style.width=innerWidth+'px';c.style.height=innerHeight+'px'};
- const flake=(y)=>{const z=Math.random();return {x:Math.random()*W,y:y??Math.random()*H,z,r:(0.6+z*2.2)*dpr,v:(0.25+z*0.9)*dpr,ph:Math.random()*6.3}};
+ const flake=(y)=>{const z=Math.random();return {x:Math.random()*W,y:y??Math.random()*H,z,r:(0.4+z*1.1)*dpr,v:(0.12+z*0.5)*dpr,ph:Math.random()*6.3}};
  const set=n=>{want=Math.round(n*(innerWidth<600?.55:1));while(fl.length<want)fl.push(flake());fl.length=want};
  size();set(want);addEventListener('resize',()=>{size();set(want/(innerWidth<600?.55:1))});
- let lastT=0;const tick=(now=0)=>{if(!document.hidden&&now-lastT>32){lastT=now;g.clearRect(0,0,W,H);for(const f of fl){f.y+=f.v*2;f.ph+=.024;f.x+=Math.sin(f.ph)*.7*dpr;if(f.y>H+5){Object.assign(f,flake(-5))}g.globalAlpha=.25+f.z*.6;g.fillStyle='#fff';g.beginPath();g.arc(f.x,f.y,f.r,0,6.3);g.fill()}}if(!rm)requestAnimationFrame(tick)};
+ let lastT=0;const tick=(now=0)=>{if(!document.hidden&&now-lastT>32){lastT=now;g.clearRect(0,0,W,H);for(const f of fl){f.y+=f.v*2;f.ph+=.024;f.x+=Math.sin(f.ph)*.7*dpr;if(f.y>H+5){Object.assign(f,flake(-5))}g.globalAlpha=.12+f.z*.5;g.fillStyle='#fff';g.beginPath();g.arc(f.x,f.y,f.r,0,6.3);g.fill()}}if(!rm)requestAnimationFrame(tick)};
  tick();return {set};
 })();
 
