@@ -557,7 +557,9 @@ function drawHeadline(dates){
  const parts=Object.entries(g).map(([k,a])=>{const t=Math.max(...a.map(s=>s.total)),lo=Math.min(...a.map(s=>s.lo)),hi=Math.max(...a.map(s=>s.hi));return `<b>${esc(k)}</b> about ${Math.round(t)}" <span style="color:var(--mute)">(models ${rng(lo,hi)})</span>`});
  const when=first===today()?'today':dayName(first),last=storms.map(x=>x.s.to).sort().pop(),span=last!==first?`${when}–${dayName(last)}`:when;
  const word=big.s.total>=18?'Deep one':big.s.total>=10?'Real storm':big.s.total>=5?'Refresh':'Light snow';
- $('#headline').innerHTML=`${esc(word)} <em>${esc(span)}</em>`;
+ const others=Object.entries(g).filter(([k])=>k!==meta(big.r).group).map(([,a])=>Math.max(...a.map(s=>s.total))),lone=others.length&&Math.max(...others)<big.s.total/2;
+ const bspan=big.s.from===big.s.to?(big.s.from===today()?'today':dayName(big.s.from)):`${big.s.from===today()?'today':dayName(big.s.from)}–${dayName(big.s.to)}`;
+ $('#headline').innerHTML=lone?`${esc(word)} at ${esc(meta(big.r).group)} <em>${esc(bspan)}</em>`:`${esc(word)} <em>${esc(span)}</em>`;
  const dn=density(big.s.ratio),wide=big.s.hi>big.s.total*1.6&&big.s.hi-big.s.lo>=6;
  $('#storm').innerHTML=`Storm totals, consensus of four models plus the NWS forecast: ${parts.join(' · ')}.${wide?' The models are far apart, so treat the totals as low confidence.':''}${dn?` Expected density at ${esc(big.r.name)}: <b>${esc(dn.label.toLowerCase())}</b> (about ${Math.round(big.s.ratio)}:1).`:''}`;
 }
@@ -716,7 +718,7 @@ async function openMap(id){
  if(id)mapRes=id;if(!mapRes)mapRes=(resorts[0]||{}).id;slManual=null;
  refreshMapUI();selectResort(mapRes,false);
  try{await loadLibs();setDiag('3D map library',true)}catch(e){setDiag('3D map library',false,e.message);$('#mapmsg').textContent='3D map library failed to load: '+e.message;return}
- if(!mapReady){try{initMap()}catch(e){$('#mapmsg').textContent='3D map could not start: '+e.message;return}map.once('load',()=>{applyLayers();showRuns()})}
+ if(!mapReady){try{initMap()}catch(e){const gl=/WebGL/i.test(e.message||'');setDiag('3D map',false,gl?'WebGL unavailable in this browser':e.message);$('#mapmsg').textContent=gl?'The 3D map needs graphics acceleration (WebGL), which this browser has turned off. The chart above still works.':'The 3D map could not start. The chart above still works.';return}map.once('load',()=>{applyLayers();showRuns()})}
  else{map.resize();flyTo();showRuns()}
 }
 function selectResort(id,fly=true){
@@ -730,8 +732,8 @@ function refreshMapUI(){
  $('#mapRes').innerHTML=resorts.map(r=>`<button class="chip" data-mapres="${esc(r.id)}" aria-pressed="${r.id===mapRes}">${esc(r.name)}</button>`).join('');
  $('#mapDays').innerHTML=dates.map(d=>`<button class="chip" data-day="${esc(d)}" aria-pressed="${d===dayPick}">${esc(d===today()?'Today':dayName(d))}</button>`).join('');
  $('#mapLayers').innerHTML=LAYERS.map(([k,l])=>`<button class="chip" data-layer="${k}" aria-pressed="${!!layerOn[k]}">${esc(l)}</button>`).join('');
- const sl=curSnowLine(),r=curRes(),rel=r?(sl>r.top?' · above the summit: rain/mix up high':sl<r.base?' · below the base: all snow':''):'';
- $('#slVal').textContent=`${r100(sl).toLocaleString()} ft`;const dd=r&&state[r.id]&&state[r.id].days&&state[r.id].days.find(x=>x.date===dayPick);
+ const sl=curSnowLine(),r=curRes();
+ $('#slVal').textContent=`${r100(sl).toLocaleString()} ft`;const dd=r&&state[r.id]&&state[r.id].days&&state[r.id].days.find(x=>x.date===dayPick),rel=r&&!(slManual==null&&dd&&dd.snowLine==null)?(sl>r.top?' · above the summit: rain or mix up high':sl<r.base?' · below the base: snow top to bottom':''):'';
  $('#slNote').textContent=(slManual!=null?'Manual':dd&&dd.snowLine==null?'Dry day: showing freezing level minus 1,000 ft':'Forecast snow line')+rel;$('#slRange').value=sl;$('#slAuto').hidden=slManual==null;
  drawProfile();applySnowLine();
 }
@@ -822,7 +824,7 @@ function showView(v){
  setNav(v);if(v!=='mountain')spinning=false;
  if(v==='mountain')openMap();else render();
 }
-function route(){const h=(location.hash||'#today').slice(1);if(h==='settings'){openDrawer();return}showView(h)}
+function route(){if(!$('#drawer').hidden&&location.hash!=='#settings')closeDrawer();const h=(location.hash||'#today').slice(1);if(h==='settings'){openDrawer();return}showView(h)}
 addEventListener('hashchange',route);
 const bg=()=>document.querySelectorAll('header.bar,main,footer');
 function openDrawer(){$('#drawer').hidden=false;bg().forEach(e=>e.inert=true);drawMyResorts();drawDiag();setTimeout(()=>$('#closeSettings').focus(),0)}
