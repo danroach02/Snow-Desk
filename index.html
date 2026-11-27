@@ -373,7 +373,7 @@ async function loadReports(){
  try{accuracy=await getJSON('data/accuracy.json?t='+t)}catch(e){accuracy=null}
 }
 // a report counts for "this morning" only if the resort wrote it today (Mountain time)
-function repFor(r){const x=reports[r.id];if(!x||(x.h24==null&&x.overnight==null&&x.base==null))return null;const up=x.updated?new Date(x.updated):null,ok=up&&!isNaN(up);
+function repFor(r){const x=reports[r.id];if(!x||!x.updated||(x.h24==null&&x.overnight==null&&x.base==null))return null;const up=x.updated?new Date(x.updated):null,ok=up&&!isNaN(up);
  return {...x,fresh:!!ok&&localDate(up)===today(),when:ok?(localDate(up)===today()?mtTime(up):up.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:TZ})):''}}
 
 /* ---------- resort extras (not stored) ---------- */
@@ -592,7 +592,7 @@ async function refreshAll(){
  const jobs=resorts.map(async r=>{const s=state[r.id]=Object.assign(state[r.id]||{},{err:{}});
   await Promise.all([loadOM(r).then(d=>{s.days=d}).catch(e=>{s.err.om=e.message}),loadNWS(r).then(n=>{s.nws=n}).catch(e=>{s.err.nws=e.message})]);if(!s.err.om)mergeNWS(s);render()});
  jobs.push(loadSnotel().then(v=>{snotel=v;setDiag('SNOTEL snowpack',true,Object.keys(v).length+' stations')}).catch(e=>{snotelErr=e.message;setDiag('SNOTEL snowpack',false,e.message)}).then(()=>Promise.all(resorts.map(async r=>{const s=state[r.id]=state[r.id]||{err:{}};s.obs=await loadObs(r);render()}))));
- jobs.push(loadReports().then(()=>{const n=resorts.filter(r=>reports[r.id]&&reports[r.id].ok).length;setDiag('Resort snow reports',n>0,`${n} of ${resorts.length} resorts`);render()}).catch(e=>setDiag('Resort snow reports',false,e.message)));
+ jobs.push(loadReports().then(()=>{const n=resorts.filter(r=>reports[r.id]&&reports[r.id].ok).length,miss=resorts.filter(r=>!(reports[r.id]&&reports[r.id].ok)).map(r=>r.name);setDiag('Resort snow reports',n>0,`${n} of ${resorts.length} resorts${miss.length?' · none for '+miss.join(', '):''}`);render()}).catch(e=>setDiag('Resort snow reports',false,e.message)));
  jobs.push(loadUDOT().then(v=>{udot=v;if(v)setDiag('UDOT roads',true)}).catch(e=>{udotErr=e.message;setDiag('UDOT roads',false,e.message)}));
  await Promise.allSettled(jobs);
  const n=resorts.length,omOk=resorts.filter(r=>state[r.id]&&!state[r.id].err.om).length,nwsOk=resorts.filter(r=>state[r.id]&&!state[r.id].err.nws).length;
