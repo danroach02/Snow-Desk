@@ -1,5 +1,5 @@
 {
- "at": "2026-11-27T03:52:24.683Z",
+ "at": "2026-11-27T03:59:41.974Z",
  "resorts": {
   "snowbasin": {
    "overnight": 0,
@@ -33,8 +33,17 @@
    "ok": true
   },
   "brighton": {
-   "ok": false,
-   "error": "no snow numbers found in the report"
+   "overnight": 0,
+   "h24": 0,
+   "h48": 0,
+   "h72": 0,
+   "d7": 40,
+   "base": 30,
+   "season": 77,
+   "lifts": "0/8",
+   "trails": "19/76",
+   "updated": "2026-11-26T16:00:28Z",
+   "ok": true
   },
   "solitude": {
    "overnight": 0,
@@ -68,14 +77,16 @@
   },
   "jackson": {
    "overnight": 0,
-   "summitOvernight": 0,
-   "since6": 0,
+   "h24": 0,
    "h48": 0,
-   "base": 0,
-   "where": "Mid mountain",
-   "updated": null,
-   "ok": false,
-   "error": "no snow numbers found in the report"
+   "d7": 24,
+   "base": 21,
+   "season": 49,
+   "midOvernight": 0,
+   "midBase": 9,
+   "where": "Upper mountain",
+   "updated": "2026-11-26T14:03:00.000Z",
+   "ok": true
   }
  }
 }
