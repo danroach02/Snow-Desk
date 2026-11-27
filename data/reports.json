@@ -1,5 +1,5 @@
 {
- "at": "2026-11-27T12:13:33.111Z",
+ "at": "2026-11-27T13:38:40.915Z",
  "resorts": {
   "snowbasin": {
    "lifts": "0/13",
@@ -10,7 +10,7 @@
    "d7": 21,
    "base": 33,
    "season": 33,
-   "updated": "2026-11-26T14:33:00.000Z",
+   "updated": "2026-11-27T12:43:00.000Z",
    "ok": true
   },
   "snowbird": {
@@ -21,7 +21,7 @@
    "d7": 8,
    "base": 38,
    "season": 80,
-   "updated": "2026-11-26T12:42:00.000Z",
+   "updated": "2026-11-27T12:45:00.000Z",
    "ok": true
   },
   "alta": {
@@ -37,7 +37,7 @@
    "storm": 0,
    "season": 71,
    "where": "12-hour total at the study plot",
-   "updated": "2026-11-27T12:00:00.000Z",
+   "updated": "2026-11-27T13:00:00.000Z",
    "ok": true
   },
   "brighton": {
@@ -58,14 +58,14 @@
    "h24": 0,
    "h48": 0,
    "h72": 0,
-   "d7": 17,
-   "base": 26,
+   "d7": 9,
+   "base": 25,
    "season": 60,
    "where": "Mid-Mountain",
    "lifts": "3/9",
    "trails": "8/82",
    "status": "Open",
-   "updated": "2026-11-26T08:07:54-0700",
+   "updated": "2026-11-27T05:20:36-0700",
    "ok": true
   },
   "deervalley": {
@@ -86,16 +86,16 @@
   "jackson": {
    "lifts": "0/13",
    "trails": "0/130",
-   "overnight": 0,
-   "h24": 0,
-   "h48": 0,
-   "d7": 24,
-   "base": 21,
+   "overnight": 1,
+   "h24": 1,
+   "h48": 1,
+   "d7": 16,
+   "base": 19,
    "season": 49,
-   "midOvernight": 0,
-   "midBase": 9,
+   "midOvernight": 1,
+   "midBase": 8,
    "where": "Upper mountain",
-   "updated": "2026-11-26T14:03:00.000Z",
+   "updated": "2026-11-27T13:07:00.000Z",
    "ok": true
   }
  }
