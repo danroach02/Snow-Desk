@@ -78,6 +78,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .chip{flex:none;min-height:38px;border-radius:8px;padding:0 16px;background:transparent;color:var(--mute);font-size:14px;font-weight:500}
 .chip:hover{background:transparent;color:var(--ink)}
 .chip[aria-pressed=true]{background:#636366;color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35)}
+.timing{margin-top:26px}.tm{margin-top:14px}.tm-h{display:flex;flex-wrap:wrap;gap:2px 14px;align-items:baseline;font-size:14px;margin-bottom:6px}.tm-h b{font-weight:500;min-width:104px}.tm-h span{color:var(--mute);font-variant-numeric:tabular-nums}
+.tl svg{display:block;width:100%;height:14px;border-radius:4px;background:rgba(255,255,255,.07)}.tl-d{display:grid;font-size:12px;color:var(--dim);margin-top:5px}
 /* comparison table */
 .board{padding:clamp(22px,3vw,40px) 0 clamp(44px,6vw,88px)}
 .section{padding:clamp(44px,6vw,88px) 0}
@@ -86,7 +88,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .sec-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px;margin-bottom:12px}
 .sec-head h2{font-size:clamp(24px,2.6vw,30px)}
 .daynote{color:var(--amber);font-size:14px;margin-left:12px;font-weight:400;letter-spacing:-.006em;white-space:nowrap}
-.sortwrap{display:none;font-size:13px;color:var(--mute);align-items:center;gap:8px}.sortwrap select{min-height:36px;width:auto;font-size:14px;padding:0 10px}
+.sortwrap{display:flex;font-size:13px;color:var(--mute);align-items:center;gap:8px}.sortwrap select{min-height:36px;width:auto;font-size:14px;padding:0 10px}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12px;color:var(--dim);align-items:center}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .stick{position:sticky;top:53px;z-index:10;margin:0 -10px;padding:10px 10px 0;background:rgba(0,0,0,.84);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px)}
@@ -203,7 +205,7 @@ footer .links{margin-top:6px;font-size:12px;gap:4px 18px}
     <label class="sortwrap">Sort<select id="sortSel" aria-label="Sort resorts by"></select></label></div>
    <div class="stick"><div class="days" id="days" role="group" aria-label="Day"></div><div class="thead" id="thead"></div></div>
    <div class="list" id="rank"></div>
-   <p class="foot">Overnight is snow forecast from 4 pm to 9 am, replaced by the resort's own report on the morning itself. Daytime is the forecast for 9 am to 4 pm. Storm total is the forecast for the whole next storm, with the range across models beneath. 7 days, Base and Lifts come from each resort's report.</p>
+   <p class="foot">Overnight is snow forecast from 4 pm to 9 am, replaced by the resort's own report on the morning itself. Daytime is the forecast for 9 am to 4 pm. Storm total is the forecast for the whole next storm, with the range across models and its approximate start beneath. 7 days, Base and Lifts come from each resort's report.</p>
    <details class="how"><summary>How the ranking works</summary><p>Recommended order scores each resort for the chosen day. Overnight snow counts most, daytime snow half as much, and the consensus of four weather models plus the NWS forecasters backs both. Snow is computed hour by hour from temperature, so cold, light storms rank above dense, warm ones. Points come off for gusts over your wind limit, rain at the base, road alerts and closures, lifts not running, weekends and holidays (more for the Cottonwood canyons on powder days) and drive time. Alta and Deer Valley drop out when Riding is set to snowboard. Tap any column heading to sort by that number instead. <a href="#accuracy">See how the forecast has scored against resort reports.</a></p></details>
   </div>
   <aside class="side" id="side" aria-label="Selected resort"></aside>
@@ -494,7 +496,8 @@ function processOM(r,main,models){
   const dayRatio=pAll>0?sAll/pAll:0,mv={};
   if(models)for(const[k,lbl]of MODELS){const a=models.daily['precipitation_sum_'+k];if(a&&a[i]!=null)mv[lbl]=a[i]*dayRatio}
   const vals=Object.values(mv);
-  days.push({date:d,snow:sAll,overnight:sum(over.map(h=>h.sn)),daySnow:sum(day.map(h=>h.sn)),ratio,snowLine,fzLine,
+  const hs=Array(24).fill(0);for(const h of all)hs[+h.t.slice(11,13)]=+h.sn.toFixed(2);
+  days.push({date:d,hs,snow:sAll,overnight:sum(over.map(h=>h.sn)),daySnow:sum(day.map(h=>h.sn)),ratio,snowLine,fzLine,
    windDir:peak&&peak.wd!=null?compass(peak.wd):'',rain:wet.some(h=>h.baseT>34&&h.p>0.02),gust:day.length?Math.max(...day.map(h=>h.g)):(D.wind_gusts_10m_max[i]||0),
    cloud:cloudH.length?sum(cloudH.map(h=>h.c))/cloudH.length:null,hi:D.temperature_2m_max[i],lo:D.temperature_2m_min[i],models:mv,
    consensus:(sum(vals)+sAll)/(vals.length+1),spread:vals.length>1?Math.max(...vals)-Math.min(...vals):null});
@@ -513,6 +516,27 @@ function busy(d){const [y,m,day]=d.split('-').map(Number),w=new Date(d+'T12:00')
  if((m===1||m===2)&&day===nthDow(y,m-1,1,3))return 'Holiday';
  return ''}
 const CANYON=['SR-210','SR-190'];
+/* ---------- storm timing: hourly snowfall for the next six days (one model, so "about") ---------- */
+function stormDays(r){const s=state[r.id];if(!s||!s.days)return null;const ds=s.days.filter(x=>x.date>=today()).slice(0,6);return ds.length&&ds.every(d=>d.hs)?ds:null}
+function stormTiming(r){
+ const st=nextStorm(r),ds=stormDays(r);if(!st||!ds)return null;
+ const flat=[];ds.forEach((d,i)=>d.hs.forEach((v,h)=>flat.push({d:d.date,h,v,x:i*24+h})));
+ const on=flat.filter(q=>q.d>=st.from&&q.d<=st.to&&q.v>=.05);if(!on.length)return null;
+ let a=on[0].x,b=on[on.length-1].x;while(a>0&&flat[a-1].v>=.05)a--;while(b<flat.length-1&&flat[b+1].v>=.05)b++;
+ let pk=null;for(let i=a;i<=Math.max(a,b-2);i++){const v=flat[i].v+(flat[i+1]||{v:0}).v+(flat[i+2]||{v:0}).v;if(!pk||v>pk.v)pk={v,a:flat[i],b:flat[Math.min(i+3,flat.length-1)]}}
+ return {a:flat[a],end:flat[b+1]||{d:null,h:0,x:b+1},hours:b-a+1,pk,live:a<=mtHour()&&b>=mtHour()};
+}
+const hh=h=>`${h%12||12} ${h<12?'am':'pm'}`,dW=d=>d===today()?'Today':d?dayName(d):'';
+const startTxt=T=>T.live?'Snowing now':`${dW(T.a.d)} ${hh(T.a.h)}`;
+const timingTxt=T=>`${startTxt(T)} → ${T.end.d?dW(T.end.d)+' '+hh(T.end.h):'beyond 6 days'} · ${T.hours} h${T.hours>=6?` · heaviest ${dW(T.pk.a.d).replace("Today","today")} ${hh(T.pk.a.h)}–${hh(T.pk.b.h)}`:''}`;
+function stormBar(r,o={}){
+ const ds=stormDays(r);if(!ds)return '';let g='';
+ if(o.lifts)ds.forEach((d,i)=>g+=`<rect x="${i*24+9}" y="0" width="7" height="10" fill="#fff" opacity=".09"/>`);
+ ds.forEach((d,i)=>d.hs.forEach((v,h)=>{if(v>=.02)g+=`<rect x="${i*24+h}" y="0" width="1.05" height="10" fill="#a8d5ff" opacity="${Math.min(1,.2+v/1.1).toFixed(2)}"/>`}));
+ ds.forEach((d,i)=>{if(i)g+=`<rect x="${i*24-.12}" y="0" width=".24" height="10" fill="#000"/>`});
+ g+=`<rect x="${mtHour()}" y="0" width=".6" height="10" fill="#fff"/>`;
+ return `<div class="tl"><svg viewBox="0 0 ${ds.length*24} 10" preserveAspectRatio="none" role="img" aria-label="Hourly snowfall, next ${ds.length} days">${g}</svg>${o.labels===false?'':`<div class="tl-d" style="grid-template-columns:repeat(${ds.length},1fr)">${ds.map(d=>`<span>${esc(d.date===today()?'Today':dayName(d.date))}</span>`).join('')}</div>`}</div>`;
+}
 function packPct(r){const p=x=>x&&x.WTEQ&&x.WTEQ.median?x.WTEQ.value/x.WTEQ.median*100:null,a=[p(snotel[(r.snotel||'').toUpperCase()]),r.snotel2?p(snotel[r.snotel2.toUpperCase()]):null].filter(v=>v!=null);return a.length?Math.round(sum(a)/a.length):null}
 // Tag colours have a job: good = snow quality (ice blue), warn = caution (amber), bad = closures and official warnings (red)
 function score(r,date){
@@ -538,8 +562,8 @@ function score(r,date){
  const cr=canyonRoad(r);if(cr&&isToday&&!/open/i.test(cr.status)){sc-=10;tags.unshift({t:`Canyon road ${cr.status.toLowerCase()}`,k:'bad'})}
  const blocked=settings.ride==='board'&&M.skiOnly;if(blocked)tags.unshift({t:'Skiers only',k:''});
  const st=nextStorm(r),lf=rp&&rp.lifts?rp.lifts.split('/').map(Number):null;
- const c={ov:chair,day:refill,storm:st?st.total:0,d7:rp&&rp.d7!=null?rp.d7:null,base:rp&&rp.base!=null?rp.base:(ob&&ob.depth!=null&&!ob.off?ob.depth:null),lifts:lf&&lf[1]>0?lf[0]/lf[1]:null,pack:packPct(r),drive:r.drive};
- return {r,sc:blocked?-1e9:sc,fresh:chair,src,pow,d,tags,blocked,st,lf:lf&&lf[1]>0?lf:null,c};
+ const c={ov:chair,day:refill,storm:st?st.total:0,d7:rp&&rp.d7!=null?rp.d7:null,base:rp&&rp.base!=null?rp.base:(ob&&ob.depth!=null&&!ob.off?ob.depth:null),lifts:lf&&lf[1]>0?lf[0]/lf[1]:null,pack:packPct(r),drive:r.drive},tm=stormTiming(r);c.start=tm?tm.a.x:null;
+ return {tm,r,sc:blocked?-1e9:sc,fresh:chair,src,pow,d,tags,blocked,st,lf:lf&&lf[1]>0?lf:null,c};
 }
 function mergeNWS(s){
  if(!s.days||!s.nws)return;const t=today();
@@ -557,13 +581,13 @@ const rng=(a,b)=>Math.round(a)===Math.round(b)?`${Math.round(a)}"`:`${Math.round
 
 /* ---------- render ---------- */
 const COLS=[['ov','Overnight'],['day','Daytime'],['storm','Storm total'],['d7','7 days'],['base','Base'],['lifts','Lifts'],['pack','Snowpack'],['drive','Drive']];
-let sortKey=store.get('sd.sort','rec');if(sortKey!=='rec'&&!COLS.some(c=>c[0]===sortKey))sortKey='rec';
+let sortKey=store.get('sd.sort','rec');if(sortKey!=='rec'&&sortKey!=='start'&&!COLS.some(c=>c[0]===sortKey))sortKey='rec';
 let selId=null;const mqWide=matchMedia('(min-width:1240px)'),wide=()=>!!mqWide.matches;
 const srcWord=s=>s==='Forecast'?'forecast':s==='Reported'?'reported':'sensor';
 const driveTxt=m=>m<90?`${m} min`:`${(m/60).toFixed(1)} h`;
 const tagHtml=(tags,n=4)=>tags.slice(0,n).map(t=>`<span class="tag ${t.k}">${esc(t.t)}</span>`).join('');
 function sortRows(rows){const k=sortKey,rec=(a,b)=>b.sc-a.sc;
- return k==='rec'?rows.sort(rec):rows.sort((a,b)=>{if(a.blocked!==b.blocked)return a.blocked?1:-1;const x=a.c[k],y=b.c[k];if(x==null||y==null)return x==null&&y==null?rec(a,b):x==null?1:-1;return (k==='drive'?x-y:y-x)||rec(a,b)})}
+ return k==='rec'?rows.sort(rec):rows.sort((a,b)=>{if(a.blocked!==b.blocked)return a.blocked?1:-1;const x=a.c[k],y=b.c[k];if(x==null||y==null)return x==null&&y==null?rec(a,b):x==null?1:-1;return (k==='drive'||k==='start'?x-y:y-x)||rec(a,b)})}
 let raf=0;function render(){if(!raf)raf=setTimeout(()=>{raf=0;draw()},120)}
 function draw(){
  const dates=upcomingDates();if(!dayPick||!dates.includes(dayPick))dayPick=dates[mtHour()>=12?1:0]||dates[0];
@@ -574,14 +598,14 @@ function draw(){
  if(dayPick){$('#rankTitle').textContent=dayPick===today()?'Today, '+dayLong(dayPick):dayLong(dayPick);const bz=busy(dayPick);$('#dayNote').textContent=bz?`${bz}: expect crowds`:''}
  const arrow=k=>sortKey===k?(k==='drive'?' ↑':' ↓'):'';
  $('#thead').innerHTML=`<button type="button" class="th th-nm" data-sort="rec" aria-pressed="${sortKey==='rec'}">Recommended</button>`+COLS.map(([k,l])=>`<button type="button" class="th c-${k}" data-sort="${k}" aria-pressed="${sortKey===k}">${l}${arrow(k)}</button>`).join('')+'<span></span>';
- const ss=$('#sortSel');ss.innerHTML=`<option value="rec">Recommended</option>`+COLS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('');ss.value=sortKey;
+ const ss=$('#sortSel');ss.innerHTML=`<option value="rec">Recommended</option>`+COLS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')+'<option value="start">Storm start</option>';ss.value=sortKey;
  const chev='<svg class="chev" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l5 5 5-5"/></svg>';
  const n=(v,cls)=>v==null?'<b class="z">–</b>':`<b class="${v<0.05?'z':cls||''}">${inch(v)}</b>`;
  if(W&&!rows.some(x=>x.r.id===selId))selId=rows[0]?rows[0].r.id:null;
  const pending=resorts.filter(r=>!rows.some(x=>x.r.id===r.id));
  $('#rank').innerHTML=rows.map(x=>{const id=x.r.id,c=x.c,open=!W&&openRows.has(id);
   return `<details class="row${x.blocked?' off':''}${W&&selId===id?' sel':''}" id="row-${esc(id)}" data-row="${esc(id)}"${open?' open':''}><summary><span class="nm">${esc(x.r.name)}</span>
-<span class="c c-ov">${n(c.ov,c.ov>=2?'ice':'')}<small>${srcWord(x.src)}</small></span><span class="c c-day">${n(c.day)}</span><span class="c c-storm">${n(c.storm,'ice')}<small>${x.st&&Math.round(x.st.lo)!==Math.round(x.st.hi)?rng(x.st.lo,x.st.hi):'&nbsp;'}</small></span><span class="c c-d7">${n(c.d7)}</span><span class="c c-base">${n(c.base)}</span><span class="c c-lifts">${x.lf?`<b class="${x.lf[0]?'':'z'}">${x.lf[0]}/${x.lf[1]}</b>`:'<b class="z">–</b>'}</span><span class="c c-pack">${c.pack==null?'<b class="z">–</b>':`<b>${c.pack}%</b>`}</span><span class="c c-drive"><b>${esc(driveTxt(x.r.drive))}</b></span>${chev}
+<span class="c c-ov">${n(c.ov,c.ov>=2?'ice':'')}<small>${srcWord(x.src)}</small></span><span class="c c-day">${n(c.day)}</span><span class="c c-storm">${n(c.storm,'ice')}<small>${x.st&&Math.round(x.st.lo)!==Math.round(x.st.hi)?rng(x.st.lo,x.st.hi):'&nbsp;'}</small>${x.tm?`<small>${esc(startTxt(x.tm).replace('Snowing now','now'))}</small>`:''}</span><span class="c c-d7">${n(c.d7)}</span><span class="c c-base">${n(c.base)}</span><span class="c c-lifts">${x.lf?`<b class="${x.lf[0]?'':'z'}">${x.lf[0]}/${x.lf[1]}</b>`:'<b class="z">–</b>'}</span><span class="c c-pack">${c.pack==null?'<b class="z">–</b>':`<b>${c.pack}%</b>`}</span><span class="c c-drive"><b>${esc(driveTxt(x.r.drive))}</b></span>${chev}
 <span class="tg">${tagHtml(x.tags)}</span></summary><div class="detail">${open?rowDetail(x.r,x):''}</div></details>`}).join('')
   +pending.map(r=>{const er=state[r.id]&&state[r.id].err&&state[r.id].err.om;return `<div class="row${er?'':' sk'}" style="padding-top:18px;padding-bottom:18px"><span class="nm">${esc(r.name)}</span>${er?` <span class="err">Forecast failed: ${esc(er)}</span>`:'<span class="skb" style="width:62%"></span>'}</div>`}).join('');
  drawSide(rows);drawRoads();if($('#drawer').hidden)drawMyResorts();
@@ -622,9 +646,12 @@ function drawHero(dates){
  const box=$('#storm');if(!big){box.hidden=true;box.innerHTML='';return}
  const g={};for(const x of storms){const k=meta(x.r).group;(g[k]=g[k]||[]).push(x.s)}
  const parts=Object.entries(g).map(([k,a])=>{const t=Math.max(...a.map(s=>s.total)),lo=Math.min(...a.map(s=>s.lo)),hi=Math.max(...a.map(s=>s.hi));return `<div class="reg"><div class="k">${esc(k)}</div><div class="v">${Math.round(t)}<small>"</small></div><div class="r">${rng(lo,hi)}</div></div>`});
+ const rep={};for(const x of storms){const k=meta(x.r).group;if(!rep[k]||x.s.total>rep[k].s.total)rep[k]=x}
+ const tms=Object.entries(rep).map(([k,x])=>({k,r:x.r,T:stormTiming(x.r)})).filter(q=>q.T);
+ const timing=tms.length?`<div class="timing"><div class="kicker">When it hits, about</div>${tms.map((q,i)=>`<div class="tm"><div class="tm-h"><b>${esc(q.k)}</b><span>${esc(timingTxt(q.T))}</span></div>${stormBar(q.r,{labels:i===tms.length-1})}</div>`).join('')}<p>Brighter means heavier snow each hour; the white mark is now. Timing comes from one hourly model, so expect it to shift by a few hours.</p></div>`:'';
  const dn=density(big.s.ratio),wideR=big.s.hi>big.s.total*1.6&&big.s.hi-big.s.lo>=6;
  box.hidden=false;
- box.innerHTML=`<div class="kicker">Forecast storm totals · ${esc(sp(first,last))}</div><div class="regions">${parts.join('')}</div><p>Consensus of four models and the NWS forecast, with the range across them below each total.${wideR?' The models are far apart, so treat these as low confidence.':''}${dn?` Expected density at ${esc(big.r.name)}: <b>${esc(dn.label.toLowerCase())}</b>, about ${Math.round(big.s.ratio)}:1.`:''}</p>`;
+ box.innerHTML=`<div class="kicker">Forecast storm totals · ${esc(sp(first,last))}</div><div class="regions">${parts.join('')}</div><p>Consensus of four models and the NWS forecast, with the range across them below each total.${wideR?' The models are far apart, so treat these as low confidence.':''}${dn?` Expected density at ${esc(big.r.name)}: <b>${esc(dn.label.toLowerCase())}</b>, about ${Math.round(big.s.ratio)}:1.`:''}</p>${timing}`;
 }
 /* ---------- contour artwork drawn from real terrain (AWS terrarium elevation tiles) ---------- */
 const artCache={};
@@ -677,6 +704,7 @@ function rowDetail(r){
   ${(()=>{const cr=canyonRoad(r);return cr?`<div class="per"><i class="dot" style="background:${/open/i.test(cr.status)?'var(--green)':'var(--red)'}"></i><b>Little Cottonwood road:</b> ${esc(cr.status)}${cr.message?' · '+esc(cr.message):''} <span class="mute">(per Alta)</span></div>`:''})()}
   ${items.slice(0,3).map(i=>`<div class="per"><b>${alertRe.test(i.text)?'Road alert':'Road'}:</b> ${esc(i.text)}</div>`).join('')}
  </div><div>
+  ${(()=>{const T=stormTiming(r);return T?`<div class="kicker">Storm timing, about</div><div class="obs" style="margin:6px 0 10px"><b>${esc(timingTxt(T))}</b></div>${stormBar(r,{lifts:true})}<div class="mute" style="font-size:12px;margin:6px 0 24px">Brighter is heavier snow. Pale bands are lift hours, 9 to 4.</div>`:''})()}
   <div class="kicker" style="margin-bottom:10px">Seven-day forecast. Paler bars are lighter snow; the thin line is the range across models.</div>
   ${days.length?`<div class="strip">${strip}</div><div class="dl">${days.map(x=>`<span>${esc(x.date===t?'Today':dayName(x.date))}</span>`).join('')}</div>`:s.err&&s.err.om?`<div class="err">Forecast failed: ${esc(s.err.om)}</div>`:'<div class="mute">Loading…</div>'}
   ${r.snotelNote?`<div class="mute" style="font-size:13px;margin-top:10px">Snowpack: ${esc(r.snotelNote)}</div>`:''}

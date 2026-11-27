@@ -32,6 +32,7 @@ setTimeout(()=>{const d=dom.window.document,txt=s=>d.querySelector(s).textConten
  setTimeout(()=>{
   assert.match(txt('#rank details.row .c-ov'),/^15"forecast/,'overnight number: '+txt('#rank details.row .c-ov'));
   assert.match(txt('#rank details.row .c-storm'),/^1[3-6]"/,'storm column: '+txt('#rank details.row .c-storm'));
+  assert.match(txt('#storm'),/· 17 h ·/,'storm timing shows a 17-hour storm: '+txt('#storm .timing'));
   assert.match(txt('#headline'),/15" forecast overnight/,'the answer names the overnight forecast: '+txt('#headline'));
   d.querySelector('[data-sort="drive"]').click();assert.strictEqual(d.querySelector('#rank details.row').id,'row-snowbasin','sorting by drive puts the closest first');
   d.querySelector('[data-sort="rec"]').click();
