@@ -126,7 +126,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 }
 @media(max-width:760px){
  .dgrid{grid-template-columns:1fr}
- .thead,.row summary{grid-template-columns:minmax(0,1fr) 70px 62px 46px 12px;column-gap:6px}
+ .thead,.row summary{grid-template-columns:minmax(0,1fr) 66px 72px 44px 12px;column-gap:6px}
  .c-day,.c-d7,.c-lifts,.c-pack,.c-drive{display:none}
  .nm{font-size:19px}.chev{width:12px}.sortwrap{display:flex}.phone-only{display:block}
  .daynote{display:block;margin:4px 0 0}
@@ -203,7 +203,7 @@ footer .links{margin-top:6px;font-size:12px;gap:4px 18px}
     <label class="sortwrap">Sort<select id="sortSel" aria-label="Sort resorts by"></select></label></div>
    <div class="stick"><div class="days" id="days" role="group" aria-label="Day"></div><div class="thead" id="thead"></div></div>
    <div class="list" id="rank"></div>
-   <p class="foot">Overnight is snow forecast from 4 pm to 9 am, replaced by the resort's own report on the morning itself. Daytime is the forecast for 9 am to 4 pm. Storm is the next storm's forecast total, with the range across models beneath. 7 days, Base and Lifts come from each resort's report.</p>
+   <p class="foot">Overnight is snow forecast from 4 pm to 9 am, replaced by the resort's own report on the morning itself. Daytime is the forecast for 9 am to 4 pm. Storm total is the forecast for the whole next storm, with the range across models beneath. 7 days, Base and Lifts come from each resort's report.</p>
    <details class="how"><summary>How the ranking works</summary><p>Recommended order scores each resort for the chosen day. Overnight snow counts most, daytime snow half as much, and the consensus of four weather models plus the NWS forecasters backs both. Snow is computed hour by hour from temperature, so cold, light storms rank above dense, warm ones. Points come off for gusts over your wind limit, rain at the base, road alerts and closures, lifts not running, weekends and holidays (more for the Cottonwood canyons on powder days) and drive time. Alta and Deer Valley drop out when Riding is set to snowboard. Tap any column heading to sort by that number instead. <a href="#accuracy">See how the forecast has scored against resort reports.</a></p></details>
   </div>
   <aside class="side" id="side" aria-label="Selected resort"></aside>
@@ -556,7 +556,7 @@ function nextStorm(r){
 const rng=(a,b)=>Math.round(a)===Math.round(b)?`${Math.round(a)}"`:`${Math.round(a)}–${Math.round(b)}"`;
 
 /* ---------- render ---------- */
-const COLS=[['ov','Overnight'],['day','Daytime'],['storm','Storm'],['d7','7 days'],['base','Base'],['lifts','Lifts'],['pack','Snowpack'],['drive','Drive']];
+const COLS=[['ov','Overnight'],['day','Daytime'],['storm','Storm total'],['d7','7 days'],['base','Base'],['lifts','Lifts'],['pack','Snowpack'],['drive','Drive']];
 let sortKey=store.get('sd.sort','rec');if(sortKey!=='rec'&&!COLS.some(c=>c[0]===sortKey))sortKey='rec';
 let selId=null;const mqWide=matchMedia('(min-width:1240px)'),wide=()=>!!mqWide.matches;
 const srcWord=s=>s==='Forecast'?'forecast':s==='Reported'?'reported':'sensor';
