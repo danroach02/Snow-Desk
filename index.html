@@ -177,11 +177,11 @@ footer .links{margin-top:6px;font-size:12px;gap:4px 18px}
  </div></div>
  <div class="ridgeband"><div class="wrap">
   <div class="ridge"><svg id="ridgeSvg" role="img" aria-label="Resorts by elevation with overnight snow and forecast snow line"></svg></div>
-  <div class="ridge-note">Each line runs from base to summit; the bold section is overnight snow. Red tick: snow line on storm days. Tap a resort for details.</div>
+  <div class="ridge-note">Each line runs from base to summit; the bold section and the number are forecast overnight snow. Red tick: snow line on storm days. Tap a resort for details.</div>
  </div></div>
  <div class="section"><div class="wrap">
   <div class="sec-head"><h2 id="rankTitle">Where to ski</h2>
-   <div class="legend"><span><svg class="sym" style="width:16px;height:16px" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#30d158"/></svg>&lt;2"</span><span><svg class="sym" style="width:16px;height:16px" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" fill="#2997ff"/></svg>2–6"</span><span><svg class="sym" style="width:16px;height:16px" viewBox="0 0 20 20"><rect x="5" y="5" width="10" height="10" transform="rotate(45 10 10)" fill="#f5f5f7"/></svg>6–12"</span><span><svg class="sym" style="width:24px;height:16px" viewBox="0 0 30 20"><rect x="3" y="5" width="10" height="10" transform="rotate(45 8 10)" fill="#f3f6fb"/><rect x="15" y="5" width="10" height="10" transform="rotate(45 20 10)" fill="#f3f6fb"/></svg>12"+ overnight, by first chair</span></div>
+   <div class="legend"><span><svg class="sym" style="width:16px;height:16px" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#30d158"/></svg>&lt;2"</span><span><svg class="sym" style="width:16px;height:16px" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" fill="#2997ff"/></svg>2–6"</span><span><svg class="sym" style="width:16px;height:16px" viewBox="0 0 20 20"><rect x="5" y="5" width="10" height="10" transform="rotate(45 10 10)" fill="#f5f5f7"/></svg>6–12"</span><span><svg class="sym" style="width:24px;height:16px" viewBox="0 0 30 20"><rect x="3" y="5" width="10" height="10" transform="rotate(45 8 10)" fill="#f3f6fb"/><rect x="15" y="5" width="10" height="10" transform="rotate(45 20 10)" fill="#f3f6fb"/></svg>12"+ forecast overnight</span></div>
   </div>
   <div class="list" id="rank"></div>
   <details class="how"><summary>How the ranking works</summary><p>The big number is snow forecast between 4 pm and 9 am, so it is what should be waiting at first chair. Snow that falls during the day is shown separately and counts half as much. The consensus blends four weather models with the NWS forecasters' numbers. On the morning itself, the resort's own reported overnight total replaces the forecast. Snow is computed hour by hour from temperature (snow-to-liquid ratio), so cold, light storms rank higher than dense, warm ones. Points come off for gusts over your wind limit (lift holds), rain or mix at the base, road alerts, weekends and holidays (extra for the Cottonwood canyons on powder weekends) and drive time. Alta and Deer Valley drop out when Riding is set to snowboard. Tap a resort for measured snow, snowpack, the 7-day outlook and links; tune everything in settings.</p></details>
@@ -461,10 +461,10 @@ function sym(k,size=26){
 }
 function score(r,date){
  const s=state[r.id],d=s&&s.days&&s.days.find(x=>x.date===date);if(!d)return null;
- const M=meta(r),tags=[],ob=s.obs;let chair=d.overnight;
+ const M=meta(r),tags=[],ob=s.obs;let chair=d.overnight,src='Forecast';
  const rp=repFor(r);
- if(date===today()&&rp&&rp.fresh&&rp.overnight!=null&&mtHour()<14){chair=rp.overnight;tags.push({t:`${inch(rp.overnight)} overnight per resort report`,k:rp.overnight>=2?'good':''})}
- else if(date===today()&&ob&&ob.n12!=null&&mtHour()<12&&ob.n12>chair){chair=ob.n12;tags.push({t:`${inch(ob.n12)} on the sensor overnight`,k:'good'})}
+ if(date===today()&&rp&&rp.fresh&&rp.overnight!=null&&mtHour()<14){chair=rp.overnight;src='Reported';tags.push({t:`${inch(rp.overnight)} overnight per resort report`,k:rp.overnight>=2?'good':''})}
+ else if(date===today()&&ob&&ob.n12!=null&&mtHour()<12&&ob.n12>chair){chair=ob.n12;src='Sensor';tags.push({t:`${inch(ob.n12)} on the sensor overnight`,k:'good'})}
  const refill=d.daySnow,pow=chair+0.5*refill;let sc=chair*10+refill*5+d.consensus*2;
  if(refill>=1)tags.push({t:`+${inch(refill)} during the day`,k:refill>=3?'good':''});
  const dn=density(d.ratio),windy=d.gust>=35;
@@ -477,7 +477,7 @@ function score(r,date){
  sc-=(r.drive/60)*settings.driveWeight;
  if(d.spread!=null&&d.consensus>=2&&d.spread>d.consensus)tags.push({t:'Models disagree',k:'bad'});
  const blocked=settings.ride==='board'&&M.skiOnly;if(M.skiOnly)tags.push({t:blocked?'Skiers only · skipped':'Skiers only',k:blocked?'bad':''});
- return {r,sc:blocked?-1e9:sc,fresh:chair,pow,d,tags,blocked,rating:rate(chair)};
+ return {r,sc:blocked?-1e9:sc,fresh:chair,src,pow,d,tags,blocked,rating:rate(chair)};
 }
 // NWS forecaster snowfall joins the model consensus for future days (today's NWS grid only covers the hours left)
 function mergeNWS(s){
@@ -506,7 +506,7 @@ function draw(){
  if(dayPick)$('#rankTitle').textContent=`${dayPick===today()?'Today':dayLong(dayPick)}`;
  const chev='<svg class="chev" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l5 5 5-5"/></svg>';
  const pending=resorts.filter(r=>!rows.some(x=>x.r.id===r.id));
- $('#rank').innerHTML=rows.map((x,i)=>{const tags=x.tags.slice(0,4);return `<details class="row${i===0&&!x.blocked&&x.pow>=2?' top':''}${x.blocked?' off':''}" id="row-${esc(x.r.id)}" data-row="${esc(x.r.id)}"${openRows.has(x.r.id)?' open':''}><summary><span class="rk">${i+1}</span>${sym(x.rating)}<span class="nm">${esc(x.r.name)}</span><span class="in">${inch(x.fresh)}<small>overnight</small></span>${chev}<span class="tg">${tags.map(t=>`<span class="tag ${t.k}">${esc(t.t)}</span>`).join('')}<span class="tag">${esc(x.r.drive)} min</span></span></summary><div class="detail">${openRows.has(x.r.id)?rowDetail(x.r):''}</div></details>`}).join('')
+ $('#rank').innerHTML=rows.map((x,i)=>{const tags=x.tags.slice(0,4);return `<details class="row${i===0&&!x.blocked&&x.pow>=2?' top':''}${x.blocked?' off':''}" id="row-${esc(x.r.id)}" data-row="${esc(x.r.id)}"${openRows.has(x.r.id)?' open':''}><summary><span class="rk">${i+1}</span>${sym(x.rating)}<span class="nm">${esc(x.r.name)}</span><span class="in">${inch(x.fresh)}<small>${esc(x.src==='Forecast'?'forecast overnight':x.src==='Reported'?'reported overnight':'sensor, overnight')}</small></span>${chev}<span class="tg">${tags.map(t=>`<span class="tag ${t.k}">${esc(t.t)}</span>`).join('')}<span class="tag">${esc(x.r.drive)} min</span></span></summary><div class="detail">${openRows.has(x.r.id)?rowDetail(x.r):''}</div></details>`}).join('')
   +pending.map(r=>`<div class="row" style="padding:16px 18px"><span class="nm">${esc(r.name)}</span> <span class="mute">${state[r.id]&&state[r.id].err&&state[r.id].err.om?'forecast failed: '+esc(state[r.id].err.om):'loading…'}</span></div>`).join('');
  drawRoads();if($('#drawer').hidden)drawMyResorts();
  if(!$('#v-mountain').hidden)refreshMapUI();
@@ -516,7 +516,7 @@ function drawPick(dates){
  const P=$('#pick');
  if(!best){P.removeAttribute('data-goto');P.innerHTML=`<div class="num">0<small>"</small></div><div class="kicker">Best day · next 5 days</div><div class="who">No powder day yet</div><div class="sub">Nothing over 2" at your resorts.</div>`;return}
  P.dataset.goto=best.r.id+'|'+best.d.date;
- P.innerHTML=`<div class="num">${Math.round(best.fresh)}<small>"</small></div><div class="kicker">Best day · ${esc(best.d.date===today()?'Today':dayLong(best.d.date))}</div><div class="who">${sym(best.rating,22)} ${esc(best.r.name)}</div><div class="sub">overnight, by first chair · ${esc(best.r.drive)} min drive · gusts ${Math.round(best.d.gust)} mph</div><div class="tags">${best.tags.map(t=>`<span class="tag ${t.k}">${esc(t.t)}</span>`).join('')}</div><div class="sub" style="grid-column:1/-1;margin-top:10px">View details</div>`;
+ P.innerHTML=`<div class="num">${Math.round(best.fresh)}<small>"</small></div><div class="kicker">Best day · ${esc(best.d.date===today()?'Today':dayLong(best.d.date))}${best.src==='Forecast'?' · Forecast':''}</div><div class="who">${sym(best.rating,22)} ${esc(best.r.name)}</div><div class="sub">${esc(best.src==='Forecast'?'Forecast overnight snow, by first chair':best.src==='Reported'?'Reported overnight by the resort':'Overnight on the depth sensor')} · ${esc(best.r.drive)} min drive · gusts ${Math.round(best.d.gust)} mph</div><div class="tags">${best.tags.map(t=>`<span class="tag ${t.k}">${esc(t.t)}</span>`).join('')}</div><div class="sub" style="grid-column:1/-1;margin-top:10px">View details</div>`;
 }
 function drawRidge(){
  const svg=$('#ridgeSvg');if(!svg||$('#v-today').hidden)return;const W=svg.clientWidth||800,H=svg.clientHeight||280;if(!W)return;
@@ -584,7 +584,7 @@ function drawHeadline(dates){
  const bspan=big.s.from===big.s.to?(big.s.from===today()?'today':dayName(big.s.from)):`${big.s.from===today()?'today':dayName(big.s.from)}–${dayName(big.s.to)}`;
  $('#headline').innerHTML=lone?`${esc(word)} for ${esc(meta(big.r).group)}. <em>${esc(big.s.from===big.s.to?wk(big.s.from):wk(big.s.from)+' to '+wk(big.s.to))}.</em>`:`${esc(word)}. <em>${esc(first===last?wk(first):wk(first)+' to '+wk(last))}.</em>`;
  const dn=density(big.s.ratio),wide=big.s.hi>big.s.total*1.6&&big.s.hi-big.s.lo>=6;
- $('#storm').innerHTML=`<div class="regions">${parts.join('')}</div><p>Storm totals: consensus of four models and the NWS forecast, with the range below each.${wide?' The models are far apart, so treat the totals as low confidence.':''}${dn?` Expected density at ${esc(big.r.name)}: <b>${esc(dn.label.toLowerCase())}</b> (about ${Math.round(big.s.ratio)}:1).`:''}</p>`;
+ $('#storm').innerHTML=`<div class="regions">${parts.join('')}</div><p>Forecast storm totals: consensus of four models and the NWS forecast, with the range below each.${wide?' The models are far apart, so treat the totals as low confidence.':''}${dn?` Expected density at ${esc(big.r.name)}: <b>${esc(dn.label.toLowerCase())}</b> (about ${Math.round(big.s.ratio)}:1).`:''}</p>`;
 }
 async function drawAFD(){
  const offices=[...new Set(resorts.map(r=>state[r.id]&&state[r.id].nws&&state[r.id].nws.cwa).filter(Boolean))];

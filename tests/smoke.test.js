@@ -30,7 +30,7 @@ setTimeout(()=>{const d=dom.window.document,txt=s=>d.querySelector(s).textConten
  // 17 storm hours x 0.06" at 20F (15:1) = 15.3" overnight
  d.querySelector('[data-day="'+D[3]+'"]').click();
  setTimeout(()=>{
-  assert.match(txt('#rank details.row .in'),/^15"overnight/,'overnight number: '+txt('#rank details.row .in'));
+  assert.match(txt('#rank details.row .in'),/^15"forecast overnight/,'overnight number: '+txt('#rank details.row .in'));
   assert.match(txt('#pick'),/15"/,'pick shows overnight snow');
   assert.match(txt('#storm'),/Snowbasin1[3-6]"/,'headline uses consensus: '+txt('#storm'));
   d.querySelector('#row-snowbird').open=true;d.querySelector('#row-snowbird').dispatchEvent(new dom.window.Event('toggle'));
