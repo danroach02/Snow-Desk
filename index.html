@@ -184,6 +184,7 @@ footer .links{margin-top:10px}
   <div class="mute" id="mvTotals" style="margin-bottom:8px"></div>
   <div class="mvfig"><svg id="mvSvg" role="img" aria-label="Snow line, snow and rain by elevation over the next 72 hours"></svg></div>
   <div class="legend" style="margin-top:6px"><span><i class="sw" style="background:#4f8cff"></i>Snowing</span><span><i class="sw" style="background:#2fa36b"></i>Rain or mix</span><span><i class="sw" style="background:#ff4d4f"></i>Snow line</span><span><i class="sw" style="background:#ff4d4f33"></i>Lifts 9–4</span><span><i class="sw" style="background:#2bc26b"></i><i class="sw" style="background:#f59e0b"></i><i class="sw" style="background:#ff4d4f"></i>Summit gusts</span></div>
+  <p class="mute" style="margin:10px 0 0;font-size:13px">One model. It gives the same precipitation at every elevation, so base, mid and summit differ only by temperature. Real summit totals often run higher.</p>
  </div>
  <div class="sec-head" style="margin:36px 0 12px"><h2>3D mountain</h2><div class="bar2" id="mapLayers" style="margin:0"></div></div>
  <div class="bar2" id="mapDays"></div>
@@ -645,7 +646,7 @@ function drawProfile(){
  P.hours.forEach((hh,i)=>{const g=hh.lv[0].g;o+=`<rect x="${x(i)}" y="${top3}" width="${cw+.6}" height="${h3}" fill="${g>=settings.windLimit?'#ff4d4f':g>=25?'#f59e0b':'#2bc26b'}"/>`;if(i%step===0)o+=`<text x="${x(i)+2}" y="${top3+h3+14}" font-size="11" fill="currentColor">${Math.round(g)} mph · ${Math.round(hh.lv[0].T)}°F</text>`});
  svg.innerHTML=o;
  const tot=cum.map(a=>a[a.length-1]),rainBase=P.hours.some(hh=>hh.lv[2].p>0.02&&hh.lv[2].T>34),holds=P.hours.filter(hh=>+hh.t.slice(11,13)>=9&&+hh.t.slice(11,13)<16&&hh.lv[0].g>=settings.windLimit).length;
- $('#mvTotals').innerHTML=`<b>72-hour snow (one model):</b> summit ${esc(inch(tot[0]))} · mid ${esc(inch(tot[1]))} · base ${esc(inch(tot[2]))}${rainBase?' · <b style="color:var(--red)">rain or mix at the base</b>':''}${holds?` · <b style="color:var(--red)">${holds} lift hours with summit gusts over ${settings.windLimit} mph</b>`:''}<br>The model gives the same precipitation at every elevation, so the three lines differ only by temperature (rain vs. snow, and how light the snow is). Real summit totals often run higher.`;
+ $('#mvTotals').innerHTML=`<b>72-hour snow (one model):</b> summit ${esc(inch(tot[0]))} · mid ${esc(inch(tot[1]))} · base ${esc(inch(tot[2]))}${rainBase?' · <b style="color:var(--red)">rain or mix at the base</b>':''}${holds?` · <b style="color:var(--red)">${holds} lift hours with summit gusts over ${settings.windLimit} mph</b>`:''}`;
 }
 
 /* ski runs and lifts from OpenStreetMap (cached 30 days) */
@@ -685,15 +686,15 @@ function initMap(){
     {id:'sat',type:'raster',source:'sat'},
     {id:'topo',type:'raster',source:'topo',layout:{visibility:'none'}},
     {id:'depth',type:'raster',source:'depth',paint:{'raster-opacity':.55},layout:{visibility:'none'}},
-    {id:'contour',type:'line',source:'contours','source-layer':'contours',filter:['==',['get','level'],1],paint:{'line-color':'#ffffff','line-opacity':.3,'line-width':.8}},
-    {id:'runs-case',type:'line',source:'runs',filter:['==',['get','kind'],'run'],layout:{'line-cap':'round'},paint:{'line-color':'#ffffff','line-width':['interpolate',['linear'],['zoom'],11,2.4,15,5.5],'line-opacity':.85}},
-    {id:'lifts',type:'line',source:'runs',filter:['==',['get','kind'],'lift'],paint:{'line-color':'#ffd60a','line-width':2.5,'line-dasharray':[2,1.2]}},
-    {id:'runs',type:'line',source:'runs',filter:['==',['get','kind'],'run'],layout:{'line-cap':'round'},paint:{'line-color':['match',['get','diff'],['novice','easy'],'#21c463',['intermediate'],'#3b82f6',['advanced','expert'],'#0b0f16',['freeride','extreme'],'#ff8a00','#e6e6e6'],'line-width':['interpolate',['linear'],['zoom'],11,1.2,15,3.5],'line-opacity':.95}},
+    {id:'contour',type:'line',source:'contours','source-layer':'contours',filter:['==',['get','level'],1],paint:{'line-color':'#ffffff','line-opacity':.16,'line-width':.6}},
+    {id:'runs-case',type:'line',source:'runs',filter:['==',['get','kind'],'run'],layout:{'line-cap':'round'},paint:{'line-color':'#ffffff','line-width':['interpolate',['linear'],['zoom'],11,1.2,13,2.2,16,5],'line-opacity':.7}},
+    {id:'lifts',type:'line',source:'runs',filter:['==',['get','kind'],'lift'],paint:{'line-color':'#ffd60a','line-width':['interpolate',['linear'],['zoom'],11,1.2,16,3],'line-dasharray':[2,1.2]}},
+    {id:'runs',type:'line',source:'runs',filter:['==',['get','kind'],'run'],layout:{'line-cap':'round'},paint:{'line-color':['match',['get','diff'],['novice','easy'],'#21c463',['intermediate'],'#3b82f6',['advanced','expert'],'#0b0f16',['freeride','extreme'],'#ff8a00','#e6e6e6'],'line-width':['interpolate',['linear'],['zoom'],11,.6,13,1.2,16,3.2],'line-opacity':.95}},
     {id:'snowline-glow',type:'line',source:'contours','source-layer':'contours',filter:slFilter(),paint:{'line-color':'#ff3b30','line-width':12,'line-opacity':.35,'line-blur':5}},
     {id:'snowline',type:'line',source:'contours','source-layer':'contours',filter:slFilter(),paint:{'line-color':'#ff3b30','line-width':3.5}},
     {id:'snowline-label',type:'symbol',source:'contours','source-layer':'contours',filter:slFilter(),layout:{'symbol-placement':'line','text-field':['concat',['to-string',['get','ele']],' ft snow line'],'text-size':12,'text-font':['Open Sans Semibold']},paint:{'text-color':'#fff','text-halo-color':'#c81e1e','text-halo-width':2}}
    ],
-   terrain:{source:'dem',exaggeration:1.3}}});
+   terrain:{source:'dem',exaggeration:1.15}}});
  map.addControl(new ml.NavigationControl({visualizePitch:true}),'top-right');
  map.on('error',e=>{const m=(e&&e.error&&e.error.message)||'';setDiag('3D map tiles',false,(e.sourceId||'')+' '+m);if(/WebGL/i.test(m))$('#mapmsg').textContent='3D map needs WebGL, which this browser has turned off.'});
  map.on('idle',()=>{if(!diag['3D map tiles'])setDiag('3D map tiles',true)});
@@ -705,20 +706,23 @@ function applyLayers(){
  vis('sat',layerOn.sat);vis('topo',layerOn.topo);vis('runs',layerOn.runs);vis('runs-case',layerOn.runs);vis('lifts',layerOn.runs);vis('depth',layerOn.depth);
  ['snowline','snowline-glow','snowline-label'].forEach(id=>vis(id,layerOn.snowline));
 }
-function applySnowLine(){if(!mapReady)return;const f=slFilter();['snowline','snowline-glow','snowline-label'].forEach(id=>map.getLayer(id)&&map.setFilter(id,f))}
+function isDryLine(){const r=curRes(),d=r&&state[r.id]&&state[r.id].days&&state[r.id].days.find(x=>x.date===dayPick);return slManual==null&&!!d&&d.snowLine==null}
+function applySnowLine(){if(!mapReady||!map.getLayer('snowline'))return;const f=slFilter(),dry=isDryLine();['snowline','snowline-glow','snowline-label'].forEach(id=>map.setFilter(id,f));
+ map.setPaintProperty('snowline','line-width',dry?1.8:3.5);map.setPaintProperty('snowline','line-dasharray',dry?[3,2]:[1,0]);map.setPaintProperty('snowline','line-color',dry?'#ffb4b0':'#ff3b30');
+ map.setPaintProperty('snowline-glow','line-opacity',dry?0:.35);map.setLayoutProperty('snowline-label','text-field',['concat',['to-string',['get','ele']],dry?' ft freezing line (dry day)':' ft snow line'])}
 function toggleSpin(){spinning=!spinning;$('#spin').textContent=spinning?'Stop':'Rotate';const step=()=>{if(!spinning||!map)return;map.setBearing(map.getBearing()+0.12);requestAnimationFrame(step)};step()}
 async function showRuns(){
  const r=curRes();if(!mapReady||!r)return;
  try{const g=await loadRuns(r);setDiag('Ski runs (OpenStreetMap)',true,g.features.length+' lines');if(curRes()===r)map.getSource('runs').setData(g);$('#mapmsg').textContent=g.features.length?`${g.features.filter(f=>f.properties.kind==='run').length} runs and ${g.features.filter(f=>f.properties.kind==='lift').length} lifts from OpenStreetMap.`:'No mapped runs found for this resort on OpenStreetMap.'}
  catch(e){setDiag('Ski runs (OpenStreetMap)',false,e.message);$('#mapmsg').textContent='Ski runs unavailable right now ('+e.message+').'}
 }
-function flyTo(){const r=curRes();if(r&&mapReady){const F=fc(r);map.flyTo({center:[(F.lon+r.lon)/2,(F.lat+r.lat)/2],zoom:r.id==='jackson'?12.6:13.2,pitch:64,bearing:-20,duration:1400})}}
+function flyTo(){const r=curRes();if(r&&mapReady){const F=fc(r);map.flyTo({center:[(F.lon+r.lon)/2,(F.lat+r.lat)/2],zoom:r.id==='jackson'?12.9:13.5,pitch:60,bearing:-20,duration:1400})}}
 async function openMap(id){
  window.scrollTo(0,0);
  if(id)mapRes=id;if(!mapRes)mapRes=(resorts[0]||{}).id;slManual=null;
  refreshMapUI();selectResort(mapRes,false);
  try{await loadLibs();setDiag('3D map library',true)}catch(e){setDiag('3D map library',false,e.message);$('#mapmsg').textContent='3D map library failed to load: '+e.message;return}
- if(!mapReady){try{initMap()}catch(e){const gl=/WebGL/i.test(e.message||'');setDiag('3D map',false,gl?'WebGL unavailable in this browser':e.message);$('#mapmsg').textContent=gl?'The 3D map needs graphics acceleration (WebGL), which this browser has turned off. The chart above still works.':'The 3D map could not start. The chart above still works.';return}map.once('load',()=>{applyLayers();showRuns()})}
+ if(!mapReady){try{initMap()}catch(e){const gl=/WebGL/i.test(e.message||'');setDiag('3D map',false,gl?'WebGL unavailable in this browser':e.message);$('#mapmsg').textContent=gl?'The 3D map needs graphics acceleration (WebGL), which this browser has turned off. The chart above still works.':'The 3D map could not start. The chart above still works.';return}map.once('load',()=>{applyLayers();applySnowLine();showRuns()})}
  else{map.resize();flyTo();showRuns()}
 }
 function selectResort(id,fly=true){
@@ -734,7 +738,7 @@ function refreshMapUI(){
  $('#mapLayers').innerHTML=LAYERS.map(([k,l])=>`<button class="chip" data-layer="${k}" aria-pressed="${!!layerOn[k]}">${esc(l)}</button>`).join('');
  const sl=curSnowLine(),r=curRes();
  $('#slVal').textContent=`${r100(sl).toLocaleString()} ft`;const dd=r&&state[r.id]&&state[r.id].days&&state[r.id].days.find(x=>x.date===dayPick),rel=r&&!(slManual==null&&dd&&dd.snowLine==null)?(sl>r.top?' · above the summit: rain or mix up high':sl<r.base?' · below the base: snow top to bottom':''):'';
- $('#slNote').textContent=(slManual!=null?'Manual':dd&&dd.snowLine==null?'Dry day: showing freezing level minus 1,000 ft':'Forecast snow line')+rel;$('#slRange').value=sl;$('#slAuto').hidden=slManual==null;
+ $('#slNote').textContent=(slManual!=null?'Manual':dd&&dd.snowLine==null?'No snow or rain forecast this day. Dashed line = where it would turn to snow':'Forecast snow line')+rel;$('#slRange').value=sl;$('#slAuto').hidden=slManual==null;
  drawProfile();applySnowLine();
 }
 
