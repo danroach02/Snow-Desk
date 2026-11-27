@@ -1,7 +1,9 @@
 {
- "at": "2026-11-27T04:23:39.222Z",
+ "at": "2026-11-27T04:25:53.130Z",
  "resorts": {
   "snowbasin": {
+   "lifts": "0/13",
+   "trails": "0/115",
    "overnight": 0,
    "h24": 0,
    "since5": 0,
@@ -76,6 +78,8 @@
    "ok": true
   },
   "jackson": {
+   "lifts": "0/13",
+   "trails": "0/130",
    "overnight": 0,
    "h24": 0,
    "h48": 0,
