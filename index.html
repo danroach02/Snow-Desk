@@ -408,7 +408,7 @@ function inPoly(lon,lat,g){
  return polys.some(p=>p.length&&ring(p[0])&&!p.slice(1).some(ring));
 }
 function avyFor(r){
- const F=fc(r),z=avyZones.find(z=>inPoly(F.lon,F.lat,z.g))||avyZones.find(z=>inPoly(r.lon,r.lat,z.g));if(!z)return null;
+ const F=fc(r),zn=meta(r).zone,z=avyZones.find(z=>inPoly(F.lon,F.lat,z.g))||avyZones.find(z=>inPoly(r.lon,r.lat,z.g))||(zn&&avyZones.find(z=>z.p.name===zn));if(!z)return null;
  const lv=z.p.danger_level>0?z.p.danger_level:0;return {zone:z.p.name,center:z.p.center,level:lv,name:AVY_NAMES[lv],color:lv?z.p.color:'#86868b',link:safeUrl(z.p.link),advice:z.p.travel_advice||'',to:z.p.end_date};
 }
 
@@ -426,13 +426,13 @@ function canyonRoad(r){const a=reports.alta;return (r.roads||[]).includes('SR-21
 
 /* ---------- resort extras (not stored) ---------- */
 const META={
- snowbasin:{short:'Basin',cams:'https://www.snowbasin.com/the-mountain/web-cams/',avy:'https://utahavalanchecenter.org/forecast/ogden',group:'Snowbasin'},
- snowbird:{short:'Bird',cams:'https://www.snowbird.com/the-mountain/webcams/view-all-webcams/',avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
- alta:{short:'Alta',cams:'https://www.alta.com/weather#mountain-cams',skiOnly:true,avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
- brighton:{short:'Brighton',cams:'https://www.brightonresort.com/conditions#webcams',avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
- solitude:{short:'Solitude',cams:'https://www.solitudemountain.com/mountain-and-village/webcams',avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
- deervalley:{short:'Deer V.',cams:'https://www.deervalley.com/explore-the-mountain/webcams',skiOnly:true,avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Deer Valley'},
- jackson:{short:'Jackson',cams:'https://www.jacksonhole.com/live-mountain-cams',avy:'https://bridgertetonavalanchecenter.org',group:'Jackson Hole'}
+ snowbasin:{short:'Basin',zone:'Ogden',cams:'https://www.snowbasin.com/the-mountain/web-cams/',avy:'https://utahavalanchecenter.org/forecast/ogden',group:'Snowbasin'},
+ snowbird:{short:'Bird',zone:'Salt Lake',cams:'https://www.snowbird.com/the-mountain/webcams/view-all-webcams/',avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
+ alta:{short:'Alta',zone:'Salt Lake',cams:'https://www.alta.com/weather#mountain-cams',skiOnly:true,avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
+ brighton:{short:'Brighton',zone:'Salt Lake',cams:'https://www.brightonresort.com/conditions#webcams',avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
+ solitude:{short:'Solitude',zone:'Salt Lake',cams:'https://www.solitudemountain.com/mountain-and-village/webcams',avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
+ deervalley:{short:'Deer V.',zone:'Salt Lake',cams:'https://www.deervalley.com/explore-the-mountain/webcams',skiOnly:true,avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Deer Valley'},
+ jackson:{short:'Jackson',zone:'Tetons',cams:'https://www.jacksonhole.com/live-mountain-cams',avy:'https://bridgertetonavalanchecenter.org',group:'Jackson Hole'}
 };
 const meta=r=>META[r.id]||{short:r.name.split(' ')[0],group:r.name};
 
