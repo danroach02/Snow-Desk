@@ -6,12 +6,12 @@ const TZ='America/Denver';
 // feed = id in the mountain-report feed these resorts publish through (the one behind their own report pages)
 export const RESORTS=[
  {id:'snowbasin',lat:41.1957,lon:-111.8701,elev:8297,page:'https://www.snowbasin.com/the-mountain/mountain-report/'},
- {id:'snowbird',lat:40.5810,lon:-111.6570,elev:9200,feed:64},
- {id:'alta',lat:40.57607,lon:-111.63889,elev:9662,feed:63},
- {id:'brighton',lat:40.5980,lon:-111.5832,elev:9500,feed:66},
+ {id:'snowbird',lat:40.5810,lon:-111.6570,elev:9200,page:'https://api.snowbird.com/api/v1/dor/agent-friendly/snow-reports',accept:'text/plain'},
+ {id:'alta',lat:40.57607,lon:-111.63889,elev:9662,page:'https://www.alta.com/weather'},
+ {id:'brighton',lat:40.5980,lon:-111.5832,elev:9500,page:'https://www.brightonresort.com/conditions'},
  {id:'solitude',lat:40.6199,lon:-111.5919,elev:9200,feed:65},
  {id:'deervalley',lat:40.611,lon:-111.4999,elev:8888,feed:49},
- {id:'jackson',lat:43.5915,lon:-110.8745,elev:9634,feed:67}];
+ {id:'jackson',lat:43.5915,lon:-110.8745,elev:9634,page:'https://www.jacksonhole.com/mountain-report'}];
 const num=v=>{const n=parseFloat(String(v??'').replace(/[^\d.\-]/g,''));return Number.isFinite(n)?n:null};
 const mtDate=(d=new Date())=>d.toLocaleDateString('en-CA',{timeZone:TZ});
 const mtHour=(d=new Date())=>+d.toLocaleString('en-US',{hour:'numeric',hour12:false,timeZone:TZ})%24;
@@ -32,6 +32,25 @@ export function parseSnowbasin(html){
  if(up){const y=new Date().getFullYear(),d=new Date(`${up[1]} ${y} ${up[2]}:${up[3]} ${up[4]} GMT-0700`);if(!isNaN(d))updated=d.toISOString()}
  return {overnight:f(/Overnight\s*([\d.]+)"/i),h24:f(/24 hours\s*([\d.]+)"/i),since5:f(/Since 5am\s*([\d.]+)"/i),d7:f(/7 days\s*([\d.]+)"/i),base:f(/Base\s*([\d.]+)"/i),season:f(/Season\s*([\d.]+)"/i),updated};
 }
+const text=html=>html.replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&#8221;|&rdquo;|”/g,'"').replace(/&nbsp;/g,' ').replace(/\s+/g,' ');
+// Mountain-time "YYYY-MM-DD HH:MM[:SS]" -> ISO (standard time in winter)
+const mtIso=s=>{const m=String(s||'').match(/(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);if(!m)return null;const d=new Date(`${m[1]}T${m[2]}:00-07:00`);return isNaN(d)?null:d.toISOString()};
+export function parseSnowbird(t){ // Snowbird's plain-text report for automated readers
+ const f=re=>{const m=t.match(re);return m?num(m[1]):null};
+ return {overnight:f(/Overnight snow amount:\s*([\d.]+)/i),h24:f(/24 Hour Total:\s*([\d.]+)/i),h48:f(/48 Hour Total:\s*([\d.]+)/i),h72:f(/72 Hour Total:\s*([\d.]+)/i),d7:f(/7 Day Total:\s*([\d.]+)/i),
+  base:f(/Base Depth:\s*([\d.]+)/i),season:f(/Season Total:\s*([\d.]+)/i),updated:mtIso((t.match(/Published Date:\s*([\d\- :]+)/i)||[])[1])};
+}
+export function parseAlta(html){ // conditions object embedded in alta.com/weather
+ const i=html.indexOf('"conditions":{'),seg=i>=0?html.slice(i,i+900):'',f=k=>{const m=seg.match(new RegExp('"'+k+'":"?([\\d.]+)'));return m?num(m[1]):null};
+ return {overnight:f('last12'),h24:f('last24'),base:f('base_depth'),storm:f('storm_total'),season:f('year_to_date'),where:'12-hour total at the study plot',updated:mtIso((seg.match(/"dated_at":"([^"]+)"/)||[])[1])};
+}
+export function parseJackson(html){ // summit and mid-mountain columns; mid-mountain used
+ const t=text(html),two=l=>{const m=t.match(new RegExp(l+'\\s*([\\d.]+)"\\s*([\\d.]+)"','i'));return m?[num(m[1]),num(m[2])]:[null,null]};
+ const on=two('OVERNIGHT'),h48=two('48 HOURS'),dp=two('SNOW DEPTH'),s6=(t.match(/SINCE 6AM\s*([\d.]+)"/i)||[])[1];
+ const up=t.match(/Updated\s*:?\s*([A-Za-z]{3,9}\.? \d{1,2},? ?\d{0,4},?\s*(?:at\s*)?\d{1,2}:\d{2}\s*[AP]M)/i);let updated=null;
+ if(up){const d=new Date(up[1].replace(/\bat\b/i,'').replace(/(\d{1,2}:\d{2})\s*([AP]M)/i,' $1 $2')+(/\d{4}/.test(up[1])?'':' '+new Date().getFullYear())+' GMT-0700');if(!isNaN(d))updated=d.toISOString()}
+ return {overnight:on[1],summitOvernight:on[0],since6:num(s6),h48:h48[1],base:dp[1],where:'Mid mountain',updated};
+}
 // same temperature table the app uses for snow-to-liquid ratio
 const slr=t=>t>34?0:t>32.5?7:t>29?10:t>25?12.5:t>18?15:t>8?17:15;
 async function forecastOvernight(r,date){ // snow from 4 pm the day before to 9 am on `date`
@@ -41,11 +60,14 @@ async function forecastOvernight(r,date){ // snow from 4 pm the day before to 9 
 }
 const read=(f,d)=>{try{return JSON.parse(fs.readFileSync(f,'utf8'))}catch(e){return d}};
 
+const PARSERS={snowbasin:parseSnowbasin,snowbird:parseSnowbird,alta:parseAlta,jackson:parseJackson,brighton:()=>({})};
+const ctx=(t,re,n=8,b=160,a=320)=>{const o=[];for(const m of t.matchAll(re)){o.push(t.slice(Math.max(0,m.index-b),m.index+a).replace(/\s+/g,' '));if(o.length>=n)break}return o};
+const DEBUG={jackson:h=>ctx(text(h),/Updated/g,4,120,200),brighton:h=>({len:h.length,hits:ctx(h,/overnight|24 ?h(?:ou)?r|base ?depth|newSnow|snowfall|inches|mtnpowder|feed|api\./gi,14,140,260)})};const debug={};
 async function main(){
  fs.mkdirSync('data',{recursive:true});
  const old=read('data/reports.json',{resorts:{}}),resorts={};
  for(const r of RESORTS){
-  try{const rep=r.feed?parseFeed(await (await get('https://mtnpowder.com/feed?resortId='+r.feed,'application/json')).json()):parseSnowbasin(await (await get(r.page,'text/html')).text());
+  try{let rep;if(r.feed)rep=parseFeed(await (await get('https://mtnpowder.com/feed?resortId='+r.feed,'application/json')).json());else{const body=await (await get(r.page,r.accept||'text/html')).text();rep=PARSERS[r.id](body);if(DEBUG[r.id])debug[r.id]=DEBUG[r.id](body)}
    if(rep.h24==null&&rep.overnight==null&&rep.base==null)throw new Error('no snow numbers found in the report');
    resorts[r.id]={...rep,ok:true}}
   catch(e){const prev={...(old.resorts[r.id]||{})};delete prev.error;resorts[r.id]={...prev,ok:false,error:String(e.message||e)};console.log(r.id,'failed:',e.message)}
@@ -64,6 +86,7 @@ async function main(){
  for(const d of Object.keys(acc.pending))if(d<today){delete acc.pending[d];changed=true}
  if(acc.rows.length>1500){acc.rows=acc.rows.slice(-1500);changed=true}
  if(changed)fs.writeFileSync('data/accuracy.json',JSON.stringify(acc));
+ fs.writeFileSync('data/debug.json',JSON.stringify(debug,null,1));
  console.log(JSON.stringify(resorts,null,1));
 }
 if(process.argv[1]&&process.argv[1].endsWith('fetch-reports.mjs'))main();
