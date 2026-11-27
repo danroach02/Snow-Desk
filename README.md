@@ -9,3 +9,11 @@ Personal snow-forecast dashboard for Utah resorts and Jackson Hole.
 - "Where to ski" pick scored on overnight snow, wind, rain risk, roads and drive time
 
 Single file: `index.html`, served with GitHub Pages.
+
+## Checks
+- `npm install && npm test` runs a smoke test with mocked data feeds.
+- In the app, Settings → Data check shows which live sources loaded.
+
+## Data notes
+Snow totals are forecasts. Depth-sensor numbers are estimates; resort reports are the official measurements.
+Ski runs come from OpenStreetMap via the public Overpass API (cached 30 days per resort). Imagery and topo are USGS.

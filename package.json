@@ -1,0 +1,1 @@
+{"name":"snow-desk","private":true,"scripts":{"test":"node tests/smoke.test.js"},"devDependencies":{"jsdom":"^24.0.0"}}
