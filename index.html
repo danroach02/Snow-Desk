@@ -201,7 +201,7 @@ footer .links{margin-top:6px;font-size:12px;gap:4px 18px}
  <div class="bar2" id="mapDays"></div>
  <div class="slbar"><div><span class="sl" id="slVal">– ft</span><div class="mute" id="slNote"></div></div><input type="range" id="slRange" min="4000" max="12000" step="100" aria-label="Snow line elevation"><button type="button" id="slAuto">Use forecast</button><button type="button" id="spin">Rotate</button></div>
  <div class="mapbox"><div id="map"></div></div>
- <div class="legend" style="margin-top:10px"><span><i class="sw" style="background:#21c463"></i>Green</span><span><i class="sw" style="background:#3b82f6"></i>Blue</span><span><i class="sw" style="background:#0b0f16;border:1px solid #fff"></i>Black</span><span><i class="sw" style="background:#ff8a00"></i>Freeride</span><span><i class="sw" style="background:#ffd60a"></i>Lifts (dashed)</span><span><i class="sw" style="background:#ff3b30"></i>Snow line</span></div>
+ <div class="legend" style="margin-top:10px"><span><i class="sw" style="background:#21c463"></i>Green</span><span><i class="sw" style="background:#3b82f6"></i>Blue</span><span><i class="sw" style="background:#0b0f16;border:1px solid #fff"></i>Black</span><span><i class="sw" style="background:#ff8a00"></i>Freeride</span><span><i class="sw" style="background:#ffd60a"></i>Lifts (dashed, named)</span><span>Zoom in for run names</span><span><i class="sw" style="background:#ff3b30"></i>Snow line</span></div>
  <p class="mute" id="mapmsg">On a phone, use two fingers to move the map, so one finger still scrolls the page.</p>
 </div></div></section>
 
@@ -724,6 +724,8 @@ function initMap(){
     {id:'runs-case',type:'line',source:'runs',filter:['==',['get','kind'],'run'],layout:{'line-cap':'round'},paint:{'line-color':'#ffffff','line-width':['interpolate',['linear'],['zoom'],11,1.2,13,2.2,16,5],'line-opacity':.7}},
     {id:'lifts',type:'line',source:'runs',filter:['==',['get','kind'],'lift'],paint:{'line-color':'#ffd60a','line-width':['interpolate',['linear'],['zoom'],11,1.2,16,3],'line-dasharray':[2,1.2]}},
     {id:'runs',type:'line',source:'runs',filter:['==',['get','kind'],'run'],layout:{'line-cap':'round'},paint:{'line-color':['match',['get','diff'],['novice','easy'],'#21c463',['intermediate'],'#3b82f6',['advanced','expert'],'#0b0f16',['freeride','extreme'],'#ff8a00','#e6e6e6'],'line-width':['interpolate',['linear'],['zoom'],11,.6,13,1.2,16,3.2],'line-opacity':.95}},
+    {id:'lift-names',type:'symbol',source:'runs',minzoom:12,filter:['all',['==',['get','kind'],'lift'],['!=',['get','name'],'']],layout:{'symbol-placement':'line-center','text-field':['get','name'],'text-size':['interpolate',['linear'],['zoom'],12,10,15,13],'text-font':['Open Sans Semibold'],'text-padding':6},paint:{'text-color':'#ffd60a','text-halo-color':'#000','text-halo-width':1.6}},
+    {id:'run-names',type:'symbol',source:'runs',minzoom:14.2,filter:['all',['==',['get','kind'],'run'],['!=',['get','name'],'']],layout:{'symbol-placement':'line','text-field':['get','name'],'text-size':11,'text-font':['Open Sans Semibold'],'symbol-spacing':400},paint:{'text-color':'#fff','text-halo-color':'#000','text-halo-width':1.4}},
     {id:'snowline-glow',type:'line',source:'contours','source-layer':'contours',filter:slFilter(),paint:{'line-color':'#ff3b30','line-width':12,'line-opacity':.35,'line-blur':5}},
     {id:'snowline',type:'line',source:'contours','source-layer':'contours',filter:slFilter(),paint:{'line-color':'#ff3b30','line-width':3.5}},
     {id:'snowline-label',type:'symbol',source:'contours','source-layer':'contours',filter:slFilter(),layout:{'symbol-placement':'line','text-field':['concat',['to-string',['get','ele']],' ft snow line'],'text-size':12,'text-font':['Open Sans Semibold']},paint:{'text-color':'#fff','text-halo-color':'#c81e1e','text-halo-width':2}}
@@ -737,7 +739,7 @@ function initMap(){
 }
 function applyLayers(){
  if(!mapReady)return;const vis=(id,on)=>map.getLayer(id)&&map.setLayoutProperty(id,'visibility',on?'visible':'none');
- vis('sat',layerOn.sat);vis('topo',layerOn.topo);vis('runs',layerOn.runs);vis('runs-case',layerOn.runs);vis('lifts',layerOn.runs);vis('depth',layerOn.depth);
+ vis('sat',layerOn.sat);vis('topo',layerOn.topo);vis('runs',layerOn.runs);vis('runs-case',layerOn.runs);vis('lifts',layerOn.runs);vis('lift-names',layerOn.runs);vis('run-names',layerOn.runs);vis('depth',layerOn.depth);
  ['snowline','snowline-glow','snowline-label'].forEach(id=>vis(id,layerOn.snowline));
 }
 function isDryLine(){const r=curRes(),d=r&&state[r.id]&&state[r.id].days&&state[r.id].days.find(x=>x.date===dayPick);return slManual==null&&!!d&&d.snowLine==null}
