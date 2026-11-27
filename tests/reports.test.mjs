@@ -6,8 +6,8 @@ const s=parseSnowbasin('<div>Trails Open 40 / 115 Lifts Open 5 / 13 Last Updated
 assert.deepStrictEqual([s.overnight,s.h24,s.base,s.season,s.d7,s.lifts,s.trails],[3,5,21,33,16,'5/13','40/115']);assert.ok(s.updated.startsWith('2026-11-26T14:33')||s.updated.includes('T14:33'));
 const b=parseSnowbird('Published Date: 2026-11-26 05:42:00\nReported snow amount: 0\nOvernight snow amount: 4\nBase Depth: 38\n24 Hour Total: 6 inches\n48 Hour Total: 7 inches\n72 Hour Total: 7 inches\n7 Day Total: 17 inches\nSeason Total: 80 inches');
 assert.deepStrictEqual([b.overnight,b.h24,b.h48,b.d7,b.base,b.season,b.updated],[4,6,7,17,38,80,'2026-11-26T12:42:00.000Z']);
-const a=parseAlta('x"conditions":{"id":8216,"dated_at":"2026-11-26 20:00:00","last12":"3.0","last24":"5.5","base_depth":"36.0","storm_total":"5.5","year_to_date":"71.0"}');
-assert.deepStrictEqual([a.overnight,a.h24,a.base,a.season],[3,5.5,36,71]);
+const a=parseAlta('{"type":"road-status","status":"Open","message":null,"x":1}"operations":{"lifts":{"open":2,"total":5},"runs":{"open":20,"total":118}}x"conditions":{"id":8216,"dated_at":"2026-11-26 20:00:00","last12":"3.0","last24":"5.5","base_depth":"36.0","storm_total":"5.5","year_to_date":"71.0"}');
+assert.deepStrictEqual([a.overnight,a.h24,a.base,a.season,a.lifts,a.trails,a.road.status],[3,5.5,36,71,'2/5','20/118','Open']);
 const j=parseJackson('<div>SINCE 6AM</div><div> 1" </div><div> </div><div>OVERNIGHT</div><div> 7" </div><div> 5" </div><div>48 HOURS</div><div> 12" </div><div> 9" </div><div>SNOW DEPTH</div><div> 40" </div><div> 31" </div>');
 assert.deepStrictEqual([j.overnight,j.summitOvernight,j.h48,j.base],[5,7,9,31]);
 const br=parseBrighton(JSON.stringify({updated:'2026-11-26T23:00:04Z',commentsUpdated:'2026-11-26T16:00:28Z',currentConditions:{resortwide:{numLiftsTotal:8,numLiftsOpen:5,numTrailsTotal:76,numTrailsOpen:19},resortLocations:{location:[{snowOverNight:{inches:'3'},snow24Hours:{inches:'5'},snow48Hours:{inches:'6'},snow72Hours:{inches:'6'},snow7Days:{inches:'40'},snowSeasonTotal:{inches:'77'},base:{inches:'30'}}]}}}));

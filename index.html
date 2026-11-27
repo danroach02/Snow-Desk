@@ -73,7 +73,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .alerts{margin-bottom:clamp(20px,3vw,36px)}.alerts:empty{display:none}
 .al{display:flex;align-items:baseline;width:100%;text-align:left;background:transparent;border-radius:0;border-top:1px solid var(--line);padding:13px 0;min-height:0;font-size:15px;font-weight:400;color:var(--ink);line-height:1.4}
 .al:last-child{border-bottom:1px solid var(--line)}.al:hover{background:transparent}.al b{font-weight:600}.al .dot{transform:translateY(-1px)}
-.alert{margin:0 0 14px;font-size:14px}.alert summary{cursor:pointer;list-style:none}.alert summary::-webkit-details-marker{display:none}.alert b{font-weight:600}.alert p{color:var(--mute);margin:10px 0 0 16px;line-height:1.5;max-width:60ch}
+.alert{margin:0 0 14px;font-size:14px}.row .alert summary{display:block;padding:0;cursor:pointer;list-style:none}.alert summary::-webkit-details-marker{display:none}.alert b{font-weight:600}.alert p{color:var(--mute);margin:10px 0 0 16px;line-height:1.5;max-width:60ch}
 /* segmented controls */
 .days,.bar2{display:inline-flex;max-width:100%;gap:2px;overflow-x:auto;scrollbar-width:none;background:var(--fill);border-radius:11px;padding:3px;-webkit-overflow-scrolling:touch}
 .days::-webkit-scrollbar,.bar2::-webkit-scrollbar{display:none}
@@ -421,12 +421,15 @@ async function loadReports(){
 function repFor(r){const x=reports[r.id];if(!x||!x.updated||(x.h24==null&&x.overnight==null&&x.base==null))return null;const up=x.updated?new Date(x.updated):null,ok=up&&!isNaN(up);
  return {...x,fresh:!!ok&&localDate(up)===today(),when:ok?(localDate(up)===today()?mtTime(up):up.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:TZ})):''}}
 
+// Little Cottonwood (SR-210) road status as published in Alta's report; applies to Alta and Snowbird
+function canyonRoad(r){const a=reports.alta;return (r.roads||[]).includes('SR-210')&&a&&a.ok!==false&&a.road&&a.road.status?a.road:null}
+
 /* ---------- resort extras (not stored) ---------- */
 const META={
  snowbasin:{short:'Basin',cams:'https://www.snowbasin.com/the-mountain/web-cams/',avy:'https://utahavalanchecenter.org/forecast/ogden',group:'Snowbasin'},
  snowbird:{short:'Bird',cams:'https://www.snowbird.com/the-mountain/webcams/view-all-webcams/',avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
  alta:{short:'Alta',cams:'https://www.alta.com/weather#mountain-cams',skiOnly:true,avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
- brighton:{short:'Brighton',cams:'https://www.brightonresort.com/conditions',avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
+ brighton:{short:'Brighton',cams:'https://www.brightonresort.com/conditions#webcams',avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
  solitude:{short:'Solitude',cams:'https://www.solitudemountain.com/mountain-and-village/webcams',avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
  deervalley:{short:'Deer V.',cams:'https://www.deervalley.com/explore-the-mountain/webcams',skiOnly:true,avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Deer Valley'},
  jackson:{short:'Jackson',cams:'https://www.jacksonhole.com/live-mountain-cams',avy:'https://bridgertetonavalanchecenter.org',group:'Jackson Hole'}
@@ -515,6 +518,7 @@ function score(r,date){
  const al=alertsOn(r,date)[0];if(al)tags.unshift({t:al.event,k:alertRank(al.event)>=3?'bad':''});
  const av=avyFor(r);if(av&&av.level>=3&&date<=today())tags.push({t:`Avalanche danger ${av.name.toLowerCase()}`,k:av.level>=4?'bad':''});
  if(date===today()&&rp&&rp.ok!==false&&rp.lifts&&mtHour()>=9&&mtHour()<16){const [o,t]=rp.lifts.split('/').map(Number);if(t>0){if(o===0){sc-=40;tags.unshift({t:'No lifts open right now',k:'bad'})}else if(o/t<.4){sc-=5;tags.push({t:`${o} of ${t} lifts open`,k:''})}}}
+ const cr=canyonRoad(r);if(cr&&date===today()&&!/open/i.test(cr.status)){sc-=10;tags.unshift({t:`Canyon road: ${cr.status}`,k:'bad'})}
  const blocked=settings.ride==='board'&&M.skiOnly;if(M.skiOnly)tags.push({t:blocked?'Skiers only · skipped':'Skiers only',k:blocked?'bad':''});
  return {r,sc:blocked?-1e9:sc,fresh:chair,src,pow,d,tags,blocked,rating:rate(chair)};
 }
@@ -602,6 +606,7 @@ function rowDetail(r){
   <div style="margin-top:10px">${facts}</div>
   ${s.nws?s.nws.periods.slice(0,2).map(p=>`<div class="per"><b>${esc(p.name)}:</b> ${esc(p.shortForecast)}, ${esc(p.temperature)}°</div>`).join(''):s.err&&s.err.nws?`<div class="err">NWS: ${esc(s.err.nws)}</div>`:''}
   ${(()=>{const av=avyFor(r);return av?`<div class="per"><i class="dot" style="background:${esc(av.color)}"></i><b>Avalanche danger, backcountry:</b> ${av.level?esc(av.name):'no rating issued yet'} <span class="mute">(${esc(av.zone)} zone, ${esc(av.center)})</span></div>`:''})()}
+  ${(()=>{const cr=canyonRoad(r);return cr?`<div class="per"><i class="dot" style="background:${/open/i.test(cr.status)?'var(--green)':'var(--red)'}"></i><b>Little Cottonwood road:</b> ${esc(cr.status)}${cr.message?' · '+esc(cr.message):''} <span class="mute">(per Alta)</span></div>`:''})()}
   ${items.slice(0,3).map(i=>`<div class="per"><b>${alertRe.test(i.text)?'Road alert':'Road'}:</b> ${esc(i.text)}</div>`).join('')}
  </div><div>
   <div class="kicker" style="margin-bottom:10px">Seven days. Lighter bars are lighter snow; red marks the range across models.</div>

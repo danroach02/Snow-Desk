@@ -43,7 +43,8 @@ export function parseSnowbird(t){ // Snowbird's plain-text report for automated 
 }
 export function parseAlta(html){ // conditions object embedded in alta.com/weather
  const i=html.indexOf('"conditions":{'),seg=i>=0?html.slice(i,i+900):'',f=k=>{const m=seg.match(new RegExp('"'+k+'":"?([\\d.]+)'));return m?num(m[1]):null};
- return {overnight:f('last12'),h24:f('last24'),base:f('base_depth'),storm:f('storm_total'),season:f('year_to_date'),where:'12-hour total at the study plot',updated:mtIso((seg.match(/"dated_at":"([^"]+)"/)||[])[1])};
+ const op=html.match(/"operations":\{"lifts":\{"open":(\d+),"total":(\d+)\},"runs":\{"open":(\d+),"total":(\d+)\}/),rd=html.match(/"type":"road-status","status":"([^"]*)","message":(?:null|"([^"]*)")/);
+ return {lifts:op?`${op[1]}/${op[2]}`:null,trails:op?`${op[3]}/${op[4]}`:null,road:rd?{status:rd[1],message:rd[2]||''}:null,overnight:f('last12'),h24:f('last24'),base:f('base_depth'),storm:f('storm_total'),season:f('year_to_date'),where:'12-hour total at the study plot',updated:mtIso((seg.match(/"dated_at":"([^"]+)"/)||[])[1])};
 }
 export function parseJackson(html){ // summit and mid-mountain columns; mid-mountain used
  const t=text(html),two=l=>{const m=t.match(new RegExp(l+'\\s*([\\d.]+)"\\s*([\\d.]+)"','i'));return m?[num(m[1]),num(m[2])]:[null,null]};
