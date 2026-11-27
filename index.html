@@ -129,6 +129,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .radar img{width:100%;border-radius:12px;display:block;background:#05070a;aspect-ratio:600/550;object-fit:cover}
 pre{white-space:pre-wrap;font-size:13px;max-height:360px;overflow:auto;background:#ffffff08;border:1px solid var(--line);padding:12px;border-radius:10px;color:#c9d4e4}
 .afd p{color:#c9d4e4}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}.tbl th{text-align:right;color:var(--mute);font-weight:600;padding:6px 8px;white-space:nowrap}.tbl td{text-align:right;padding:8px;border-top:1px solid var(--line);white-space:nowrap}.tbl th:first-child,.tbl td:first-child{text-align:left}
 /* drawer */
 .drawer{position:fixed;inset:0;z-index:40;display:flex;justify-content:flex-end;background:rgba(0,0,0,.6)}
 .drawer[hidden]{display:none}
@@ -173,7 +174,7 @@ footer .links{margin-top:10px}
    <div class="legend"><span><svg class="sym" style="width:16px;height:16px" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#2bc26b"/></svg>&lt;2"</span><span><svg class="sym" style="width:16px;height:16px" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" fill="#3b82f6"/></svg>2–6"</span><span><svg class="sym" style="width:16px;height:16px" viewBox="0 0 20 20"><rect x="5" y="5" width="10" height="10" transform="rotate(45 10 10)" fill="#f3f6fb"/></svg>6–12"</span><span><svg class="sym" style="width:24px;height:16px" viewBox="0 0 30 20"><rect x="3" y="5" width="10" height="10" transform="rotate(45 8 10)" fill="#f3f6fb"/><rect x="15" y="5" width="10" height="10" transform="rotate(45 20 10)" fill="#f3f6fb"/></svg>12"+ overnight, by first chair</span></div>
   </div>
   <div class="list" id="rank"></div>
-  <details class="how"><summary>How the ranking works</summary><p>The big number is snow forecast between 4 pm and 9 am, so it is what should be waiting at first chair. Snow that falls during the day is shown separately and counts half as much. The consensus blends four weather models with the NWS forecasters' numbers. Snow is computed hour by hour from temperature (snow-to-liquid ratio), so cold, light storms rank higher than dense, warm ones. Points come off for gusts over your wind limit (lift holds), rain or mix at the base, road alerts, weekends and holidays (extra for the Cottonwood canyons on powder weekends) and drive time. Alta and Deer Valley drop out when Riding is set to snowboard. Tap a resort for measured snow, snowpack, the 7-day outlook and links; tune everything in settings.</p></details>
+  <details class="how"><summary>How the ranking works</summary><p>The big number is snow forecast between 4 pm and 9 am, so it is what should be waiting at first chair. Snow that falls during the day is shown separately and counts half as much. The consensus blends four weather models with the NWS forecasters' numbers. On the morning itself, the resort's own reported overnight total replaces the forecast. Snow is computed hour by hour from temperature (snow-to-liquid ratio), so cold, light storms rank higher than dense, warm ones. Points come off for gusts over your wind limit (lift holds), rain or mix at the base, road alerts, weekends and holidays (extra for the Cottonwood canyons on powder weekends) and drive time. Alta and Deer Valley drop out when Riding is set to snowboard. Tap a resort for measured snow, snowpack, the 7-day outlook and links; tune everything in settings.</p></details>
  </div></div>
 </section>
 
@@ -201,6 +202,7 @@ footer .links{margin-top:10px}
   <figure style="margin:0"><img id="rJAC" alt="Pocatello radar loop (KSFX), nearest to the Tetons"><figcaption class="mute" style="margin-top:6px">Pocatello radar (KSFX), covers the Tetons</figcaption></figure>
  </div>
  <div id="afd" class="afd" style="margin-top:18px"></div>
+ <div class="panel" style="margin-top:14px"><h3 style="margin-bottom:8px">Forecast vs. resort reports</h3><div id="score"></div></div>
  <div class="panel" style="margin-top:14px"><h3 style="margin-bottom:6px">Roads &amp; avalanche</h3><div id="roadbox"></div>
   <div class="links"><a target="_blank" rel="noopener" href="https://udottraffic.utah.gov">UDOT Traffic &amp; cameras</a><a target="_blank" rel="noopener" href="https://x.com/UDOTcottonwoods">@UDOTcottonwoods</a><a target="_blank" rel="noopener" href="https://www.wyoroad.info">WYDOT 511</a><a target="_blank" rel="noopener" href="https://utahavalanchecenter.org">Utah Avalanche Center</a><a target="_blank" rel="noopener" href="https://bridgertetonavalanchecenter.org">Bridger-Teton Avalanche Center</a></div></div>
 </div></div></section>
@@ -230,7 +232,7 @@ footer .links{margin-top:10px}
 
 <footer><div class="wrap">
  <div>Snow Desk · Forecasts are guidance. Check avalanche and road conditions before you go.</div>
- <div class="links"><span>Data: NOAA/NWS · Open-Meteo (GFS, ECMWF, ICON, GEM) · USDA NRCS SNOTEL · NOAA NOHRSC · USGS · OpenStreetMap</span></div>
+ <div class="links"><span>Data: NOAA/NWS · Open-Meteo (GFS, ECMWF, ICON, GEM) · USDA NRCS SNOTEL · NOAA NOHRSC · USGS · OpenStreetMap · resort mountain reports</span></div>
  <div class="links"><a href="https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml" target="_blank" rel="noopener">CPC ENSO discussion</a><a href="https://www.cpc.ncep.noaa.gov/products/predictions/90day/" target="_blank" rel="noopener">CPC 90-day outlook</a></div>
 </div></footer>
 
@@ -278,7 +280,7 @@ let resorts=store.get('sd.resorts',null)||JSON.parse(JSON.stringify(DEFAULTS));
 if(store.get('sd.dataVersion',1)<DATA_VERSION){const fresh=Object.fromEntries(DEFAULTS.map(d=>[d.id,d]));resorts=resorts.map(r=>fresh[r.id]?JSON.parse(JSON.stringify(fresh[r.id])):r);store.set('sd.resorts',resorts);store.set('sd.dataVersion',DATA_VERSION)}
 const fc=r=>({lat:r.fcLat??r.lat,lon:r.fcLon??r.lon,elev:r.fcElev??Math.round((r.base+r.top)/2)});
 let settings=Object.assign({ride:'ski',crowdWeight:6,synToken:'',udotKey:'',driveWeight:6,windLimit:40},store.get('sd.settings',{}));settings.synToken='';
-const state={};let snotel={},snHourly={},snotelErr='',udot=null,udotErr='',lastUpdated=null,dayPick=null,offline=false,refreshing=false;const afd={};
+const state={};let snotel={},snHourly={},snotelErr='',udot=null,udotErr='',lastUpdated=null,dayPick=null,offline=false,refreshing=false,reports={},accuracy=null;const afd={};
 const mtHour=()=>+new Date().toLocaleString('en-US',{hour:'numeric',hour12:false,timeZone:TZ})%24;
 const mtTime=d=>new Date(d).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:TZ})+' MT';
 const diag={};const setDiag=(k,ok,msg)=>{diag[k]={ok,msg:msg||''}};
@@ -365,6 +367,15 @@ function roadItems(r){
 }
 const alertRe=/clos|chain|traction|restrict|avalanche|interlodge/i;
 
+/* ---------- official resort reports, collected hourly by the GitHub job into data/ ---------- */
+async function loadReports(){
+ const t=Math.floor(Date.now()/6e5);const j=await getJSON('data/reports.json?t='+t);reports=j.resorts||{};
+ try{accuracy=await getJSON('data/accuracy.json?t='+t)}catch(e){accuracy=null}
+}
+// a report counts for "this morning" only if the resort wrote it today (Mountain time)
+function repFor(r){const x=reports[r.id];if(!x||(x.h24==null&&x.overnight==null&&x.base==null))return null;const up=x.updated?new Date(x.updated):null,ok=up&&!isNaN(up);
+ return {...x,fresh:!!ok&&localDate(up)===today(),when:ok?(localDate(up)===today()?mtTime(up):up.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:TZ})):''}}
+
 /* ---------- resort extras (not stored) ---------- */
 const META={
  snowbasin:{short:'Basin',avy:'https://utahavalanchecenter.org/forecast/ogden',group:'Snowbasin'},
@@ -441,7 +452,9 @@ function sym(k,size=26){
 function score(r,date){
  const s=state[r.id],d=s&&s.days&&s.days.find(x=>x.date===date);if(!d)return null;
  const M=meta(r),tags=[],ob=s.obs;let chair=d.overnight;
- if(date===today()&&ob&&ob.n12!=null&&mtHour()<12&&ob.n12>chair){chair=ob.n12;tags.push({t:`${inch(ob.n12)} on the sensor overnight`,k:'good'})}
+ const rp=repFor(r);
+ if(date===today()&&rp&&rp.fresh&&rp.overnight!=null&&mtHour()<14){chair=rp.overnight;tags.push({t:`${inch(rp.overnight)} overnight per resort report`,k:rp.overnight>=2?'good':''})}
+ else if(date===today()&&ob&&ob.n12!=null&&mtHour()<12&&ob.n12>chair){chair=ob.n12;tags.push({t:`${inch(ob.n12)} on the sensor overnight`,k:'good'})}
  const refill=d.daySnow,pow=chair+0.5*refill;let sc=chair*10+refill*5+d.consensus*2;
  if(refill>=1)tags.push({t:`+${inch(refill)} during the day`,k:refill>=3?'good':''});
  const dn=density(d.ratio),windy=d.gust>=35;
@@ -520,17 +533,18 @@ function rowDetail(r){
  const M=meta(r),s=state[r.id]||{},t=today(),days=(s.days||[]).filter(x=>x.date>=t).slice(0,7),sn=snotel[(r.snotel||'').toUpperCase()]||{},sn2=r.snotel2?snotel[r.snotel2.toUpperCase()]||{}:null;
  const pctOf=x=>x&&x.WTEQ&&x.WTEQ.median?x.WTEQ.value/x.WTEQ.median*100:null;
  const pcts=[pctOf(sn),sn2?pctOf(sn2):null].filter(v=>v!=null),pct=pcts.length?Math.round(sum(pcts)/pcts.length):null;
- const ob=s.obs||{},hasOb=ob.depth!=null,st=nextStorm(r),d0=days.find(x=>x.date===dayPick)||days[0];
+ const rp=repFor(r),ob=s.obs||{},hasOb=ob.depth!=null,st=nextStorm(r),d0=days.find(x=>x.date===dayPick)||days[0];
  const top=Math.max(12,...days.map(x=>Math.max(x.consensus,...Object.values(x.models))));
  const strip=days.map(x=>{const mv=Object.values(x.models),lo=mv.length?Math.min(...mv):x.consensus,hi=mv.length?Math.max(...mv):x.consensus,dn=density(x.ratio);
   return `<div class="col" title="${esc(Object.entries(x.models).map(([k,v])=>k+' '+v.toFixed(1)+'"').join(', '))}"><div class="n">${inch(x.consensus)}</div><div class="b ${dn?dn.cls:''}" style="height:${x.consensus/top*80}%"></div>${mv.length>1&&hi>0.5?`<span class="rng" style="bottom:${lo/top*80}%;height:${Math.max(1,(hi-lo)/top*80)}%"></span>`:''}</div>`}).join('');
  const items=roadItems(r);
- const facts=[hasOb&&!ob.off&&ob.depth<30?`<span class="tag bad">Thin cover at the sensor: ${inch(ob.depth)}</span>`:'',d0?`${d0.snowLine!=null?`<span class="tag">Snow line ~${(Math.round(d0.snowLine/100)*100).toLocaleString()} ft</span>`:''}<span class="tag">${Math.round(d0.lo)}–${Math.round(d0.hi)}°F</span>`:'',d0&&d0.rain?'<span class="tag bad">Rain/mix risk at base</span>':'',M.skiOnly?'<span class="tag">Skiers only</span>':'',r.approx?'<span class="tag">Elevations estimated</span>':''].join('');
+ const facts=[rp&&rp.base!=null?(rp.base<30?`<span class="tag bad">Thin base: ${inch(rp.base)} reported</span>`:''):hasOb&&!ob.off&&ob.depth<30?`<span class="tag bad">Thin cover at the sensor: ${inch(ob.depth)}</span>`:'',d0?`${d0.snowLine!=null?`<span class="tag">Snow line ~${(Math.round(d0.snowLine/100)*100).toLocaleString()} ft</span>`:''}<span class="tag">${Math.round(d0.lo)}–${Math.round(d0.hi)}°F</span>`:'',d0&&d0.rain?'<span class="tag bad">Rain/mix risk at base</span>':'',M.skiOnly?'<span class="tag">Skiers only</span>':'',r.approx?'<span class="tag">Elevations estimated</span>':''].join('');
  return `<div class="dgrid"><div>
-  <div class="stats"><div class="stat"><div class="v">${hasOb?(ob.n24?inch(ob.n24):'<2"'):'–'}</div><div class="l">Sensor estimate, last 24h</div></div>
+  <div class="stats"><div class="stat"><div class="v">${rp&&rp.h24!=null?inch(rp.h24):hasOb?(ob.n24?inch(ob.n24):'<2"'):'–'}</div><div class="l">${rp&&rp.h24!=null?`Resort report, last 24h${rp.fresh?'':' (as of '+esc(rp.when)+')'}`:'Sensor estimate, last 24h'}</div></div>
    <div class="stat"><div class="v">${st?rng(st.lo,st.hi):'0"'}</div><div class="l">${st?`Next storm ${esc(dayName(st.from))}${st.to!==st.from?'–'+esc(dayName(st.to)):''}`:'No storm in 6 days'}</div></div>
    <div class="stat"><div class="v">${pct!=null?pct+'%':'–'}</div><div class="l">Snowpack vs median${sn2?' (regional)':''}</div></div></div>
-  <div class="obs">${hasOb?`Depth sensor: ${ob.n12?inch(ob.n12):'under 2"'} in 12h · ${ob.n48?inch(ob.n48):'under 2"'} in 48h · ${inch(ob.depth)} on the ground <span class="mute">(${esc(ob.label)}, ${esc(mtTime(ob.at))}; an estimate, the resort report is the official number)</span>`:s.obs?`<span class="mute">No free on-mountain snow sensor here${ob.notes&&ob.notes.length?' ('+esc(ob.notes[0])+')':''}. Use Live stations or the resort report.</span>`:'<span class="mute">Loading station data…</span>'}</div>
+  ${rp?`<div class="obs"><b>Resort report</b> <span class="mute">(${rp.fresh?'today ':''}${esc(rp.when)}${rp.where?', '+esc(rp.where.toLowerCase()):''})</span>: ${[rp.overnight!=null?inch(rp.overnight)+' overnight':'',rp.h48!=null?inch(rp.h48)+' in 48h':'',rp.d7!=null?inch(rp.d7)+' in 7 days':'',rp.base!=null?inch(rp.base)+' base':'',rp.season!=null?inch(rp.season)+' this season':'',rp.lifts?rp.lifts+' lifts open':''].filter(Boolean).join(' · ')}${rp.ok===false?' <span class="mute">(latest check failed; showing the last report read)</span>':''}</div>`:''}
+  <div class="obs">${hasOb?`Depth sensor: ${ob.n12?inch(ob.n12):'under 2"'} in 12h · ${ob.n48?inch(ob.n48):'under 2"'} in 48h · ${inch(ob.depth)} on the ground <span class="mute">(${esc(ob.label)}, ${esc(mtTime(ob.at))}; an estimate, the resort report is the official number)</span>`:s.obs?`<span class="mute">No free on-mountain depth sensor here${rp?'; the resort report above is the measurement':''}.</span>`:'<span class="mute">Loading station data…</span>'}</div>
   <div style="margin-top:10px">${facts}</div>
   ${s.nws?s.nws.periods.slice(0,2).map(p=>`<div class="per"><b>${esc(p.name)}:</b> ${esc(p.shortForecast)}, ${esc(p.temperature)}°</div>`).join(''):s.err&&s.err.nws?`<div class="err">NWS: ${esc(s.err.nws)}</div>`:''}
   ${items.slice(0,3).map(i=>`<div class="per"><b>${alertRe.test(i.text)?'Road alert':'Road'}:</b> ${esc(i.text)}</div>`).join('')}
@@ -570,14 +584,15 @@ async function drawAFD(){
   return `<div class="panel" style="margin-bottom:12px"><h3>NWS ${esc(c)} forecaster discussion</h3><div class="mute">Issued ${esc(new Date(a.time).toLocaleString('en-US',{weekday:'short',hour:'numeric',minute:'2-digit',timeZone:TZ})+' MT')}</div><p>${esc(m?m[2].trim():'')}</p><details><summary>Full discussion</summary><pre>${esc(a.text)}</pre></details></div>`}catch(e){return `<div class="err">NWS ${esc(c)} discussion unavailable: ${esc(e.message)}</div>`}}));
  $('#afd').innerHTML=parts.join('');
 }
-function saveCache(){const st={};for(const r of resorts){const x=state[r.id];if(x&&x.days)st[r.id]={days:x.days,nws:x.nws,obs:x.obs,roadAlert:x.roadAlert}}store.set('sd.cache',{at:Date.now(),st,snotel})}
-function loadCache(){const c=store.get('sd.cache',null);if(!c||Date.now()-c.at>36*36e5)return;for(const id in c.st)state[id]=Object.assign({err:{}},c.st[id]);snotel=c.snotel||{};lastUpdated=new Date(c.at);offline=true}
+function saveCache(){const st={};for(const r of resorts){const x=state[r.id];if(x&&x.days)st[r.id]={days:x.days,nws:x.nws,obs:x.obs,roadAlert:x.roadAlert}}store.set('sd.cache',{at:Date.now(),st,snotel,reports})}
+function loadCache(){const c=store.get('sd.cache',null);if(!c||Date.now()-c.at>36*36e5)return;for(const id in c.st)state[id]=Object.assign({err:{}},c.st[id]);snotel=c.snotel||{};reports=c.reports||{};lastUpdated=new Date(c.at);offline=true}
 async function refreshAll(){
  refreshing=true;const ts=Date.now();$('#rSLC').src='https://radar.weather.gov/ridge/standard/KMTX_loop.gif?t='+ts;$('#rJAC').src='https://radar.weather.gov/ridge/standard/KSFX_loop.gif?t='+ts;
  for(const k in afd)delete afd[k];snotelErr='';udotErr='';
  const jobs=resorts.map(async r=>{const s=state[r.id]=Object.assign(state[r.id]||{},{err:{}});
   await Promise.all([loadOM(r).then(d=>{s.days=d}).catch(e=>{s.err.om=e.message}),loadNWS(r).then(n=>{s.nws=n}).catch(e=>{s.err.nws=e.message})]);if(!s.err.om)mergeNWS(s);render()});
  jobs.push(loadSnotel().then(v=>{snotel=v;setDiag('SNOTEL snowpack',true,Object.keys(v).length+' stations')}).catch(e=>{snotelErr=e.message;setDiag('SNOTEL snowpack',false,e.message)}).then(()=>Promise.all(resorts.map(async r=>{const s=state[r.id]=state[r.id]||{err:{}};s.obs=await loadObs(r);render()}))));
+ jobs.push(loadReports().then(()=>{const n=resorts.filter(r=>reports[r.id]&&reports[r.id].ok).length;setDiag('Resort snow reports',n>0,`${n} of ${resorts.length} resorts`);render()}).catch(e=>setDiag('Resort snow reports',false,e.message)));
  jobs.push(loadUDOT().then(v=>{udot=v;if(v)setDiag('UDOT roads',true)}).catch(e=>{udotErr=e.message;setDiag('UDOT roads',false,e.message)}));
  await Promise.allSettled(jobs);
  const n=resorts.length,omOk=resorts.filter(r=>state[r.id]&&!state[r.id].err.om).length,nwsOk=resorts.filter(r=>state[r.id]&&!state[r.id].err.nws).length;
@@ -586,7 +601,19 @@ async function refreshAll(){
  try{setDiag('Display font',document.fonts.check('800 20px "Big Shoulders Display"'))}catch(e){}
  for(const r of resorts)if(state[r.id])state[r.id].roadAlert=roadItems(r).some(i=>alertRe.test(i.text));
  if(omOk){lastUpdated=new Date();offline=false;saveCache()}else if(!lastUpdated)lastUpdated=new Date();
- refreshing=false;render();drawAFD();drawDiag();
+ refreshing=false;render();drawAFD();drawDiag();drawScore();
+}
+// forecast vs. what the resorts reported the next morning
+function drawScore(){
+ const el=$('#score');if(!el)return;const rows=(accuracy&&accuracy.rows)||[];
+ if(!rows.length){el.innerHTML='<p class="mute" style="margin:0">Logging has started. Each afternoon the overnight forecast is saved, and the next morning it is compared with what each resort reports. Results appear here after the first morning, and they only mean something after a few storms.</p>';return}
+ const by={};for(const x of rows)(by[x.id]=by[x.id]||[]).push(x);
+ const line=(name,a)=>{const n=a.length,snow=a.filter(x=>x.forecast>=1||x.reported>=1),mae=snow.length?sum(snow.map(x=>Math.abs(x.forecast-x.reported)))/snow.length:null,bias=snow.length?sum(snow.map(x=>x.forecast-x.reported))/snow.length:null;
+  return `<tr><td>${esc(name)}</td><td>${n}</td><td>${snow.length}</td><td>${mae==null?'–':mae.toFixed(1)+'"'}</td><td>${bias==null?'–':(bias>0?'+':'')+bias.toFixed(1)+'"'}</td></tr>`};
+ const last=rows.slice(-7*resorts.length).filter(x=>x.forecast>=1||x.reported>=1).slice(-8).reverse();
+ el.innerHTML=`<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Resort</th><th>Mornings</th><th>Snow mornings</th><th>Avg miss</th><th>Bias</th></tr></thead><tbody>${resorts.filter(r=>by[r.id]).map(r=>line(r.name,by[r.id])).join('')}${line('All resorts',rows)}</tbody></table></div>
+  <p class="mute">Avg miss and bias count only mornings when snow was forecast or reported. Bias above zero means the forecast ran high. ${rows.filter(x=>x.forecast>=1||x.reported>=1).length<20?'Too few snow mornings so far to judge.':''}</p>
+  ${last.length?`<div class="mute">Recent: ${last.map(x=>{const r=resorts.find(q=>q.id===x.id);return `${esc(dayName(x.date))} ${esc(r?r.name:x.id)} forecast ${inch(x.forecast)}, reported ${inch(x.reported)}`}).join(' · ')}</div>`:''}`;
 }
 function drawDiag(){
  const el=$('#diag');if(!el)return;const ks=Object.keys(diag);

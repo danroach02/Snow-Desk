@@ -17,3 +17,8 @@ Single file: `index.html`, served with GitHub Pages.
 ## Data notes
 Snow totals are forecasts. Depth-sensor numbers are estimates; resort reports are the official measurements.
 Ski runs come from OpenStreetMap via the public Overpass API (cached 30 days per resort). Imagery and topo are USGS.
+
+## Resort reports
+`.github/workflows/reports.yml` runs `scripts/fetch-reports.mjs` hourly. It reads each resort's published mountain report
+(one request per resort), writes `data/reports.json`, and logs afternoon forecasts against next-morning reports in
+`data/accuracy.json`. Personal use only.
