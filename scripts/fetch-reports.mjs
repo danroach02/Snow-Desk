@@ -30,7 +30,8 @@ export function parseSnowbasin(html){
  const f=re=>{const m=seg.match(re);return m?num(m[1]):null};
  const up=seg.match(/Last Updated:\s*([A-Za-z]{3} \d{1,2}),?\s*(\d{1,2}):(\d{2})\s*(AM|PM)/i);let updated=null;
  if(up){const y=new Date().getFullYear(),d=new Date(`${up[1]} ${y} ${up[2]}:${up[3]} ${up[4]} GMT-0700`);if(!isNaN(d))updated=d.toISOString()}
- return {overnight:f(/Overnight\s*([\d.]+)"/i),h24:f(/24 hours\s*([\d.]+)"/i),since5:f(/Since 5am\s*([\d.]+)"/i),d7:f(/7 days\s*([\d.]+)"/i),base:f(/Base\s*([\d.]+)"/i),season:f(/Season\s*([\d.]+)"/i),updated};
+ const lf=t.match(/Lifts Open\s*(\d+)\s*\/\s*(\d+)/i),tr=t.match(/Trails Open\s*(\d+)\s*\/\s*(\d+)/i);
+ return {lifts:lf?`${lf[1]}/${lf[2]}`:null,trails:tr?`${tr[1]}/${tr[2]}`:null,overnight:f(/Overnight\s*([\d.]+)"/i),h24:f(/24 hours\s*([\d.]+)"/i),since5:f(/Since 5am\s*([\d.]+)"/i),d7:f(/7 days\s*([\d.]+)"/i),base:f(/Base\s*([\d.]+)"/i),season:f(/Season\s*([\d.]+)"/i),updated};
 }
 const text=html=>html.replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&#8221;|&rdquo;|”/g,'"').replace(/&nbsp;/g,' ').replace(/\s+/g,' ');
 // Mountain-time "YYYY-MM-DD HH:MM[:SS]" -> ISO (standard time in winter)
@@ -59,8 +60,8 @@ export function parseBrighton(body){ // JSON behind brightonresort.com/condition
 }
 export function parseJacksonJson(body){ // JSON behind jacksonhole.com/mountain-report; upper mountain (tram summit) used, mid-mountain kept
  const j=JSON.parse(body),sn=j.snow||{},a=sn.tramSummit||{},m=sn.midMountain||{},v=(o,k)=>o[k]&&o[k].value!=null?num(o[k].value):null;
- const d=new Date(j.lastModified);
- return {overnight:v(a,'newSnowSinceLiftsClosed'),h24:v(a,'newSnowLast24H'),h48:v(a,'newSnowLast48H'),d7:v(a,'newSnowLast7D'),base:v(a,'totalSnowDepth'),season:v(a,'seasonTotalSnow'),
+ const d=new Date(j.lastModified),ls=j.liftStatus||{},ts=j.trailStatus||{};
+ return {lifts:ls.totalLifts?`${ls.openLifts||0}/${ls.totalLifts}`:null,trails:ts.totalTrails?`${ts.openTrails||0}/${ts.totalTrails}`:null,overnight:v(a,'newSnowSinceLiftsClosed'),h24:v(a,'newSnowLast24H'),h48:v(a,'newSnowLast48H'),d7:v(a,'newSnowLast7D'),base:v(a,'totalSnowDepth'),season:v(a,'seasonTotalSnow'),
   midOvernight:v(m,'newSnowSinceLiftsClosed'),midBase:v(m,'totalSnowDepth'),where:'Upper mountain',updated:isNaN(d)?null:d.toISOString()};
 }
 // same temperature table the app uses for snow-to-liquid ratio

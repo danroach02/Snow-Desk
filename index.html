@@ -69,6 +69,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .pick .sub{color:var(--mute);font-size:14px}
 .pick .tags{grid-column:1/-1;margin-top:14px;font-size:14px}
 .pick .sub:last-child{color:var(--blue)!important}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px;flex:none}
+.alerts{margin-bottom:clamp(20px,3vw,36px)}.alerts:empty{display:none}
+.al{display:flex;align-items:baseline;width:100%;text-align:left;background:transparent;border-radius:0;border-top:1px solid var(--line);padding:13px 0;min-height:0;font-size:15px;font-weight:400;color:var(--ink);line-height:1.4}
+.al:last-child{border-bottom:1px solid var(--line)}.al:hover{background:transparent}.al b{font-weight:600}.al .dot{transform:translateY(-1px)}
+.alert{margin:0 0 14px;font-size:14px}.alert summary{cursor:pointer;list-style:none}.alert summary::-webkit-details-marker{display:none}.alert b{font-weight:600}.alert p{color:var(--mute);margin:10px 0 0 16px;line-height:1.5;max-width:60ch}
 /* segmented controls */
 .days,.bar2{display:inline-flex;max-width:100%;gap:2px;overflow-x:auto;scrollbar-width:none;background:var(--fill);border-radius:11px;padding:3px;-webkit-overflow-scrolling:touch}
 .days::-webkit-scrollbar,.bar2::-webkit-scrollbar{display:none}
@@ -169,6 +174,7 @@ footer .links{margin-top:6px;font-size:12px;gap:4px 18px}
 <main>
 <section class="view" id="v-today">
  <div class="hero"><div class="wrap">
+  <div id="alerts" class="alerts"></div>
   <div class="hero-top">
    <div><div class="kicker" id="status">Loading forecasts…</div><h1 class="headline" id="headline">Snow Desk</h1><div class="storm" id="storm"></div></div>
    <div class="pick" id="pick" tabindex="0" role="button" aria-label="The pick: open details"><div class="num">–</div><div class="who">The pick</div></div>
@@ -214,7 +220,7 @@ footer .links{margin-top:6px;font-size:12px;gap:4px 18px}
  <div id="afd" class="afd" style="margin-top:18px"></div>
  <div class="panel" style="margin-top:14px"><h3 style="margin-bottom:8px">Forecast vs. resort reports</h3><div id="score"></div></div>
  <div class="panel" style="margin-top:14px"><h3 style="margin-bottom:6px">Roads &amp; avalanche</h3><div id="roadbox"></div>
-  <div class="links"><a target="_blank" rel="noopener" href="https://udottraffic.utah.gov">UDOT Traffic &amp; cameras</a><a target="_blank" rel="noopener" href="https://x.com/UDOTcottonwoods">@UDOTcottonwoods</a><a target="_blank" rel="noopener" href="https://www.wyoroad.info">WYDOT 511</a><a target="_blank" rel="noopener" href="https://utahavalanchecenter.org">Utah Avalanche Center</a><a target="_blank" rel="noopener" href="https://bridgertetonavalanchecenter.org">Bridger-Teton Avalanche Center</a></div></div>
+  <div class="links"><a target="_blank" rel="noopener" href="https://udottraffic.utah.gov">UDOT Traffic &amp; cameras</a><a target="_blank" rel="noopener" href="https://x.com/UDOTcottonwoods">@UDOTcottonwoods</a><a target="_blank" rel="noopener" href="https://www.wyoroad.info">WYDOT 511</a><a target="_blank" rel="noopener" href="https://cottonwoodcanyons.udot.utah.gov">Cottonwood Canyons road status</a><a target="_blank" rel="noopener" href="https://utahavalanchecenter.org">Utah Avalanche Center</a><a target="_blank" rel="noopener" href="https://bridgertetonavalanchecenter.org">Bridger-Teton Avalanche Center</a></div></div>
 </div></div></section>
 </main>
 
@@ -242,7 +248,7 @@ footer .links{margin-top:6px;font-size:12px;gap:4px 18px}
 
 <footer><div class="wrap">
  <div>Snow Desk · Forecasts are guidance. Check avalanche and road conditions before you go.</div>
- <div class="links"><span>Data: NOAA/NWS · Open-Meteo (GFS, ECMWF, ICON, GEM) · USDA NRCS SNOTEL · NOAA NOHRSC · USGS · OpenStreetMap · resort mountain reports</span></div>
+ <div class="links"><span>Data: NOAA/NWS · Open-Meteo (GFS, ECMWF, ICON, GEM) · USDA NRCS SNOTEL · NOAA NOHRSC · USGS · OpenStreetMap · avalanche.org · resort mountain reports</span></div>
  <div class="links"><a href="https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml" target="_blank" rel="noopener">CPC ENSO discussion</a><a href="https://www.cpc.ncep.noaa.gov/products/predictions/90day/" target="_blank" rel="noopener">CPC 90-day outlook</a></div>
 </div></footer>
 
@@ -377,6 +383,35 @@ function roadItems(r){
 }
 const alertRe=/clos|chain|traction|restrict|avalanche|interlodge/i;
 
+/* ---------- NWS watches, warnings and advisories for each resort ---------- */
+const ALERT_RE=/winter|snow|blizzard|wind|avalanche|ice storm|freez|cold|chill/i;
+const alertRank=e=>/warning/i.test(e)?3:/watch/i.test(e)?2:1;
+async function loadAlerts(r){
+ const F=fc(r),j=await getJSON(`https://api.weather.gov/alerts/active?point=${(+F.lat).toFixed(4)},${(+F.lon).toFixed(4)}`,{headers:{Accept:'application/geo+json'}});
+ return (j.features||[]).map(f=>f.properties).filter(p=>p&&ALERT_RE.test(p.event||'')&&p.status!=='Test')
+  .map(p=>({event:p.event,headline:p.headline||'',desc:p.description||'',what:p.instruction||'',from:p.onset||p.effective,to:p.ends||p.expires,id:p.id||p['@id']||p.event}))
+  .sort((a,b)=>alertRank(b.event)-alertRank(a.event));
+}
+const alertsOn=(r,date)=>((state[r.id]||{}).alerts||[]).filter(a=>(!a.from||localDate(new Date(a.from))<=date)&&(!a.to||localDate(new Date(a.to))>=date));
+const untilTxt=t=>t?'until '+new Date(t).toLocaleString('en-US',{weekday:'short',hour:'numeric',minute:'2-digit',timeZone:TZ})+' MT':'';
+
+/* ---------- backcountry avalanche danger from the regional avalanche centers (avalanche.org) ---------- */
+let avyZones=[];const AVY_NAMES=['No rating','Low','Moderate','Considerable','High','Extreme'];
+async function loadAvy(){
+ const centers=[...new Set(resorts.map(r=>(r.lat>42.3?'BTAC':'UAC')))],out=[];
+ for(const c of centers){const j=await getJSON('https://api.avalanche.org/v2/public/products/map-layer/'+c);for(const f of j.features||[])out.push({p:f.properties,g:f.geometry})}
+ avyZones=out;
+}
+function inPoly(lon,lat,g){
+ if(!g)return false;const polys=g.type==='Polygon'?[g.coordinates]:g.type==='MultiPolygon'?g.coordinates:[];
+ const ring=rg=>{let c=false;for(let i=0,j=rg.length-1;i<rg.length;j=i++){const[xi,yi]=rg[i],[xj,yj]=rg[j];if((yi>lat)!==(yj>lat)&&lon<(xj-xi)*(lat-yi)/(yj-yi)+xi)c=!c}return c};
+ return polys.some(p=>p.length&&ring(p[0])&&!p.slice(1).some(ring));
+}
+function avyFor(r){
+ const F=fc(r),z=avyZones.find(z=>inPoly(F.lon,F.lat,z.g))||avyZones.find(z=>inPoly(r.lon,r.lat,z.g));if(!z)return null;
+ const lv=z.p.danger_level>0?z.p.danger_level:0;return {zone:z.p.name,center:z.p.center,level:lv,name:AVY_NAMES[lv],color:lv?z.p.color:'#86868b',link:safeUrl(z.p.link),advice:z.p.travel_advice||'',to:z.p.end_date};
+}
+
 /* ---------- official resort reports, collected hourly by the GitHub job into data/ ---------- */
 async function loadReports(){
  const t=Math.floor(Date.now()/6e5);const j=await getJSON('data/reports.json?t='+t);reports=j.resorts||{};
@@ -388,13 +423,13 @@ function repFor(r){const x=reports[r.id];if(!x||!x.updated||(x.h24==null&&x.over
 
 /* ---------- resort extras (not stored) ---------- */
 const META={
- snowbasin:{short:'Basin',avy:'https://utahavalanchecenter.org/forecast/ogden',group:'Snowbasin'},
- snowbird:{short:'Bird',avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
- alta:{short:'Alta',skiOnly:true,avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
- brighton:{short:'Brighton',avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
- solitude:{short:'Solitude',avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
- deervalley:{short:'Deer V.',skiOnly:true,avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Deer Valley'},
- jackson:{short:'Jackson',avy:'https://bridgertetonavalanchecenter.org',group:'Jackson Hole'}
+ snowbasin:{short:'Basin',cams:'https://www.snowbasin.com/the-mountain/web-cams/',avy:'https://utahavalanchecenter.org/forecast/ogden',group:'Snowbasin'},
+ snowbird:{short:'Bird',cams:'https://www.snowbird.com/the-mountain/webcams/view-all-webcams/',avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
+ alta:{short:'Alta',cams:'https://www.alta.com/weather#mountain-cams',skiOnly:true,avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
+ brighton:{short:'Brighton',cams:'https://www.brightonresort.com/conditions',avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
+ solitude:{short:'Solitude',cams:'https://www.solitudemountain.com/mountain-and-village/webcams',avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Cottonwoods'},
+ deervalley:{short:'Deer V.',cams:'https://www.deervalley.com/explore-the-mountain/webcams',skiOnly:true,avy:'https://utahavalanchecenter.org/forecast/salt-lake',group:'Deer Valley'},
+ jackson:{short:'Jackson',cams:'https://www.jacksonhole.com/live-mountain-cams',avy:'https://bridgertetonavalanchecenter.org',group:'Jackson Hole'}
 };
 const meta=r=>META[r.id]||{short:r.name.split(' ')[0],group:r.name};
 
@@ -403,11 +438,12 @@ async function loadOM(r){
  const F=fc(r),elev=Math.round(F.elev*0.3048);
  const base=`https://api.open-meteo.com/v1/forecast?latitude=${F.lat}&longitude=${F.lon}&elevation=${elev}&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=${encodeURIComponent(TZ)}&forecast_days=7&past_days=2`;
  const [h,m]=await Promise.allSettled([
-  getJSON(base+'&hourly=precipitation,temperature_2m,freezing_level_height,wind_gusts_10m,cloud_cover&daily=precipitation_sum,wind_gusts_10m_max,temperature_2m_max,temperature_2m_min'),
+  getJSON(base+'&hourly=precipitation,temperature_2m,freezing_level_height,wind_gusts_10m,wind_direction_10m,cloud_cover&daily=precipitation_sum,wind_gusts_10m_max,temperature_2m_max,temperature_2m_min'),
   getJSON(base+'&daily=precipitation_sum&models='+MODELS.map(x=>x[0]).join(','))]);
  if(h.status!=='fulfilled')throw h.reason;
  return processOM(r,h.value,m.status==='fulfilled'?m.value:null);
 }
+const compass=d=>['N','NE','E','SE','S','SW','W','NW'][Math.round(((d%360)+360)%360/45)%8];
 // °F at forecast elevation → snow:liquid ratio (0 = rain)
 const slr=t=>t>34?0:t>32.5?7:t>29?10:t>25?12.5:t>18?15:t>8?17:15;
 function density(ratio){
@@ -421,7 +457,7 @@ function processOM(r,main,models){
  const D=main.daily,H=main.hourly,F=fc(r),lapse=(F.elev-r.base)/1000*3.3,days=[];
  const flK=/ft/i.test((main.hourly_units||{}).freezing_level_height||'')?1:3.281; // Open-Meteo returns feet when precipitation_unit=inch
  const hrs=H.time.map((t,j)=>{const T=H.temperature_2m[j],p=H.precipitation[j]||0;
-  return {t,p,T,sn:p*slr(T),fl:(H.freezing_level_height[j]||0)*flK,g:H.wind_gusts_10m[j]||0,c:H.cloud_cover?H.cloud_cover[j]:null,baseT:T+lapse}});
+  return {t,p,T,sn:p*slr(T),fl:(H.freezing_level_height[j]||0)*flK,g:H.wind_gusts_10m[j]||0,wd:H.wind_direction_10m?H.wind_direction_10m[j]:null,c:H.cloud_cover?H.cloud_cover[j]:null,baseT:T+lapse}});
  for(let i=0;i<D.time.length;i++){
   const d=D.time[i],prev=i?D.time[i-1]:null;
   const over=hrs.filter(h=>prev&&h.t>=prev+'T16:00'&&h.t<d+'T09:00'),day=hrs.filter(h=>h.t>=d+'T09:00'&&h.t<d+'T16:00'),all=hrs.filter(h=>h.t.slice(0,10)===d);
@@ -429,12 +465,12 @@ function processOM(r,main,models){
   const wet=[...over,...day].filter(h=>h.p>0.01),pw=sum(wet.map(h=>h.p)),snowWet=sum(wet.map(h=>h.sn));
   const ratio=pw>0.04&&snowWet>0?snowWet/pw:null;
   const snowLine=wet.length?Math.round(sum(wet.map(h=>(h.fl-1000)*h.p))/pw):null,fzLine=Math.round((day.length?Math.min(...day.map(h=>h.fl)):hrs[0].fl)-1000);
-  const cloudH=day.filter(h=>h.c!=null);
+  const cloudH=day.filter(h=>h.c!=null),peak=day.length?day.reduce((a,b)=>b.g>a.g?b:a):null;
   const dayRatio=pAll>0?sAll/pAll:0,mv={};
   if(models)for(const[k,lbl]of MODELS){const a=models.daily['precipitation_sum_'+k];if(a&&a[i]!=null)mv[lbl]=a[i]*dayRatio}
   const vals=Object.values(mv);
   days.push({date:d,snow:sAll,overnight:sum(over.map(h=>h.sn)),daySnow:sum(day.map(h=>h.sn)),ratio,snowLine,fzLine,
-   rain:wet.some(h=>h.baseT>34&&h.p>0.02),gust:day.length?Math.max(...day.map(h=>h.g)):(D.wind_gusts_10m_max[i]||0),
+   windDir:peak&&peak.wd!=null?compass(peak.wd):'',rain:wet.some(h=>h.baseT>34&&h.p>0.02),gust:day.length?Math.max(...day.map(h=>h.g)):(D.wind_gusts_10m_max[i]||0),
    cloud:cloudH.length?sum(cloudH.map(h=>h.c))/cloudH.length:null,hi:D.temperature_2m_max[i],lo:D.temperature_2m_min[i],models:mv,
    consensus:(sum(vals)+sAll)/(vals.length+1),spread:vals.length>1?Math.max(...vals)-Math.min(...vals):null});
  }
@@ -470,12 +506,15 @@ function score(r,date){
  const dn=density(d.ratio),windy=d.gust>=35;
  if(pow>=2&&dn){tags.push({t:`${dn.label} ${Math.round(d.ratio)}:1${windy&&dn.bonus>0?' · wind-affected':''}`,k:windy?'':dn.k});sc+=windy&&dn.bonus>0?dn.bonus/2:dn.bonus}
  if(pow>=4&&d.cloud!=null&&d.cloud<35){sc+=6;tags.push({t:'Bluebird',k:'good'})}
- if(d.gust>settings.windLimit){sc-=(d.gust-settings.windLimit)*1.5;tags.push({t:`Gusts ${Math.round(d.gust)} mph · holds likely`,k:'bad'})}
+ if(d.gust>settings.windLimit){sc-=(d.gust-settings.windLimit)*1.5;tags.push({t:`${d.windDir?d.windDir+' gusts':'Gusts'} ${Math.round(d.gust)} mph · lift holds likely`,k:'bad'})}
  if(d.rain){sc-=15;tags.push({t:'Rain/mix at base',k:'bad'})}
  if(s.roadAlert){sc-=8;tags.push({t:'Road alert',k:'bad'})}
  const bz=busy(date);if(bz){sc-=settings.crowdWeight;if((r.roads||[]).some(x=>CANYON.includes(x))&&pow>=6){sc-=settings.crowdWeight;tags.push({t:`${bz} powder · canyon traffic`,k:'bad'})}else tags.push({t:bz,k:''})}
  sc-=(r.drive/60)*settings.driveWeight;
  if(d.spread!=null&&d.consensus>=2&&d.spread>d.consensus)tags.push({t:'Models disagree',k:'bad'});
+ const al=alertsOn(r,date)[0];if(al)tags.unshift({t:al.event,k:alertRank(al.event)>=3?'bad':''});
+ const av=avyFor(r);if(av&&av.level>=3&&date<=today())tags.push({t:`Avalanche danger ${av.name.toLowerCase()}`,k:av.level>=4?'bad':''});
+ if(date===today()&&rp&&rp.ok!==false&&rp.lifts&&mtHour()>=9&&mtHour()<16){const [o,t]=rp.lifts.split('/').map(Number);if(t>0){if(o===0){sc-=40;tags.unshift({t:'No lifts open right now',k:'bad'})}else if(o/t<.4){sc-=5;tags.push({t:`${o} of ${t} lifts open`,k:''})}}}
  const blocked=settings.ride==='board'&&M.skiOnly;if(M.skiOnly)tags.push({t:blocked?'Skiers only · skipped':'Skiers only',k:blocked?'bad':''});
  return {r,sc:blocked?-1e9:sc,fresh:chair,src,pow,d,tags,blocked,rating:rate(chair)};
 }
@@ -499,17 +538,23 @@ let raf=0;function render(){if(!raf)raf=setTimeout(()=>{raf=0;draw()},120)}
 function draw(){
  const dates=upcomingDates();if(!dayPick||!dates.includes(dayPick))dayPick=dates[mtHour()>=12?1:0]||dates[0];
  $('#status').textContent=lastUpdated?`${offline?(refreshing?'Refreshing · showing forecast saved at':'Offline · showing forecast saved at'):'Updated'} ${mtTime(lastUpdated)} · ${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',timeZone:TZ})}`:'Loading forecasts…';
- drawHeadline(dates);drawPick(dates);drawRidge();
+ drawAlerts();drawHeadline(dates);drawPick(dates);drawRidge();
  const chips=dates.map(d=>`<button class="chip" data-day="${esc(d)}" aria-pressed="${d===dayPick}">${esc(d===today()?'Today':dayName(d))}</button>`).join('');
  $('#days').innerHTML=chips;
  const rows=resorts.map(r=>score(r,dayPick)).filter(Boolean).sort((a,b)=>b.sc-a.sc);
  if(dayPick)$('#rankTitle').textContent=`${dayPick===today()?'Today':dayLong(dayPick)}`;
  const chev='<svg class="chev" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l5 5 5-5"/></svg>';
  const pending=resorts.filter(r=>!rows.some(x=>x.r.id===r.id));
- $('#rank').innerHTML=rows.map((x,i)=>{const tags=x.tags.slice(0,4);return `<details class="row${i===0&&!x.blocked&&x.pow>=2?' top':''}${x.blocked?' off':''}" id="row-${esc(x.r.id)}" data-row="${esc(x.r.id)}"${openRows.has(x.r.id)?' open':''}><summary><span class="rk">${i+1}</span>${sym(x.rating)}<span class="nm">${esc(x.r.name)}</span><span class="in">${inch(x.fresh)}<small>${esc(x.src==='Forecast'?'forecast overnight':x.src==='Reported'?'reported overnight':'sensor, overnight')}</small></span>${chev}<span class="tg">${tags.map(t=>`<span class="tag ${t.k}">${esc(t.t)}</span>`).join('')}<span class="tag">${esc(x.r.drive)} min</span></span></summary><div class="detail">${openRows.has(x.r.id)?rowDetail(x.r):''}</div></details>`}).join('')
+ $('#rank').innerHTML=rows.map((x,i)=>{const tags=x.tags.slice(0,5);return `<details class="row${i===0&&!x.blocked&&x.pow>=2?' top':''}${x.blocked?' off':''}" id="row-${esc(x.r.id)}" data-row="${esc(x.r.id)}"${openRows.has(x.r.id)?' open':''}><summary><span class="rk">${i+1}</span>${sym(x.rating)}<span class="nm">${esc(x.r.name)}</span><span class="in">${inch(x.fresh)}<small>${esc(x.src==='Forecast'?'forecast overnight':x.src==='Reported'?'reported overnight':'sensor, overnight')}</small></span>${chev}<span class="tg">${tags.map(t=>`<span class="tag ${t.k}">${esc(t.t)}</span>`).join('')}<span class="tag">${esc(x.r.drive)} min</span></span></summary><div class="detail">${openRows.has(x.r.id)?rowDetail(x.r):''}</div></details>`}).join('')
   +pending.map(r=>`<div class="row" style="padding:16px 18px"><span class="nm">${esc(r.name)}</span> <span class="mute">${state[r.id]&&state[r.id].err&&state[r.id].err.om?'forecast failed: '+esc(state[r.id].err.om):'loading…'}</span></div>`).join('');
  drawRoads();if($('#drawer').hidden)drawMyResorts();
  if(!$('#v-mountain').hidden)refreshMapUI();
+}
+function drawAlerts(){
+ const el=$('#alerts');if(!el)return;const by={};
+ for(const r of resorts)for(const a of (state[r.id]||{}).alerts||[]){const k=a.event+'|'+(a.to||'');(by[k]=by[k]||{a,rs:[]}).rs.push(r)}
+ const list=Object.values(by).sort((x,y)=>alertRank(y.a.event)-alertRank(x.a.event));
+ el.innerHTML=list.map(({a,rs})=>`<button type="button" class="al" data-goto="${esc(rs[0].id)}|${esc(a.from&&localDate(new Date(a.from))>today()?localDate(new Date(a.from)):today())}"><i class="dot" style="background:${alertRank(a.event)>=3?'var(--red)':'var(--amber)'}"></i><span><b>${esc(a.event)}</b> · ${esc(rs.map(r=>r.name).join(', '))} <span class="mute">${esc(untilTxt(a.to))}</span></span></button>`).join('');
 }
 function drawPick(dates){
  let best=null;for(const dt of dates.slice(0,5))for(const r of resorts){const s=score(r,dt);if(s&&!s.blocked&&s.pow>=2&&(!best||s.sc>best.sc))best=s}
@@ -546,22 +591,24 @@ function rowDetail(r){
  const strip=days.map(x=>{const mv=Object.values(x.models),lo=mv.length?Math.min(...mv):x.consensus,hi=mv.length?Math.max(...mv):x.consensus,dn=density(x.ratio);
   return `<div class="col" title="${esc(Object.entries(x.models).map(([k,v])=>k+' '+v.toFixed(1)+'"').join(', '))}"><div class="n">${inch(x.consensus)}</div><div class="b ${dn?dn.cls:''}" style="height:${x.consensus/top*80}%"></div>${mv.length>1&&hi>0.5?`<span class="rng" style="bottom:${lo/top*80}%;height:${Math.max(1,(hi-lo)/top*80)}%"></span>`:''}</div>`}).join('');
  const items=roadItems(r);
- const facts=[rp&&rp.base!=null?(rp.base<30?`<span class="tag bad">Thin base: ${inch(rp.base)} reported</span>`:''):hasOb&&!ob.off&&ob.depth<30?`<span class="tag bad">Thin cover at the sensor: ${inch(ob.depth)}</span>`:'',d0?`${d0.snowLine!=null?`<span class="tag">Snow line ~${(Math.round(d0.snowLine/100)*100).toLocaleString()} ft</span>`:''}<span class="tag">${Math.round(d0.lo)}–${Math.round(d0.hi)}°F</span>`:'',d0&&d0.rain?'<span class="tag bad">Rain/mix risk at base</span>':'',M.skiOnly?'<span class="tag">Skiers only</span>':'',r.approx?'<span class="tag">Elevations estimated</span>':''].join('');
+ const facts=[rp&&rp.base!=null?(rp.base<30?`<span class="tag bad">Thin base: ${inch(rp.base)} reported</span>`:''):hasOb&&!ob.off&&ob.depth<30?`<span class="tag bad">Thin cover at the sensor: ${inch(ob.depth)}</span>`:'',d0?`${d0.snowLine!=null?`<span class="tag">Snow line ~${(Math.round(d0.snowLine/100)*100).toLocaleString()} ft</span>`:''}<span class="tag">${Math.round(d0.lo)}–${Math.round(d0.hi)}°F</span><span class="tag">${d0.windDir?d0.windDir+' wind, gusts':'Gusts'} ${Math.round(d0.gust)} mph</span>`:'',d0&&d0.rain?'<span class="tag bad">Rain/mix risk at base</span>':'',M.skiOnly?'<span class="tag">Skiers only</span>':'',r.approx?'<span class="tag">Elevations estimated</span>':''].join('');
  return `<div class="dgrid"><div>
   <div class="stats"><div class="stat"><div class="v">${rp&&rp.h24!=null?inch(rp.h24):hasOb?(ob.n24?inch(ob.n24):'<2"'):'–'}</div><div class="l">${rp&&rp.h24!=null?`Resort report, last 24h${rp.fresh?'':' (as of '+esc(rp.when)+')'}`:'Sensor estimate, last 24h'}</div></div>
    <div class="stat"><div class="v">${st?rng(st.lo,st.hi):'0"'}</div><div class="l">${st?`Next storm ${esc(dayName(st.from))}${st.to!==st.from?'–'+esc(dayName(st.to)):''}`:'No storm in 6 days'}</div></div>
    <div class="stat"><div class="v">${pct!=null?pct+'%':'–'}</div><div class="l">Snowpack vs median${sn2?' (regional)':''}</div></div></div>
-  ${rp?`<div class="obs"><b>Resort report</b> <span class="mute">(${rp.fresh?'today ':''}${esc(rp.when)}${rp.where?', '+esc(rp.where.toLowerCase()):''})</span>: ${[rp.overnight!=null?inch(rp.overnight)+' overnight':'',rp.h48!=null?inch(rp.h48)+' in 48h':'',rp.d7!=null?inch(rp.d7)+' in 7 days':'',rp.base!=null?inch(rp.base)+' base':'',rp.season!=null?inch(rp.season)+' this season':'',rp.lifts?rp.lifts+' lifts open':''].filter(Boolean).join(' · ')}${rp.ok===false?' <span class="mute">(latest check failed; showing the last report read)</span>':''}</div>`:''}
+  ${alertsOn(r,dayPick).map(a=>`<details class="alert"><summary><i class="dot" style="background:${alertRank(a.event)>=3?'var(--red)':'var(--amber)'}"></i><b>${esc(a.event)}</b> <span class="mute">${esc(untilTxt(a.to))}</span></summary><p>${esc(a.desc).replace(/\n\n/g,'<br><br>')}</p></details>`).join('')}
+  ${rp?`<div class="obs"><b>Resort report</b> <span class="mute">(${rp.fresh?'today ':''}${esc(rp.when)}${rp.where?', '+esc(rp.where.toLowerCase()):''})</span>: ${[rp.overnight!=null?inch(rp.overnight)+' overnight':'',rp.h48!=null?inch(rp.h48)+' in 48h':'',rp.d7!=null?inch(rp.d7)+' in 7 days':'',rp.base!=null?inch(rp.base)+' base':'',rp.season!=null?inch(rp.season)+' this season':'',rp.lifts?rp.lifts.replace('/',' of ')+' lifts open now':'',rp.trails?rp.trails.replace('/',' of ')+' trails':''].filter(Boolean).join(' · ')}${rp.ok===false?' <span class="mute">(latest check failed; showing the last report read)</span>':''}</div>`:''}
   <div class="obs">${hasOb?`Depth sensor: ${ob.n12?inch(ob.n12):'under 2"'} in 12h · ${ob.n48?inch(ob.n48):'under 2"'} in 48h · ${inch(ob.depth)} on the ground <span class="mute">(${esc(ob.label)}, ${esc(mtTime(ob.at))}; an estimate, the resort report is the official number)</span>`:s.obs?`<span class="mute">No free on-mountain depth sensor here${rp?'; the resort report above is the measurement':''}.</span>`:'<span class="mute">Loading station data…</span>'}</div>
   <div style="margin-top:10px">${facts}</div>
   ${s.nws?s.nws.periods.slice(0,2).map(p=>`<div class="per"><b>${esc(p.name)}:</b> ${esc(p.shortForecast)}, ${esc(p.temperature)}°</div>`).join(''):s.err&&s.err.nws?`<div class="err">NWS: ${esc(s.err.nws)}</div>`:''}
+  ${(()=>{const av=avyFor(r);return av?`<div class="per"><i class="dot" style="background:${esc(av.color)}"></i><b>Avalanche danger, backcountry:</b> ${av.level?esc(av.name):'no rating issued yet'} <span class="mute">(${esc(av.zone)} zone, ${esc(av.center)})</span></div>`:''})()}
   ${items.slice(0,3).map(i=>`<div class="per"><b>${alertRe.test(i.text)?'Road alert':'Road'}:</b> ${esc(i.text)}</div>`).join('')}
  </div><div>
   <div class="kicker" style="margin-bottom:10px">Seven days. Lighter bars are lighter snow; red marks the range across models.</div>
   ${days.length?`<div class="strip">${strip}</div><div class="dl">${days.map(x=>`<span>${esc(x.date===t?'Today':dayName(x.date))}</span>`).join('')}</div>`:s.err&&s.err.om?`<div class="err">Forecast failed: ${esc(s.err.om)}</div>`:'<div class="mute">Loading…</div>'}
   ${r.snotelNote?`<div class="mute" style="font-size:12.5px;margin-top:10px">Snowpack: ${esc(r.snotelNote)}</div>`:''}
  </div></div>
- <div class="links">${[[r.snotel,r.snotelName],[r.snotel2,r.snotel2Name]].filter(x=>x[0]).map(([t2,n])=>`<a target="_blank" rel="noopener" href="https://wcc.sc.egov.usda.gov/nwcc/site?sitenum=${esc(parseInt(t2))}">SNOTEL ${esc(n||t2)}</a>`).join('')}${safeUrl(r.stations)?`<a target="_blank" rel="noopener" href="${esc(r.stations)}">Live stations</a>`:''}${safeUrl(M.avy)?`<a target="_blank" rel="noopener" href="${esc(M.avy)}">Avalanche</a>`:''}${safeUrl(r.report)?`<a target="_blank" rel="noopener" href="${esc(r.report)}">Resort report</a>`:''}<a target="_blank" rel="noopener" href="https://forecast.weather.gov/MapClick.php?lat=${fc(r).lat}&lon=${fc(r).lon}">NWS</a><a class="go" href="#mountain" data-mapopen="${esc(r.id)}">Mountain view</a></div>`;
+ <div class="links">${[[r.snotel,r.snotelName],[r.snotel2,r.snotel2Name]].filter(x=>x[0]).map(([t2,n])=>`<a target="_blank" rel="noopener" href="https://wcc.sc.egov.usda.gov/nwcc/site?sitenum=${esc(parseInt(t2))}">SNOTEL ${esc(n||t2)}</a>`).join('')}${safeUrl(r.stations)?`<a target="_blank" rel="noopener" href="${esc(r.stations)}">Live stations</a>`:''}${(()=>{const av=avyFor(r),u=(av&&av.link)||safeUrl(M.avy);return u?`<a target="_blank" rel="noopener" href="${esc(u)}">Avalanche forecast</a>`:''})()}${safeUrl(M.cams)?`<a target="_blank" rel="noopener" href="${esc(M.cams)}">Webcams</a>`:''}${safeUrl(r.report)?`<a target="_blank" rel="noopener" href="${esc(r.report)}">Resort report</a>`:''}<a target="_blank" rel="noopener" href="https://forecast.weather.gov/MapClick.php?lat=${fc(r).lat}&lon=${fc(r).lon}">NWS</a><a class="go" href="#mountain" data-mapopen="${esc(r.id)}">Mountain view</a></div>`;
 }
 function drawRoads(){
  $('#roadbox').innerHTML=settings.udotKey?(udotErr?`<p class="err">UDOT API: ${esc(udotErr)}</p>`:udot?'<p class="mute" style="margin:0">Live UDOT closures and conditions appear inside each Utah resort on the Today list.</p>':'<p class="mute">Loading UDOT…</p>'):'<p class="mute" style="margin:0">Add a free UDOT Traffic API key in settings to show closures and road conditions inside each resort.</p>';
@@ -592,19 +639,21 @@ async function drawAFD(){
   return `<div class="panel" style="margin-bottom:12px"><h3>NWS ${esc(c)} forecaster discussion</h3><div class="mute">Issued ${esc(new Date(a.time).toLocaleString('en-US',{weekday:'short',hour:'numeric',minute:'2-digit',timeZone:TZ})+' MT')}</div><p>${esc(m?m[2].trim():'')}</p><details><summary>Full discussion</summary><pre>${esc(a.text)}</pre></details></div>`}catch(e){return `<div class="err">NWS ${esc(c)} discussion unavailable: ${esc(e.message)}</div>`}}));
  $('#afd').innerHTML=parts.join('');
 }
-function saveCache(){const st={};for(const r of resorts){const x=state[r.id];if(x&&x.days)st[r.id]={days:x.days,nws:x.nws,obs:x.obs,roadAlert:x.roadAlert}}store.set('sd.cache',{at:Date.now(),st,snotel,reports})}
+function saveCache(){const st={};for(const r of resorts){const x=state[r.id];if(x&&x.days)st[r.id]={days:x.days,nws:x.nws,obs:x.obs,alerts:x.alerts,roadAlert:x.roadAlert}}store.set('sd.cache',{at:Date.now(),st,snotel,reports})}
 function loadCache(){const c=store.get('sd.cache',null);if(!c||Date.now()-c.at>36*36e5)return;for(const id in c.st)state[id]=Object.assign({err:{}},c.st[id]);snotel=c.snotel||{};reports=c.reports||{};lastUpdated=new Date(c.at);offline=true}
 async function refreshAll(){
  refreshing=true;const ts=Date.now();$('#rSLC').src='https://radar.weather.gov/ridge/standard/KMTX_loop.gif?t='+ts;$('#rJAC').src='https://radar.weather.gov/ridge/standard/KSFX_loop.gif?t='+ts;
  for(const k in afd)delete afd[k];snotelErr='';udotErr='';
  const jobs=resorts.map(async r=>{const s=state[r.id]=Object.assign(state[r.id]||{},{err:{}});
-  await Promise.all([loadOM(r).then(d=>{s.days=d}).catch(e=>{s.err.om=e.message}),loadNWS(r).then(n=>{s.nws=n}).catch(e=>{s.err.nws=e.message})]);if(!s.err.om)mergeNWS(s);render()});
+  await Promise.all([loadOM(r).then(d=>{s.days=d}).catch(e=>{s.err.om=e.message}),loadNWS(r).then(n=>{s.nws=n}).catch(e=>{s.err.nws=e.message}),loadAlerts(r).then(a=>{s.alerts=a}).catch(e=>{s.err.alerts=e.message})]);if(!s.err.om)mergeNWS(s);render()});
+ jobs.push(loadAvy().then(()=>{setDiag('Avalanche danger',avyZones.length>0,`${resorts.filter(r=>avyFor(r)).length} of ${resorts.length} resorts matched to a zone`);render()}).catch(e=>setDiag('Avalanche danger',false,e.message)));
  jobs.push(loadSnotel().then(v=>{snotel=v;setDiag('SNOTEL snowpack',true,Object.keys(v).length+' stations')}).catch(e=>{snotelErr=e.message;setDiag('SNOTEL snowpack',false,e.message)}).then(()=>Promise.all(resorts.map(async r=>{const s=state[r.id]=state[r.id]||{err:{}};s.obs=await loadObs(r);render()}))));
  jobs.push(loadReports().then(()=>{const n=resorts.filter(r=>reports[r.id]&&reports[r.id].ok).length,miss=resorts.filter(r=>!(reports[r.id]&&reports[r.id].ok)).map(r=>r.name);setDiag('Resort snow reports',n>0,`${n} of ${resorts.length} resorts${miss.length?' · none for '+miss.join(', '):''}`);render()}).catch(e=>setDiag('Resort snow reports',false,e.message)));
  jobs.push(loadUDOT().then(v=>{udot=v;if(v)setDiag('UDOT roads',true)}).catch(e=>{udotErr=e.message;setDiag('UDOT roads',false,e.message)}));
  await Promise.allSettled(jobs);
  const n=resorts.length,omOk=resorts.filter(r=>state[r.id]&&!state[r.id].err.om).length,nwsOk=resorts.filter(r=>state[r.id]&&!state[r.id].err.nws).length;
  setDiag('Model forecasts (Open-Meteo)',omOk===n,`${omOk} of ${n} resorts`);setDiag('NWS forecasts',nwsOk===n,`${nwsOk} of ${n} resorts`);
+ {const ok=resorts.filter(r=>state[r.id]&&!state[r.id].err.alerts).length;setDiag('NWS alerts',ok===n,`${ok} of ${n} resorts checked · ${resorts.filter(r=>state[r.id]&&(state[r.id].alerts||[]).length).length} with active alerts`)}
  setDiag('Depth sensors with fresh readings',true,`${resorts.filter(r=>state[r.id]&&state[r.id].obs&&state[r.id].obs.depth!=null).length} of ${n} resorts`);
  for(const r of resorts)if(state[r.id])state[r.id].roadAlert=roadItems(r).some(i=>alertRe.test(i.text));
  if(omOk){lastUpdated=new Date();offline=false;saveCache()}else if(!lastUpdated)lastUpdated=new Date();
@@ -645,12 +694,12 @@ async function loadProfile(r){
  const s=state[r.id]=state[r.id]||{err:{}};
  if(s.profile&&Date.now()-s.profile.at<30*60e3)return s.profile;
  const F=fc(r),els=[r.top,Math.round((r.base+r.top)/2),r.base];
- const res=await Promise.all(els.map(e=>getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${F.lat}&longitude=${F.lon}&elevation=${Math.round(e*0.3048)}&hourly=precipitation,temperature_2m,wind_gusts_10m,freezing_level_height&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=${encodeURIComponent(TZ)}&forecast_days=4`)));
+ const res=await Promise.all(els.map(e=>getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${F.lat}&longitude=${F.lon}&elevation=${Math.round(e*0.3048)}&hourly=precipitation,temperature_2m,wind_gusts_10m,wind_direction_10m,freezing_level_height&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=${encodeURIComponent(TZ)}&forecast_days=4`)));
  const key=today()+'T'+String(mtHour()).padStart(2,'0')+':00';
  const flK=/ft/i.test((res[1].hourly_units||{}).freezing_level_height||'')?1:3.281;
  const T0=res[0].hourly.time,i0=Math.max(0,T0.indexOf(key));
  const hours=T0.slice(i0,i0+72).map((t,k)=>{const j=i0+k;
-  return {t,sl:(res[1].hourly.freezing_level_height[j]||0)*flK-1000,lv:res.map(x=>{const T=x.hourly.temperature_2m[j],p=x.hourly.precipitation[j]||0;return {T,p,sn:p*slr(T),g:x.hourly.wind_gusts_10m[j]||0}})}});
+  return {t,sl:(res[1].hourly.freezing_level_height[j]||0)*flK-1000,lv:res.map(x=>{const T=x.hourly.temperature_2m[j],p=x.hourly.precipitation[j]||0;return {T,p,sn:p*slr(T),g:x.hourly.wind_gusts_10m[j]||0,wd:x.hourly.wind_direction_10m?x.hourly.wind_direction_10m[j]:null}})}});
  s.profile={at:Date.now(),els,hours};return s.profile;
 }
 function drawProfile(){
@@ -677,7 +726,7 @@ function drawProfile(){
  cum.forEach((a,k)=>{o+=`<path d="${a.map((v,i)=>(i?'L':'M')+(x(i)+cw).toFixed(1)+','+y2(v).toFixed(1)).join(' ')}" fill="none" stroke="${cols[k]}" stroke-width="${k?2:3}"/>`;let ly=y2(a[a.length-1])-4;for(const e of ends)if(Math.abs(e-ly)<13)ly=e+13;ends.push(ly);o+=`<text x="${W-R-2}" y="${ly}" text-anchor="end" font-size="12" font-weight="700" fill="${cols[k]}" paint-order="stroke" stroke="#000" stroke-width="4">${nm[k]} ${esc(inch(a[a.length-1]))}</text>`});
  // summit wind
  const top3=top2+h2+30,h3=16,step=narrow?24:12;o+=`<text x="${L}" y="${top3-6}" font-size="12" font-weight="700" fill="currentColor">Summit gusts &amp; temp</text>`;
- P.hours.forEach((hh,i)=>{const g=hh.lv[0].g;o+=`<rect x="${x(i)}" y="${top3}" width="${cw+.6}" height="${h3}" fill="${g>=settings.windLimit?'#ff453a':g>=25?'#ffd60a':'#30d158'}"/>`;if(i%step===0)o+=`<text x="${x(i)+2}" y="${top3+h3+14}" font-size="11" fill="currentColor">${Math.round(g)} mph · ${Math.round(hh.lv[0].T)}°F</text>`});
+ P.hours.forEach((hh,i)=>{const g=hh.lv[0].g;o+=`<rect x="${x(i)}" y="${top3}" width="${cw+.6}" height="${h3}" fill="${g>=settings.windLimit?'#ff453a':g>=25?'#ffd60a':'#30d158'}"/>`;if(i%step===0)o+=`<text x="${x(i)+2}" y="${top3+h3+14}" font-size="11" fill="currentColor">${hh.lv[0].wd!=null?compass(hh.lv[0].wd)+' ':''}${Math.round(g)} mph · ${Math.round(hh.lv[0].T)}°F</text>`});
  svg.innerHTML=o;
  const tot=cum.map(a=>a[a.length-1]),rainBase=P.hours.some(hh=>hh.lv[2].p>0.02&&hh.lv[2].T>34),holds=P.hours.filter(hh=>+hh.t.slice(11,13)>=9&&+hh.t.slice(11,13)<16&&hh.lv[0].g>=settings.windLimit).length;
  $('#mvTotals').innerHTML=`<b>72-hour snow (one model):</b> summit ${esc(inch(tot[0]))} · mid ${esc(inch(tot[1]))} · base ${esc(inch(tot[2]))}${rainBase?' · <b style="color:var(--red)">rain or mix at the base</b>':''}${holds?` · <b style="color:var(--red)">${holds} lift hours with summit gusts over ${settings.windLimit} mph</b>`:''}`;
@@ -875,7 +924,7 @@ addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#drawer').hidden)closeDr
 $('#rank').addEventListener('toggle',e=>{const d=e.target.closest('[data-row]');if(!d)return;const id=d.dataset.row;
  if(d.open){openRows.add(id);const r=resorts.find(x=>x.id===id);d.querySelector('.detail').innerHTML=r?rowDetail(r):''}else openRows.delete(id)},true);
 document.addEventListener('change',e=>{const i=e.target.closest('[data-drive]');if(!i)return;const r=resorts.find(x=>x.id===i.dataset.drive),v=Math.round(+i.value);if(r&&v>0){r.drive=v;store.set('sd.resorts',resorts);render()}else if(r)i.value=r.drive});
-function goTo(id,date){if(date)dayPick=date;openRows.add(id);draw();const el=$('#row-'+id);if(el){el.querySelector('.detail').innerHTML=rowDetail(resorts.find(x=>x.id===id));el.scrollIntoView({behavior:'smooth',block:'center'})}}
+function goTo(id,date){if(date&&upcomingDates().includes(date))dayPick=date;openRows.add(id);draw();const el=$('#row-'+id);if(el){el.querySelector('.detail').innerHTML=rowDetail(resorts.find(x=>x.id===id));el.scrollIntoView({behavior:'smooth',block:'center'})}}
 document.addEventListener('click',e=>{
  const gt=e.target.closest('[data-goto]');if(gt){const [id,date]=gt.dataset.goto.split('|');goTo(id,date);return}
  const mo=e.target.closest('[data-mapopen]');if(mo){e.preventDefault();mapRes=mo.dataset.mapopen;location.hash='#mountain';if(!$('#v-mountain').hidden)selectResort(mapRes);return}
