@@ -1,5 +1,5 @@
 {
- "at": "2026-11-28T05:22:53.793Z",
+ "at": "2026-11-28T07:34:03.604Z",
  "resorts": {
   "snowbasin": {
    "lifts": "4/13",
@@ -18,7 +18,7 @@
    "h24": 0,
    "h48": 0,
    "h72": 0,
-   "d7": 8,
+   "d7": 0,
    "base": 38,
    "season": 80,
    "updated": "2026-11-27T12:45:00.000Z",
@@ -37,7 +37,7 @@
    "storm": 0,
    "season": 71,
    "where": "12-hour total at the study plot",
-   "updated": "2026-11-28T05:00:00.000Z",
+   "updated": "2026-11-28T07:00:00.000Z",
    "ok": true
   },
   "brighton": {
