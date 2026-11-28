@@ -1,5 +1,5 @@
 {
- "at": "2026-11-28T15:02:17.384Z",
+ "at": "2026-11-28T16:02:44.936Z",
  "resorts": {
   "snowbasin": {
    "lifts": "4/13",
@@ -21,7 +21,7 @@
    "d7": 0,
    "base": 37,
    "season": 80,
-   "updated": "2026-11-28T12:45:00.000Z",
+   "updated": "2026-11-28T15:12:00.000Z",
    "ok": true
   },
   "alta": {
@@ -31,13 +31,13 @@
     "status": "Open",
     "message": ""
    },
-   "overnight": 2,
-   "h24": 2,
-   "base": 36,
-   "storm": 2,
-   "season": 73,
+   "overnight": 3,
+   "h24": 3,
+   "base": 37,
+   "storm": 3,
+   "season": 74,
    "where": "12-hour total at the study plot",
-   "updated": "2026-11-28T14:00:00.000Z",
+   "updated": "2026-11-28T15:00:00.000Z",
    "ok": true
   },
   "brighton": {
@@ -48,9 +48,9 @@
    "d7": 3,
    "base": 30,
    "season": 80,
-   "lifts": "0/8",
+   "lifts": "1/8",
    "trails": "20/76",
-   "updated": "2026-11-28T12:21:59Z",
+   "updated": "2026-11-28T16:00:37Z",
    "ok": true
   },
   "solitude": {
@@ -84,7 +84,7 @@
    "ok": true
   },
   "jackson": {
-   "lifts": "0/13",
+   "lifts": "3/13",
    "trails": "6/140",
    "overnight": 10,
    "h24": 14,
