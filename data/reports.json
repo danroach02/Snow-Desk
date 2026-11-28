@@ -1,5 +1,5 @@
 {
- "at": "2026-11-28T00:04:13.895Z",
+ "at": "2026-11-28T01:34:41.135Z",
  "resorts": {
   "snowbasin": {
    "lifts": "4/13",
@@ -37,7 +37,7 @@
    "storm": 0,
    "season": 71,
    "where": "12-hour total at the study plot",
-   "updated": "2026-11-27T23:00:00.000Z",
+   "updated": "2026-11-28T01:00:00.000Z",
    "ok": true
   },
   "brighton": {
@@ -73,14 +73,14 @@
    "h24": 0,
    "h48": 0,
    "h72": 0,
-   "d7": 15,
+   "d7": 17,
    "base": 18,
    "season": 27,
    "where": "Mid-Mountain",
    "lifts": "0/32",
    "trails": "0/209",
    "status": "Closed",
-   "updated": "2026-11-25T05:38:35-0700",
+   "updated": "2026-11-27T18:18:19-0700",
    "ok": true
   },
   "jackson": {
