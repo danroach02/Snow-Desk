@@ -1,5 +1,5 @@
 {
- "at": "2026-11-27T23:11:47.147Z",
+ "at": "2026-11-28T00:04:13.895Z",
  "resorts": {
   "snowbasin": {
    "lifts": "4/13",
@@ -25,8 +25,8 @@
    "ok": true
   },
   "alta": {
-   "lifts": "2/5",
-   "trails": "17/118",
+   "lifts": "0/5",
+   "trails": "0/118",
    "road": {
     "status": "Open",
     "message": ""
